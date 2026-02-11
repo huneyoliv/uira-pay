@@ -1,0 +1,67 @@
+# Donezo Design System Model (UIRÁ Payments - Dashboard Focus)
+
+## 1. Philosophy
+- **Organic & Friendly**: Highly rounded corners (`rounded-3xl`), soft shadows, and a nature-inspired palette.
+- **Clean & Spacious**: Generous padding, white cards on light gray backgrounds.
+- **Visual Hierarchy**: clear distinction between primary actions (Deep Green) and secondary elements.
+
+## 2. Typography
+- **Font Family**: Plus Jakarta Sans, Outfit, or Inter.
+- **Headings**:
+  - Bold, Dark (`text-slate-900`).
+  - Large and friendly.
+- **Body**:
+  - `text-slate-500` for secondary text.
+  - Medium weight for labels.
+
+## 3. Color Palette
+- **Primary**: Forest Green.
+  - Main: `#105D37` (Deep Green) - Used for primary buttons, active states, key metric cards.
+  - Light: `#E7F6F0` (Mint Green) - Used for backgrounds, badges.
+- **Secondary**:
+  - Dark: `#1E293B` (Slate 900) - Text.
+  - Gray: `#F1F5F9` (Slate 100) - App Background.
+- **Accents**:
+  - Orange/Yellow for specific status indicators.
+  - White for cards (`#FFFFFF`).
+
+## 4. Layout & Shapes
+- **Container**: Fluid dashboard layout with fixed sidebar.
+- **Cards**:
+  - `bg-white`.
+  - `rounded-[32px]` (Very rounded).
+  - `shadow-sm` or `shadow-[0_2px_20px_rgba(0,0,0,0.04)]`.
+  - Padding: `p-6` or `p-8`.
+
+## 5. Components
+
+### Sidebar
+- **Background**: White (`bg-white`) or very light gray.
+- **Navigation**:
+  - Inactive: `text-slate-400`.
+  - Active: `text-[#105D37]` with a left border indicator or subtle background.
+- **CTA**: "Download App" card at bottom with dark background.
+
+### Header
+- **Search**: Pill-shaped input (`rounded-full`), light gray background.
+- **Actions**: Circular icon buttons.
+- **Profile**: Avatar with name and email.
+
+### Dashboard Widgets
+- **Metrics Cards**:
+  - Primary metric in large font.
+  - Trend indicator in a circle arrow.
+  - Some cards have full solid background (Primary Green), others are white.
+- **Charts**:
+  - Rounded bars.
+  - Clean grid lines (or no grid lines).
+- **Lists**:
+  - Avatars for team members.
+  - Status badges (pill shaped).
+
+## 6. Implementation Guidelines (Tailwind CSS)
+- **Radius**: Use `rounded-2xl` or `rounded-3xl` for cards. `rounded-full` for buttons/inputs.
+- **Shadows**: `shadow-sm` for subtle depth.
+- **Colors**:
+  - Primary Button: `bg-[#105D37] hover:bg-[#0d4a2c] text-white`.
+  - Background: `bg-[#F8FAFC]`.

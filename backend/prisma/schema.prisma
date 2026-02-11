@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Currency {
+  USDT
+  USDC
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  EXPIRED
+  COMPLETED
+}
+
+enum ConversionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Tenant {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String
+  doc_number            String
+  email                 String   @unique
+  default_currency      Currency?
+  preference_locked_until DateTime
+  password              String
+  documentUrl           String?
+  country               String?
+  fiatCurrency          String?
+  language              String   @default("PT")
+  theme                 String   @default("system")
+  created_at            DateTime @default(now())
+
+  wallets Wallet[]
+  orders  Order[]
+  saved_wallets SavedWallet[] // Relation to SavedWallet
+
+  @@map("tenants")
+}
+
+model Wallet {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id  String   @db.ObjectId
+  currency   Currency
+  balance    Float
+  updated_at DateTime @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenant_id], references: [id])
+  transactions Transaction[]
+
+  @@map("wallets")
+}
+
+model Transaction {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  wallet_id  String            @db.ObjectId
+  type       TransactionType
+  amount     Float
+  fee        Float
+  tx_hash    String?
+  description String?
+  status     TransactionStatus
+  created_at DateTime          @default(now())
+
+  wallet Wallet @relation(fields: [wallet_id], references: [id])
+
+  @@map("transactions")
+}
+
+model Order {
+  id                String      @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id         String      @db.ObjectId
+  fiat_amount       Float
+  crypto_amount_est Float
+  status            OrderStatus
+  conversion_status ConversionStatus @default(PENDING)
+  pix_code          String
+  txid              String?     @unique
+  payerName         String?
+  payerDocument     String?
+  created_at        DateTime    @default(now())
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+
+  @@map("orders")
+}
+
+model SavedWallet {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id  String   @db.ObjectId
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id])
+  address    String
+  network    String
+  nickname   String?
+  created_at DateTime @default(now())
+
+  @@map("saved_wallets")
+}
+
+model VerificationCode {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("verification_codes")
+}
