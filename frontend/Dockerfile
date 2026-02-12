@@ -7,6 +7,10 @@ COPY package*.json ./
 COPY . .
 
 RUN npm install
+
+ARG NEXT_PUBLIC_DOMAIN
+ENV NEXT_PUBLIC_DOMAIN=$NEXT_PUBLIC_DOMAIN
+
 RUN npm run build
 
 # Stage 2: Production

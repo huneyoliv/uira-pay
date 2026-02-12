@@ -46,7 +46,8 @@ async function bootstrap() {
 
   // Enable CORS with Credentials for Frontend
   const configService = app.get(ConfigService);
-  const frontendUrl = configService.get<string>('FRONTEND_URL');
+  const domain = configService.get<string>('DOMAIN');
+  const frontendUrl = domain ? `https://${domain}` : null;
   app.enableCors({
     origin: frontendUrl || 'http://localhost:3001',
     credentials: true,

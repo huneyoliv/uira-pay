@@ -31,7 +31,7 @@ services:
     container_name: uira_frontend
     restart: always
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000 # Adjust domain for prod
+      - NEXT_PUBLIC_DOMAIN=${DOMAIN}
     ports:
       - "9000:3000"
     networks:
