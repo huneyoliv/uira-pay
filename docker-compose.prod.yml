@@ -7,6 +7,8 @@ services:
     restart: always
     volumes:
       - mongodb_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
     networks:
       - uira_network
 
@@ -14,8 +16,9 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY}-backend:main
     container_name: uira_backend
     restart: always
+    network_mode: host
     environment:
-      - DATABASE_URL=mongodb://mongodb:27017/uira_payments
+      - DATABASE_URL=mongodb://127.0.0.1:27017/uira_payments
       - PORT=8000
       # OCI Vault OCID mappings — VaultService fetches values at runtime via Instance Principals
       - OCI_SECRET_DOMAIN=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziajd5suxfhu6nftj2miucp2ct4m7z5uqcsxkpqivjywnna
@@ -28,12 +31,8 @@ services:
       - OCI_SECRET_BINANCE_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziatm6qwxululpzdubxpttarosk5uy4gx6igg3uyyvraudq
       - OCI_SECRET_BINANCE_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziauijciokebbpzqbnx2qtfbmitmqf2fymu3ue2sw3dmm7a
       - OCI_SECRET_RESEND_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziam2pgmrp3q4wopu2haee3cpl5h7pnomoyh5et7lax7yra
-    ports:
-      - "8000:8000"
     depends_on:
       - mongodb
-    networks:
-      - uira_network
 
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY}-frontend:main
