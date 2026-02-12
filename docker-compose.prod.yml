@@ -17,8 +17,17 @@ services:
     environment:
       - DATABASE_URL=mongodb://mongodb:27017/uira_payments
       - PORT=8000
-      # OCI Vault will inject secrets at runtime via Instance Principals
-      # OCI_SECRET_... vars should be set in VPS env or via .env file on VPS
+      # OCI Vault OCID mappings — VaultService fetches values at runtime via Instance Principals
+      - OCI_SECRET_DOMAIN=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziajd5suxfhu6nftj2miucp2ct4m7z5uqcsxkpqivjywnna
+      - OCI_SECRET_JWT_SECRET=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziacgauexee3fwpmwa6647jnib476ocncolwe6b5622d6jq
+      - OCI_SECRET_ADMIN_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziaof42zsxdge4dglxkjdp72teqpahzdngjqi2c666uzbwq
+      - OCI_SECRET_EFI_CLIENT_ID=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziapato4uhpzl3xy3mibpkp4fgtmvmo5pg63ztuk542ew4a
+      - OCI_SECRET_EFI_CLIENT_SECRET=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziarvntl6vhfmjzolkhpgz4mmfk6icqknx6mmqh3zdpj7ea
+      - OCI_SECRET_EFI_CERTIFICATE_BASE64=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziapu7yvsh56ralxqa4ls676wa2qc5shwaoikt5ahb2lygq
+      - OCI_SECRET_EFI_PIX_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziaghbxsgxhseyg6vbytup4qu4u6limxdhqahm5adyag5iq
+      - OCI_SECRET_BINANCE_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziatm6qwxululpzdubxpttarosk5uy4gx6igg3uyyvraudq
+      - OCI_SECRET_BINANCE_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziauijciokebbpzqbnx2qtfbmitmqf2fymu3ue2sw3dmm7a
+      - OCI_SECRET_RESEND_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziam2pgmrp3q4wopu2haee3cpl5h7pnomoyh5et7lax7yra
     ports:
       - "8000:8000"
     depends_on:
