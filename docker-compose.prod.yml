@@ -16,11 +16,11 @@ services:
     restart: always
     environment:
       - DATABASE_URL=mongodb://mongodb:27017/uira_payments
-      - PORT=8080
+      - PORT=8000
       # OCI Vault will inject secrets at runtime via Instance Principals
       # OCI_SECRET_... vars should be set in VPS env or via .env file on VPS
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       - mongodb
     networks:
@@ -31,9 +31,9 @@ services:
     container_name: uira_frontend
     restart: always
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080 # Adjust domain for prod
+      - NEXT_PUBLIC_API_URL=http://localhost:8000 # Adjust domain for prod
     ports:
-      - "3000:3000"
+      - "9000:3000"
     networks:
       - uira_network
 
