@@ -14,20 +14,6 @@ export class VaultService {
      * Updates process.env with the actual values.
      */
     async loadSecrets(): Promise<void> {
-        // Initialize OCI SDK (Async)
-        if (!this.secretsClient) {
-            try {
-                const provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
-                // Alternatively, check env to decide provider if local dev needs config file
-                // const provider = new common.ConfigFileAuthenticationDetailsProvider(); 
-
-                this.secretsClient = new secrets.SecretsClient({ authenticationDetailsProvider: provider });
-            } catch (error) {
-                this.logger.warn('Failed to initialize OCI Auth Provider. Vault integration disabled locally? ' + error.message);
-                return;
-            }
-        }
-
         const secretVars = Object.keys(process.env).filter(key => key.startsWith('OCI_SECRET_'));
 
         if (secretVars.length === 0) {
@@ -36,6 +22,26 @@ export class VaultService {
         }
 
         this.logger.log(`Found ${secretVars.length} OCI secrets to fetch...`);
+
+        // Initialize OCI SDK (Async)
+        if (!this.secretsClient) {
+            try {
+                let provider: common.AuthenticationDetailsProvider;
+
+                if (process.env.OCI_AUTH_METHOD === 'config_file') {
+                    this.logger.log('Using OCI Config File Authentication (Local Dev)');
+                    provider = new common.ConfigFileAuthenticationDetailsProvider();
+                } else {
+                    this.logger.log('Using OCI Instance Principals Authentication');
+                    provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
+                }
+
+                this.secretsClient = new secrets.SecretsClient({ authenticationDetailsProvider: provider });
+            } catch (error) {
+                this.logger.warn('Failed to initialize OCI Auth Provider. Vault integration disabled. ' + error.message);
+                return;
+            }
+        }
 
         for (const envVar of secretVars) {
             const secretOcid = process.env[envVar];

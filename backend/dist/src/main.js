@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const app_module_1 = require("./app.module");
@@ -10,7 +11,7 @@ const swagger_1 = require("@nestjs/swagger");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const helmet_1 = __importDefault(require("helmet"));
 const config_1 = require("@nestjs/config");
-const vault_service_1 = require("./modules/infra/oci/vault.service");
+const vault_service_1 = require("./infra/oci/vault.service");
 async function bootstrap() {
     const logger = new common_1.Logger('Bootstrap');
     try {

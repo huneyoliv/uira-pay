@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: uira_mongodb
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - uira_network
+
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY}-backend:main
+    container_name: uira_backend
+    restart: always
+    environment:
+      - DATABASE_URL=mongodb://mongodb:27017/uira_payments
+      - PORT=8080
+      # OCI Vault will inject secrets at runtime via Instance Principals
+      # OCI_SECRET_... vars should be set in VPS env or via .env file on VPS
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    networks:
+      - uira_network
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY}-frontend:main
+    container_name: uira_frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080 # Adjust domain for prod
+    ports:
+      - "3000:3000"
+    networks:
+      - uira_network
+
+volumes:
+  mongodb_data:
+
+
+networks:
+  uira_network:
+    driver: bridge

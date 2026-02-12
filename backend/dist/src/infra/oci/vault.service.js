@@ -52,22 +52,30 @@ let VaultService = VaultService_1 = class VaultService {
     secretsClient;
     constructor() { }
     async loadSecrets() {
-        if (!this.secretsClient) {
-            try {
-                const provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
-                this.secretsClient = new secrets.SecretsClient({ authenticationDetailsProvider: provider });
-            }
-            catch (error) {
-                this.logger.warn('Failed to initialize OCI Auth Provider. Vault integration disabled locally? ' + error.message);
-                return;
-            }
-        }
         const secretVars = Object.keys(process.env).filter(key => key.startsWith('OCI_SECRET_'));
         if (secretVars.length === 0) {
             this.logger.log('No OCI_SECRET_* environment variables found. Skipping Vault fetch.');
             return;
         }
         this.logger.log(`Found ${secretVars.length} OCI secrets to fetch...`);
+        if (!this.secretsClient) {
+            try {
+                let provider;
+                if (process.env.OCI_AUTH_METHOD === 'config_file') {
+                    this.logger.log('Using OCI Config File Authentication (Local Dev)');
+                    provider = new common.ConfigFileAuthenticationDetailsProvider();
+                }
+                else {
+                    this.logger.log('Using OCI Instance Principals Authentication');
+                    provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
+                }
+                this.secretsClient = new secrets.SecretsClient({ authenticationDetailsProvider: provider });
+            }
+            catch (error) {
+                this.logger.warn('Failed to initialize OCI Auth Provider. Vault integration disabled. ' + error.message);
+                return;
+            }
+        }
         for (const envVar of secretVars) {
             const secretOcid = process.env[envVar];
             const targetVar = envVar.replace('OCI_SECRET_', '');
