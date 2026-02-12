@@ -50,9 +50,10 @@ async function bootstrap() {
         console.log('Configuration updated successfully:', JSON.stringify(response, null, 2));
 
         // 2. Register Webhook URL
-        const domain = process.env.DOMAIN || 'swaptune.me';
-        // Ensure we use https and the correct subdomain if needed. 
-        // User logs showed https://api.swaptune.me/orders, so we use api. subdomain.
+        const domain = process.env.DOMAIN;
+        if (!domain) {
+            throw new Error('DOMAIN is missing in .env');
+        }
         const webhookUrl = `https://api.${domain}/webhooks/efi/pix`;
 
         console.log(`Registering webhook URL: ${webhookUrl} for key: ${pixKey}`);
