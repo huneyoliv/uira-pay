@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const baseURL = process.env.NODE_ENV === 'development'
     ? 'http://localhost:8080'
-    : (process.env.NEXT_PUBLIC_DOMAIN ? `https://api.${process.env.NEXT_PUBLIC_DOMAIN}` : 'http://localhost:8080');
+    : (process.env.NEXT_PUBLIC_DOMAIN ? `https://api.${process.env.NEXT_PUBLIC_DOMAIN}` : 'https://api.swaptune.me');
 
 console.log('API Client Config:', {
     NODE_ENV: process.env.NODE_ENV,
