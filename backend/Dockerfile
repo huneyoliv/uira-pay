@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20 AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /usr/src/app
 
@@ -14,7 +14,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20
+FROM node:20-slim
 
 WORKDIR /usr/src/app
 
@@ -26,7 +26,8 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 # Add native dependencies if needed for OCI SDK (usually not needed for pure JS sdk but good to have)
 # RUN apk add --no-cache python3 make g++
 
-# Openssl is included in node:20 full image
+# Add openssl for Prisma
+RUN apt-get update -y && apt-get install -y openssl
 
 EXPOSE 8080
 
