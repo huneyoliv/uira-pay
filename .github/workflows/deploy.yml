@@ -85,6 +85,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: GITHUB_REPOSITORY,GITHUB_TOKEN,GITHUB_ACTOR,DOMAIN
+          command_timeout: 30m
           script: |
             # Login to GHCR to pull private images
             echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
