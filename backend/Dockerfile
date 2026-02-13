@@ -26,6 +26,9 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 # Add native dependencies if needed for OCI SDK (usually not needed for pure JS sdk but good to have)
 # RUN apk add --no-cache python3 make g++
 
+# Add compat-openssl1.1 for Prisma
+RUN apk add --no-cache compat-openssl1.1
+
 EXPOSE 8080
 
 CMD ["npm", "run", "start:prod"]
