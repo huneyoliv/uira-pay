@@ -49,7 +49,13 @@ async function bootstrap() {
   const domain = configService.get<string>('DOMAIN');
   const frontendUrl = domain ? `https://${domain}` : null;
   app.enableCors({
-    origin: frontendUrl || 'http://localhost:3001',
+    origin: [
+      'https://swaptune.me',
+      'https://www.swaptune.me',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      frontendUrl
+    ].filter(Boolean),
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
