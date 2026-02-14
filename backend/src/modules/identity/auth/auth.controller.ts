@@ -47,14 +47,17 @@ export class AuthController {
 
         console.log('[LoginDebug] Controller: Case executed. Signing token...');
         // SECURITY: Store JWT in HttpOnly Cookie
+        // Using SameSite: None + Secure to ensure cross-subdomain/cross-site delivery works
+        const domain = process.env.DOMAIN || undefined; // e.g., 'swaptune.me'
         response.cookie('access_token', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: true, // Always true for SameSite=None
+            sameSite: 'none',
+            domain: domain ? `.${domain}` : undefined, // Allow subdomains
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
-        console.log('[LoginDebug] Controller: Cookie set. Returning response 200.');
+        console.log(`[LoginDebug] Controller: Cookie set with domain: ${domain ? '.' + domain : 'HostOnly'}, SameSite: None. Returning response 200.`);
         return { message: 'Login successful', user: result.user };
     }
 
@@ -74,11 +77,15 @@ export class AuthController {
 
     @Post('logout')
     @HttpCode(HttpStatus.OK)
+    @Post('logout')
+    @HttpCode(HttpStatus.OK)
     async logout(@Res({ passthrough: true }) response: Response) {
+        const domain = process.env.DOMAIN || undefined;
         response.clearCookie('access_token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
+            domain: domain ? `.${domain}` : undefined,
         });
         return { message: 'Logged out successfully' };
     }
