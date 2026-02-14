@@ -9,6 +9,9 @@ import { LoginDto } from './application/dtos/login.dto';
 import { SendVerificationCodeUseCase } from './application/send-verification-code.usecase';
 import { VerifyCodeUseCase } from './application/verify-code.usecase';
 
+import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
+import { ResetPasswordUseCase } from './application/reset-password.usecase';
+
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -16,6 +19,8 @@ export class AuthController {
         private readonly loginUseCase: LoginUseCase,
         private readonly sendVerificationCodeUseCase: SendVerificationCodeUseCase,
         private readonly verifyCodeUseCase: VerifyCodeUseCase,
+        private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+        private readonly resetPasswordUseCase: ResetPasswordUseCase,
     ) { }
 
     @Post('register')
@@ -74,5 +79,19 @@ export class AuthController {
             sameSite: 'lax',
         });
         return { message: 'Logged out successfully' };
+    }
+
+    @Post('forgot-password')
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    async forgotPassword(@Body('email') email: string) {
+        await this.forgotPasswordUseCase.execute(email);
+        return { message: 'If the email exists, a recovery code has been sent.' };
+    }
+
+    @Post('reset-password')
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    async resetPassword(@Body() body: any) {
+        await this.resetPasswordUseCase.execute(body.email, body.code, body.newPassword);
+        return { message: 'Password reset successfully' };
     }
 }

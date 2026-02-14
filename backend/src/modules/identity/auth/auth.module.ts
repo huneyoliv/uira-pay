@@ -13,6 +13,8 @@ import { InfraModule } from '../../../infra/infra.module';
 import { EmailService } from '../infra/services/email.service';
 import { SendVerificationCodeUseCase } from './application/send-verification-code.usecase';
 import { VerifyCodeUseCase } from './application/verify-code.usecase';
+import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
+import { ResetPasswordUseCase } from './application/reset-password.usecase';
 
 @Module({
     imports: [
@@ -47,6 +49,8 @@ import { VerifyCodeUseCase } from './application/verify-code.usecase';
         EmailService,
         SendVerificationCodeUseCase,
         VerifyCodeUseCase,
+        ForgotPasswordUseCase,
+        ResetPasswordUseCase,
     ],
     exports: [JwtStrategy, PassportModule],
 })
