@@ -51,6 +51,7 @@ model Tenant {
   fiatCurrency          String?
   language              String   @default("PT")
   theme                 String   @default("system")
+  tokenVersion          Int      @default(1)
   created_at            DateTime @default(now())
 
   wallets Wallet[]

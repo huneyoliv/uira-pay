@@ -59,7 +59,7 @@ export function PendingRequirementsModal() {
             setOpen(false);
         } catch (err: any) {
             if (err.response?.status === 401) {
-                logout();
+                await logout();
                 router.push("/login");
                 return;
             }
@@ -133,7 +133,7 @@ export function PendingRequirementsModal() {
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-row gap-2">
-                    <Button variant="ghost" onClick={() => { logout(); router.push("/login"); }}>
+                    <Button variant="ghost" onClick={async () => { await logout(); router.push("/login"); }}>
                         Sair
                     </Button>
                     <Button

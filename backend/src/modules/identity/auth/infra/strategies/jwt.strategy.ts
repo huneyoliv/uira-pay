@@ -2,10 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
+import { PrismaService } from '../../../../infra/database/prisma.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor() {
+    constructor(private readonly prisma: PrismaService) {
         if (!process.env.JWT_SECRET) {
             throw new Error('JWT_SECRET environment variable is not defined');
         }
@@ -51,7 +52,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        console.log(`[JwtStrategy] Validate payload: ${JSON.stringify(payload)}`);
+        // console.log(`[JwtStrategy] Validate payload: ${JSON.stringify(payload)}`);
+        const user = await this.prisma.tenant.findUnique({ where: { id: payload.sub } });
+
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+
+        if (payload.tokenVersion !== user.tokenVersion) {
+            console.log(`[JwtStrategy] Token version mismatch. Payload: ${payload.tokenVersion}, User: ${user.tokenVersion}`);
+            throw new UnauthorizedException('Token revoked');
+        }
+
         return { id: payload.sub, email: payload.email };
     }
 }

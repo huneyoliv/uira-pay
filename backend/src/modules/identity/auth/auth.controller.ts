@@ -11,6 +11,9 @@ import { VerifyCodeUseCase } from './application/verify-code.usecase';
 
 import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
 import { ResetPasswordUseCase } from './application/reset-password.usecase';
+import { LogoutUseCase } from './application/logout.usecase';
+import { UseGuards, Req } from '@nestjs/common';
+import { JwtAuthGuard } from './infra/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +24,7 @@ export class AuthController {
         private readonly verifyCodeUseCase: VerifyCodeUseCase,
         private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
         private readonly resetPasswordUseCase: ResetPasswordUseCase,
+        private readonly logoutUseCase: LogoutUseCase,
     ) { }
 
     @Post('register')
@@ -76,16 +80,22 @@ export class AuthController {
     }
 
     @Post('logout')
+    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Post('logout')
-    @HttpCode(HttpStatus.OK)
-    async logout(@Res({ passthrough: true }) response: Response) {
+    async logout(@Req() req: any, @Res({ passthrough: true }) response: Response) {
+
+        // Revoke token by incrementing version
+        if (req.user && req.user.id) {
+            await this.logoutUseCase.execute(req.user.id);
+        }
+
         const domain = process.env.DOMAIN || undefined;
         response.clearCookie('access_token', {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
             domain: domain ? `.${domain}` : undefined,
+            path: '/'
         });
         return { message: 'Logged out successfully' };
     }

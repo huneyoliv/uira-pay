@@ -154,8 +154,8 @@ export default function DashboardLayout({
                 <div className="mt-auto p-8">
 
                     <button
-                        onClick={() => {
-                            useAuthStore.getState().logout();
+                        onClick={async () => {
+                            await useAuthStore.getState().logout();
                             window.location.href = "/login";
                         }}
                         className="flex items-center gap-3 px-4 py-3 mt-6 text-slate-400 hover:text-red-500 transition-colors w-full"
@@ -229,8 +229,8 @@ export default function DashboardLayout({
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => {
-                                                    useAuthStore.getState().logout();
+                                                onClick={async () => {
+                                                    await useAuthStore.getState().logout();
                                                     window.location.href = "/login";
                                                 }}
                                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
@@ -276,8 +276,8 @@ export default function DashboardLayout({
                                 </Link>
                             ))}
                             <button
-                                onClick={() => {
-                                    useAuthStore.getState().logout();
+                                onClick={async () => {
+                                    await useAuthStore.getState().logout();
                                     window.location.href = "/login";
                                 }}
                                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 w-full transition-colors"

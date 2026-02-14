@@ -15,6 +15,7 @@ import { SendVerificationCodeUseCase } from './application/send-verification-cod
 import { VerifyCodeUseCase } from './application/verify-code.usecase';
 import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
 import { ResetPasswordUseCase } from './application/reset-password.usecase';
+import { LogoutUseCase } from './application/logout.usecase';
 
 @Module({
     imports: [
@@ -51,6 +52,7 @@ import { ResetPasswordUseCase } from './application/reset-password.usecase';
         VerifyCodeUseCase,
         ForgotPasswordUseCase,
         ResetPasswordUseCase,
+        LogoutUseCase,
     ],
     exports: [JwtStrategy, PassportModule],
 })
