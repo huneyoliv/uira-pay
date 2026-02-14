@@ -45,6 +45,7 @@ export class AuthController {
     async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
         const result = await this.loginUseCase.execute(dto);
 
+        console.log('[LoginDebug] Controller: Case executed. Signing token...');
         // SECURITY: Store JWT in HttpOnly Cookie
         response.cookie('access_token', result.accessToken, {
             httpOnly: true,
@@ -53,6 +54,7 @@ export class AuthController {
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
+        console.log('[LoginDebug] Controller: Cookie set. Returning response 200.');
         return { message: 'Login successful', user: result.user };
     }
 
