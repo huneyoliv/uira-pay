@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+// Force deploy: Fix backend dependency
 import "./globals.css";
 import { Providers } from "./providers";
 
