@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: uira_mongodb
-    restart: always
-    volumes:
-      - mongodb_data:/data/db
-    ports:
-      - "127.0.0.1:27017:27017"
-    networks:
-      - uira_network
-
   backend:
     image: ghcr.io/${GITHUB_REPOSITORY}-backend:main
     container_name: uira_backend
@@ -31,23 +20,6 @@ services:
       - OCI_SECRET_BINANCE_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziatm6qwxululpzdubxpttarosk5uy4gx6igg3uyyvraudq
       - OCI_SECRET_BINANCE_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziauijciokebbpzqbnx2qtfbmitmqf2fymu3ue2sw3dmm7a
       - OCI_SECRET_RESEND_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziam2pgmrp3q4wopu2haee3cpl5h7pnomoyh5et7lax7yra
-    depends_on:
-      - mongodb
-
-  frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY}-frontend:main
-    container_name: uira_frontend
-    restart: always
-    environment:
-      - NEXT_PUBLIC_DOMAIN=${DOMAIN}
-    ports:
-      - "9000:3000"
-    networks:
-      - uira_network
-
-volumes:
-  mongodb_data:
-
 
 networks:
   uira_network:
