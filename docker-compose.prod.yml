@@ -18,9 +18,9 @@ services:
     restart: always
     network_mode: host
     environment:
-      - DATABASE_URL=mongodb+srv://teste:AsWra2eUOcd23xAK@teste.85m3ziz.mongodb.net/uira_payments?appName=teste
       - PORT=8000
       # OCI Vault OCID mappings — VaultService fetches values at runtime via Instance Principals
+      - OCI_SECRET_DATABASE_URL=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziabh44ljbmtawsq3bphfh336m3mmmv2jzppfng74wcxtha
       - OCI_SECRET_DOMAIN=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziajd5suxfhu6nftj2miucp2ct4m7z5uqcsxkpqivjywnna
       - OCI_SECRET_JWT_SECRET=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziacgauexee3fwpmwa6647jnib476ocncolwe6b5622d6jq
       - OCI_SECRET_ADMIN_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziaof42zsxdge4dglxkjdp72teqpahzdngjqi2c666uzbwq
