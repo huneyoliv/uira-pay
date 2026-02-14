@@ -9,6 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!process.env.JWT_SECRET) {
             throw new Error('JWT_SECRET environment variable is not defined');
         }
+        console.log(`[JwtStrategy] Initialized with Secret prefix: ${process.env.JWT_SECRET.substring(0, 4)}***`);
 
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
@@ -28,6 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
+        console.log(`[JwtStrategy] Validate payload: ${JSON.stringify(payload)}`);
         return { id: payload.sub, email: payload.email };
     }
 }
