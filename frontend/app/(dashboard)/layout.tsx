@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuthStore } from "@/store/auth-store";
+
 
 import { PendingRequirementsModal } from "@/components/pending-requirements-modal";
 import { LanguageSelector } from "@/components/language-selector";
