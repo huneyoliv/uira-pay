@@ -21,6 +21,14 @@ services:
       - OCI_SECRET_BINANCE_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziauijciokebbpzqbnx2qtfbmitmqf2fymu3ue2sw3dmm7a
       - OCI_SECRET_RESEND_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziam2pgmrp3q4wopu2haee3cpl5h7pnomoyh5et7lax7yra
 
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY}-frontend:main
+    container_name: uira_frontend
+    restart: always
+    ports:
+      - "9000:3000"
+
 networks:
   uira_network:
     driver: bridge
+
