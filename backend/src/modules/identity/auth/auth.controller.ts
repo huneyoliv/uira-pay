@@ -37,6 +37,7 @@ export class AuthController {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
+            path: '/',
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
@@ -58,6 +59,7 @@ export class AuthController {
             secure: true, // Always true for SameSite=None
             sameSite: 'none',
             domain: domain ? `.${domain}` : undefined, // Allow subdomains
+            path: '/',
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
@@ -90,6 +92,8 @@ export class AuthController {
         }
 
         const domain = process.env.DOMAIN || undefined;
+
+        // Option 1: Clear with domain (if set)
         response.clearCookie('access_token', {
             httpOnly: true,
             secure: true,
@@ -97,6 +101,15 @@ export class AuthController {
             domain: domain ? `.${domain}` : undefined,
             path: '/'
         });
+
+        // Option 2: Clear without domain (HostOnly) - fallback
+        response.clearCookie('access_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/'
+        });
+
         return { message: 'Logged out successfully' };
     }
 
