@@ -93,21 +93,26 @@ export class AuthController {
 
         const domain = process.env.DOMAIN || undefined;
 
-        // Option 1: Clear with domain (if set)
-        response.clearCookie('access_token', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            domain: domain ? `.${domain}` : undefined,
-            path: '/'
-        });
+        // Strategy: Scorched Earth - Clear for all likely paths and domains
+        const paths = ['/', '/auth', '/api', '/api/auth'];
 
-        // Option 2: Clear without domain (HostOnly) - fallback
-        response.clearCookie('access_token', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            path: '/'
+        paths.forEach(path => {
+            // Option 1: Clear with domain (if set)
+            response.clearCookie('access_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                domain: domain ? `.${domain}` : undefined,
+                path: path
+            });
+
+            // Option 2: Clear without domain (HostOnly)
+            response.clearCookie('access_token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                path: path
+            });
         });
 
         return { message: 'Logged out successfully' };
