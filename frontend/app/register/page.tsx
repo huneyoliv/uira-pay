@@ -64,6 +64,7 @@ export default function RegisterPage() {
     const [documentUrl, setDocumentUrl] = useState("");
     const [uploading, setUploading] = useState(false);
     const [idValidation, setIdValidation] = useState<{ isValid: boolean; message: string } | null>(null);
+    const [verificationToken, setVerificationToken] = useState("");
 
     const handleIdBlur = () => {
         if (!docNumber) {
@@ -131,7 +132,8 @@ export default function RegisterPage() {
         setLoading(true);
         setError("");
         try {
-            await api.post("/auth/verify-code", { email, code: verificationCode });
+            const response = await api.post("/auth/verify-code", { email, code: verificationCode });
+            setVerificationToken(response.data.verificationToken);
             setStep(3);
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || "Código inválido.");
@@ -175,7 +177,7 @@ export default function RegisterPage() {
         setError("");
         try {
             await api.post("/auth/register", {
-                name, docNumber, email, password, country, fiatCurrency: currency, documentUrl
+                name, docNumber, email, password, country, fiatCurrency: currency, documentUrl, verificationToken
             });
             router.push("/login");
         } catch (err: any) {

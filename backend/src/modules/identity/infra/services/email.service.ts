@@ -1,29 +1,41 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
 @Injectable()
 export class EmailService {
-    private readonly apiKey: string;
+    private readonly logger = new Logger(EmailService.name);
     private readonly apiUrl = 'https://api.resend.com/emails';
 
-    constructor(private readonly configService: ConfigService) {
-        this.apiKey = this.configService.get<string>('RESEND_API_KEY') || '';
+    constructor(private readonly configService: ConfigService) { }
+
+    private getApiKey(): string {
+        // Try ConfigService first, fallback to process.env (for runtime-injected secrets)
+        return this.configService.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY || '';
     }
 
     async sendVerificationEmail(to: string, code: string): Promise<void> {
-        if (!this.apiKey) {
-            console.error('RESEND_API_KEY is missing');
-            return; // Or throw error
+        const apiKey = this.getApiKey();
+        this.logger.log(`[Email] Attempting to send verification email to: ${to}`);
+        this.logger.log(`[Email] API Key present: ${!!apiKey} (length: ${apiKey.length})`);
+
+        if (!apiKey) {
+            this.logger.error('[Email] RESEND_API_KEY is missing! Cannot send email.');
+            throw new InternalServerErrorException('Email service not configured');
         }
 
+        const domain = this.configService.get('DOMAIN') || process.env.DOMAIN;
+        const fromAddress = domain
+            ? `Uirá Payments <onboarding@${domain}>`
+            : 'Uirá Payments <onboarding@resend.dev>';
+
+        this.logger.log(`[Email] From: ${fromAddress}, Domain: ${domain}`);
+
         try {
-            await axios.post(
+            const response = await axios.post(
                 this.apiUrl,
                 {
-                    from: this.configService.get('DOMAIN')
-                        ? `Uirá Payments <onboarding@${this.configService.get('DOMAIN')}>`
-                        : 'Uirá Payments <onboarding@resend.dev>',
+                    from: fromAddress,
                     to: [to],
                     subject: 'Seu código de verificação Uirá',
                     html: `
@@ -37,30 +49,37 @@ export class EmailService {
                 },
                 {
                     headers: {
-                        Authorization: `Bearer ${this.apiKey}`,
+                        Authorization: `Bearer ${apiKey}`,
                         'Content-Type': 'application/json',
                     },
                 }
             );
+            this.logger.log(`[Email] Resend API response: ${JSON.stringify(response.data)}`);
         } catch (error: any) {
-            console.error('Failed to send email:', error.response?.data || error.message);
+            this.logger.error(`[Email] Failed to send email to ${to}:`, error.response?.data || error.message);
             throw new InternalServerErrorException('Failed to send verification email');
         }
     }
 
     async sendPasswordResetEmail(to: string, code: string): Promise<void> {
-        if (!this.apiKey) {
-            console.error('RESEND_API_KEY is missing');
-            return;
+        const apiKey = this.getApiKey();
+        this.logger.log(`[Email] Attempting to send password reset email to: ${to}`);
+
+        if (!apiKey) {
+            this.logger.error('[Email] RESEND_API_KEY is missing! Cannot send email.');
+            throw new InternalServerErrorException('Email service not configured');
         }
 
+        const domain = this.configService.get('DOMAIN') || process.env.DOMAIN;
+        const fromAddress = domain
+            ? `Uirá Payments <security@${domain}>`
+            : 'Uirá Payments <security@resend.dev>';
+
         try {
-            await axios.post(
+            const response = await axios.post(
                 this.apiUrl,
                 {
-                    from: this.configService.get('DOMAIN')
-                        ? `Uirá Payments <security@${this.configService.get('DOMAIN')}>`
-                        : 'Uirá Payments <security@resend.dev>',
+                    from: fromAddress,
                     to: [to],
                     subject: 'Recuperação de Senha - Uirá Payments',
                     html: `
@@ -75,13 +94,14 @@ export class EmailService {
                 },
                 {
                     headers: {
-                        Authorization: `Bearer ${this.apiKey}`,
+                        Authorization: `Bearer ${apiKey}`,
                         'Content-Type': 'application/json',
                     },
                 }
             );
+            this.logger.log(`[Email] Password reset email sent: ${JSON.stringify(response.data)}`);
         } catch (error: any) {
-            console.error('Failed to send password reset email:', error.response?.data || error.message);
+            this.logger.error(`[Email] Failed to send password reset email to ${to}:`, error.response?.data || error.message);
             throw new InternalServerErrorException('Failed to send password reset email');
         }
     }
