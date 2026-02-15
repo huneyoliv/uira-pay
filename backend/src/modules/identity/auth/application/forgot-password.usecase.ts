@@ -28,7 +28,8 @@ export class ForgotPasswordUseCase {
             create: { email, code, expiresAt },
         });
 
-        // 4. Send Email
-        await this.emailService.sendPasswordResetEmail(email, code);
+        // 4. Send Email (in user's preferred language from DB)
+        const userLanguage = (user as any).language || 'PT';
+        await this.emailService.sendPasswordResetEmail(email, code, userLanguage);
     }
 }

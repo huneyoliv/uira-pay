@@ -47,7 +47,7 @@ const PasswordStrengthMeter = ({ password, labels }: { password: string, labels:
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -65,6 +65,8 @@ export default function RegisterPage() {
     const [uploading, setUploading] = useState(false);
     const [idValidation, setIdValidation] = useState<{ isValid: boolean; message: string } | null>(null);
     const [verificationToken, setVerificationToken] = useState("");
+    const [timer, setTimer] = useState(0);
+    const [canResend, setCanResend] = useState(false);
 
     const handleIdBlur = () => {
         if (!docNumber) {
@@ -113,15 +115,53 @@ export default function RegisterPage() {
         }
     };
 
+    // Countdown timer effect
+    useEffect(() => {
+        if (timer <= 0) {
+            setCanResend(true);
+            return;
+        }
+        setCanResend(false);
+        const interval = setInterval(() => {
+            setTimer((prev) => prev - 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [timer]);
+
+    const startTimer = () => {
+        setTimer(15 * 60); // 15 minutes
+        setCanResend(false);
+    };
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
     const handleSendCode = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
         try {
-            await api.post("/auth/send-verification", { email });
+            await api.post("/auth/send-verification", { email, language });
+            startTimer();
             setStep(2);
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || "Erro ao enviar código.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendCode = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            await api.post("/auth/send-verification", { email, language });
+            startTimer();
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || "Erro ao reenviar código.");
         } finally {
             setLoading(false);
         }
@@ -257,6 +297,16 @@ export default function RegisterPage() {
                         />
                     </div>
                     {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+
+                    {/* Countdown timer */}
+                    {timer > 0 && (
+                        <div className="text-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                {(t.register as any).codeExpires} <span className="font-mono font-bold text-slate-900 dark:text-white">{formatTime(timer)}</span>
+                            </p>
+                        </div>
+                    )}
+
                     <div className="flex gap-3">
                         <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-14 w-14 rounded-full border-slate-200 hover:bg-slate-50 p-0 flex items-center justify-center shrink-0">
                             <ArrowLeft className="h-5 w-5 text-slate-500" />
@@ -265,6 +315,18 @@ export default function RegisterPage() {
                             {loading ? <Loader2 className="animate-spin h-5 w-5" /> : t.register.verifyButton}
                         </Button>
                     </div>
+
+                    {/* Resend button */}
+                    {canResend && timer <= 0 && (
+                        <button
+                            type="button"
+                            onClick={handleResendCode}
+                            disabled={loading}
+                            className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white underline transition-colors w-full text-center"
+                        >
+                            {(t.register as any).resendCode}
+                        </button>
+                    )}
                 </form>
             )}
 

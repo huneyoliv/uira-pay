@@ -72,8 +72,8 @@ export class AuthController {
 
     @Post('send-verification')
     @Throttle({ default: { limit: 3, ttl: 60000 } })
-    async sendVerification(@Body('email') email: string) {
-        await this.sendVerificationCodeUseCase.execute(email);
+    async sendVerification(@Body() body: { email: string; language?: string }) {
+        await this.sendVerificationCodeUseCase.execute(body.email, body.language || 'PT');
         return { message: 'Verification code sent' };
     }
 

@@ -96,6 +96,9 @@ export const locales = {
             documentUploadLabel: "Comprovante da Empresa",
             documentUploadHint: "Envie um documento oficial (PDF, PNG, JPG).",
             placeholderEmail: "email@empresa.com",
+            codeExpires: "O código expira em",
+            resendCode: "Reenviar código",
+            resendIn: "Reenviar em",
         },
         transactions: {
             title: "Transações",
@@ -323,6 +326,9 @@ export const locales = {
             documentUploadLabel: "Company Proof",
             documentUploadHint: "Upload an official document (PDF, PNG, JPG).",
             placeholderEmail: "name@company.com",
+            codeExpires: "Code expires in",
+            resendCode: "Resend code",
+            resendIn: "Resend in",
         },
         transactions: {
             title: "Transactions",
@@ -550,6 +556,9 @@ export const locales = {
             documentUploadLabel: "Preuve de l'entreprise",
             documentUploadHint: "Téléchargez un document officiel (PDF, PNG, JPG).",
             placeholderEmail: "nom@entreprise.com",
+            codeExpires: "Le code expire dans",
+            resendCode: "Renvoyer le code",
+            resendIn: "Renvoyer dans",
         },
         transactions: {
             title: "Transactions",
@@ -777,6 +786,9 @@ export const locales = {
             documentUploadLabel: "Comprobante de Empresa",
             documentUploadHint: "Sube un documento oficial (PDF, PNG, JPG).",
             placeholderEmail: "nombre@empresa.com",
+            codeExpires: "El código expira en",
+            resendCode: "Reenviar código",
+            resendIn: "Reenviar en",
         },
         transactions: {
             title: "Transacciones",

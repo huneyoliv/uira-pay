@@ -11,8 +11,8 @@ export class SendVerificationCodeUseCase {
         private readonly emailService: EmailService,
     ) { }
 
-    async execute(email: string): Promise<void> {
-        this.logger.log(`[SendVerification] Attempting to send code to: ${email}`);
+    async execute(email: string, language: string = 'PT'): Promise<void> {
+        this.logger.log(`[SendVerification] Attempting to send code to: ${email} (lang: ${language})`);
 
         // Check if email is already registered
         const existingUser = await this.prisma.tenant.findUnique({ where: { email } });
@@ -23,7 +23,6 @@ export class SendVerificationCodeUseCase {
 
         // Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        this.logger.log(`[SendVerification] Generated code for ${email}`);
 
         // Save to DB (upsert) with 15min expiration
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
@@ -34,9 +33,8 @@ export class SendVerificationCodeUseCase {
         });
         this.logger.log(`[SendVerification] Code saved to DB for ${email}`);
 
-        // Send Email
-        this.logger.log(`[SendVerification] Calling emailService.sendVerificationEmail for ${email}`);
-        await this.emailService.sendVerificationEmail(email, code);
+        // Send Email (localized)
+        await this.emailService.sendVerificationEmail(email, code, language);
         this.logger.log(`[SendVerification] Email sent successfully to ${email}`);
     }
 }
