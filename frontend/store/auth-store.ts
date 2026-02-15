@@ -42,7 +42,9 @@ export const useAuthStore = create<AuthState>()(
                     console.error('Logout failed', error);
                 } finally {
                     localStorage.removeItem('auth-token');
+                    localStorage.removeItem('auth-storage'); // Clear persisted Zustand state
                     set({ token: null, user: null, isAuthenticated: false });
+                    window.location.href = '/login'; // Force hard redirect to clear memory/state
                 }
             },
         }),
