@@ -148,9 +148,9 @@ export default function DashboardLayout({
                                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                                         }`}
                                 >
-                                    <item.icon className={`h-5 w-5 ${isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"}`} />
+                                    <item.icon className={`h-5 w-5 ${isActive ? "text-white dark:text-black" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"}`} />
                                     <span className="font-medium">{item.name}</span>
-                                    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/30" />}
+                                    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/30 dark:bg-black/30" />}
                                 </Link>
                             );
                         })}

@@ -8,7 +8,8 @@ import {
     ArrowUpRight,
     ArrowDownRight,
     Search,
-    Filter
+    Filter,
+    Download
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth-store";
@@ -121,6 +122,34 @@ export default function TransactionsPage() {
         );
     }
 
+    const handleExportCSV = () => {
+        if (transactions.length === 0) return;
+
+        const headers = [t.type, t.id, t.date, t.status, t.amount, 'Currency'];
+        const rows = transactions.map((tx) => [
+            tx.type === 'DEPOSIT' ? t.deposit : t.withdrawal,
+            tx.id,
+            new Date(tx.date).toLocaleDateString(locale) + ' ' + new Date(tx.date).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
+            tx.status,
+            tx.amount.toString(),
+            tx.currency,
+        ]);
+
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+
+        const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `transactions_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -133,7 +162,12 @@ export default function TransactionsPage() {
                         <Filter className="h-4 w-4 mr-2" />
                         {t.filter}
                     </Button>
-                    <Button className="rounded-full h-11 px-6 bg-black hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200 text-white font-semibold shadow-lg shadow-black/20">
+                    <Button
+                        className="rounded-full h-11 px-6 bg-black hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200 text-white font-semibold shadow-lg shadow-black/20"
+                        onClick={handleExportCSV}
+                        disabled={transactions.length === 0}
+                    >
+                        <Download className="h-4 w-4 mr-2" />
                         {t.exportCSV}
                     </Button>
                 </div>
