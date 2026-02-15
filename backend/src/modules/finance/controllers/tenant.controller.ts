@@ -1,4 +1,5 @@
 import { Controller, Get, UseGuards, Request, Patch, Body } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { PrismaService } from '../../../infra/database/prisma.service';
 import { JwtAuthGuard } from '../../identity/auth/infra/guards/jwt-auth.guard';
 
@@ -8,6 +9,7 @@ export class TenantController {
     constructor(private readonly prisma: PrismaService) { }
 
     @Get('dashboard/metrics')
+    @Throttle({ default: { limit: 20, ttl: 60000 } })
     async getMetrics(@Request() req: any) {
         const tenantId = req.user.id;
         const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -53,6 +55,7 @@ export class TenantController {
     }
 
     @Get('dashboard/transactions')
+    @Throttle({ default: { limit: 20, ttl: 60000 } })
     async getRecentTransactions(@Request() req: any) {
         const tenantId = req.user.id;
 
