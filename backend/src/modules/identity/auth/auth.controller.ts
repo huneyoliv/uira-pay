@@ -15,6 +15,8 @@ import { LogoutUseCase } from './application/logout.usecase';
 import { UseGuards, Req } from '@nestjs/common';
 import { JwtAuthGuard } from './infra/guards/jwt-auth.guard';
 
+import { JwtService } from '@nestjs/jwt';
+
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -25,6 +27,7 @@ export class AuthController {
         private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
         private readonly resetPasswordUseCase: ResetPasswordUseCase,
         private readonly logoutUseCase: LogoutUseCase,
+        private readonly jwtService: JwtService,
     ) { }
 
     @Post('register')
@@ -82,13 +85,28 @@ export class AuthController {
     }
 
     @Post('logout')
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard) // REMOVED: Custom handling to ensure cookies are cleared even if token is invalid
     @HttpCode(HttpStatus.OK)
     async logout(@Req() req: any, @Res({ passthrough: true }) response: Response) {
 
-        // Revoke token by incrementing version
-        if (req.user && req.user.id) {
-            await this.logoutUseCase.execute(req.user.id);
+        try {
+            // Manually extract and verify token to perform revocation (if valid)
+            let token = req.cookies['access_token'];
+            if (token) {
+                // Verify token to get userId
+                try {
+                    const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+                    if (payload && payload.sub) {
+                        // Revoke token by incrementing version
+                        await this.logoutUseCase.execute(payload.sub);
+                        console.log(`[Logout] Token revoked for user ${payload.sub}`);
+                    }
+                } catch (tokenError) {
+                    console.warn('[Logout] Token invalid or expired. Proceeding to clear cookies.', tokenError.message);
+                }
+            }
+        } catch (error) {
+            console.error('[Logout] Error during logout process:', error);
         }
 
         const domain = process.env.DOMAIN || undefined;
@@ -103,7 +121,6 @@ export class AuthController {
                 secure: true,
                 sameSite: 'none',
                 domain: domain ? `.${domain}` : undefined,
-                path: path
             });
 
             // Option 2: Clear without domain (HostOnly)
