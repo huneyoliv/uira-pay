@@ -288,7 +288,7 @@ export default function WithdrawalsPage() {
 
                 {/* Main View: Selection */}
                 {view === 'main' && (
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Button
                             variant="outline"
                             className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[24px] dark:bg-slate-900"
@@ -313,7 +313,7 @@ export default function WithdrawalsPage() {
                             className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[24px] dark:bg-slate-900"
                             onClick={() => setView('other')}
                         >
-                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                                 <Wallet className="h-6 w-6 text-slate-600" />
                             </div>
                             <div className="text-center">
@@ -386,14 +386,14 @@ export default function WithdrawalsPage() {
                                     </div>
                                 )}
 
-                                {/* Address Input */}
                                 <div className="space-y-2">
-                                    <Label>{view === 'binance' ? t.email : t.address}</Label>
+                                    <Label className={view === 'other' && !selectedNetwork ? 'text-slate-400' : ''}>{view === 'binance' ? t.email : t.address}</Label>
                                     <Input
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
                                         placeholder={view === 'binance' ? "user@example.com" : "0x..."}
                                         className="rounded-xl h-12"
+                                        disabled={view === 'other' && !selectedNetwork}
                                     />
                                 </div>
 

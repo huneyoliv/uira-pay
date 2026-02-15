@@ -257,7 +257,7 @@ export default function DashboardLayout({
             {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 z-50 bg-slate-900/50 lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="absolute left-0 top-0 h-full w-[280px] bg-white p-6" onClick={e => e.stopPropagation()}>
+                    <div className="absolute left-0 top-0 h-full w-[280px] bg-white dark:bg-[#0B0F19] p-6" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-8">
                             <span className="font-bold text-xl text-black dark:text-white">{t.menu}</span>
                             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
@@ -266,21 +266,27 @@ export default function DashboardLayout({
                         </div>
                         {/* Mobile Nav Items */}
                         <nav className="space-y-2">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <item.icon className="h-5 w-5" />
-                                    <span className="font-medium">{item.name}</span>
-                                </Link>
-                            ))}
+                            {navItems.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                            ? "bg-black text-white dark:bg-white dark:text-black"
+                                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                            }`}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <item.icon className={`h-5 w-5 ${isActive ? "text-white dark:text-black" : ""}`} />
+                                        <span className="font-medium">{item.name}</span>
+                                    </Link>
+                                );
+                            })}
                             <button
                                 onClick={() => useAuthStore.getState().logout()}
 
-                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 w-full transition-colors"
+                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 w-full transition-colors"
                             >
                                 <LogOut className="h-5 w-5" />
                                 <span className="font-medium">{t.logout}</span>

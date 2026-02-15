@@ -33,7 +33,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
         if (!user) return;
         setLoading(true);
         try {
-            await api.patch("/tenant/config", { language: langCode });
+            await api.patch("/me/config", { language: langCode });
             // Update local user state
             login(localStorage.getItem('auth-token') || '', { ...user, language: langCode });
             // Force reload to apply changes globally if needed, or rely on reactive state
@@ -53,15 +53,15 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
                     <span>{currentLang.label}</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-slate-900 dark:border-slate-700">
                 {languages.map((lang) => (
                     <DropdownMenuItem
                         key={lang.code}
                         onClick={() => handleLanguageChange(lang.code)}
-                        className="gap-2 cursor-pointer"
+                        className="gap-2 cursor-pointer dark:hover:bg-slate-800"
                         disabled={loading}
                     >
-                        <span>{lang.flag}</span>
+                        <span className="text-base">{lang.flag}</span>
                         {lang.label}
                     </DropdownMenuItem>
                 ))}
