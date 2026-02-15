@@ -271,11 +271,11 @@ export default function WithdrawalsPage() {
 
             <div className="grid gap-6">
                 {/* Balance Card */}
-                <Card className="bg-black dark:bg-white text-white dark:text-black border-none shadow-xl shadow-black/20 rounded-[24px] relative overflow-hidden">
+                <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl shadow-black/20 dark:shadow-slate-900/50 rounded-[24px] relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 dark:bg-black/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                     <CardContent className="p-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
                         <div>
-                            <p className="text-slate-300 dark:text-slate-600 text-sm font-medium mb-1">{t.availableBalance}</p>
+                            <p className="text-slate-300 dark:text-slate-400 text-sm font-medium mb-1">{t.availableBalance}</p>
                             <div className="text-3xl font-bold">
                                 {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balance)} <span className="text-lg opacity-80">{currency}</span>
                             </div>

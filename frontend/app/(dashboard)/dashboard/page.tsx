@@ -203,17 +203,17 @@ export default function DashboardPage() {
       {/* Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Primary Card - Total Revenue */}
-        <Card className="bg-black dark:bg-white text-white dark:text-black border-none shadow-xl shadow-black/20 dark:shadow-white/10 rounded-[32px] relative overflow-hidden">
+        <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl shadow-black/20 dark:shadow-slate-900/50 rounded-[32px] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-gray-100">{t.totalRevenue}</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-100 dark:text-gray-300">{t.totalRevenue}</CardTitle>
             <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
               <ArrowUpRight className="h-4 w-4 text-white" />
             </div>
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-4xl font-bold mb-2">
-              {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.totalSales || 0)} <span className="text-lg text-gray-300 dark:text-gray-600 font-medium">{cryptoCurrency}</span>
+              {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.totalSales || 0)} <span className="text-lg text-gray-300 dark:text-gray-400 font-medium">{cryptoCurrency}</span>
             </div>
             <div className="flex items-center text-xs text-green-100 bg-white/10 w-fit px-2 py-1 rounded-full">
               <Plus className="h-3 w-3 mr-1" />

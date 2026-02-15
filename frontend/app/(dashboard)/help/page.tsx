@@ -91,7 +91,7 @@ export default function HelpPage() {
             <div className="grid gap-6 md:grid-cols-2">
                 <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
                     <CardHeader>
-                        <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+                        <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
                             <FileText className="h-6 w-6" />
                         </div>
                         <CardTitle>{t.docs}</CardTitle>
@@ -104,9 +104,9 @@ export default function HelpPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
+                <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
                     <CardHeader>
-                        <div className="h-12 w-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-4 group-hover:bg-green-100 transition-colors">
+                        <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-4 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors">
                             <MessageCircle className="h-6 w-6" />
                         </div>
                         <CardTitle>{t.liveChat}</CardTitle>
@@ -119,9 +119,9 @@ export default function HelpPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
+                <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
                     <CardHeader>
-                        <div className="h-12 w-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:bg-purple-100 transition-colors">
+                        <div className="h-12 w-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 transition-colors">
                             <Mail className="h-6 w-6" />
                         </div>
                         <CardTitle>{t.email}</CardTitle>
@@ -135,12 +135,12 @@ export default function HelpPage() {
                 </Card>
             </div>
 
-            <Card className="bg-black dark:bg-white text-white dark:text-black border-none shadow-xl rounded-[32px] p-8 relative overflow-hidden">
+            <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl rounded-[32px] p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 dark:bg-black/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                 <div className="relative z-10">
                     <h3 className="text-2xl font-bold mb-2">{t.needHelp}</h3>
-                    <p className="text-slate-300 dark:text-slate-600 mb-6 max-w-lg">{t.needHelpDesc}</p>
-                    <Button className="bg-white text-black hover:bg-slate-100 dark:bg-black dark:text-white dark:hover:bg-slate-900 rounded-full px-8 font-bold">
+                    <p className="text-slate-300 dark:text-slate-400 mb-6 max-w-lg">{t.needHelpDesc}</p>
+                    <Button className="bg-white text-black hover:bg-slate-100 dark:bg-white dark:text-black dark:hover:bg-slate-200 rounded-full px-8 font-bold">
                         {t.talkToExpert}
                     </Button>
                 </div>
