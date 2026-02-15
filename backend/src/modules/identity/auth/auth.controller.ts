@@ -85,7 +85,6 @@ export class AuthController {
     }
 
     @Post('logout')
-    // @UseGuards(JwtAuthGuard) // REMOVED: Custom handling to ensure cookies are cleared even if token is invalid
     @HttpCode(HttpStatus.OK)
     async logout(@Req() req: any, @Res({ passthrough: true }) response: Response) {
 
@@ -93,11 +92,9 @@ export class AuthController {
             // Manually extract and verify token to perform revocation (if valid)
             let token = req.cookies['access_token'];
             if (token) {
-                // Verify token to get userId
                 try {
                     const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
                     if (payload && payload.sub) {
-                        // Revoke token by incrementing version
                         await this.logoutUseCase.execute(payload.sub);
                         console.log(`[Logout] Token revoked for user ${payload.sub}`);
                     }
@@ -111,25 +108,21 @@ export class AuthController {
 
         const domain = process.env.DOMAIN || undefined;
 
-        // Strategy: Scorched Earth - Clear for all likely paths and domains
-        const paths = ['/', '/auth', '/api', '/api/auth'];
+        // Clear the cookie with the EXACT same options it was set with
+        response.clearCookie('access_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: domain ? `.${domain}` : undefined,
+            path: '/',
+        });
 
-        paths.forEach(path => {
-            // Option 1: Clear with domain (if set)
-            response.clearCookie('access_token', {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-                domain: domain ? `.${domain}` : undefined,
-            });
-
-            // Option 2: Clear without domain (HostOnly)
-            response.clearCookie('access_token', {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-                path: path
-            });
+        // Also clear without domain (HostOnly) in case it was set that way
+        response.clearCookie('access_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/',
         });
 
         return { message: 'Logged out successfully' };

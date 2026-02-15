@@ -37,14 +37,20 @@ export default function DashboardLayout({
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const router = useRouter(); // Import useRouter from next/navigation
+    const hasHydrated = useAuthStore((state) => state._hasHydrated);
+    const router = useRouter();
 
-    // Backup client-side check
+    // Backup client-side check — ONLY after Zustand has rehydrated from localStorage
     useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/login'); // Middleware usually handles this, but good as backup
+        if (hasHydrated && !isAuthenticated) {
+            router.push('/login');
         }
-    }, [isAuthenticated, router]);
+    }, [hasHydrated, isAuthenticated, router]);
+
+    // Show nothing until Zustand state is rehydrated — prevents flash redirect loop
+    if (!hasHydrated) {
+        return null;
+    }
 
     const translations: any = {
         PT: {
@@ -154,10 +160,8 @@ export default function DashboardLayout({
                 <div className="mt-auto p-8">
 
                     <button
-                        onClick={async () => {
-                            await useAuthStore.getState().logout();
-                            window.location.href = "/login";
-                        }}
+                        onClick={() => useAuthStore.getState().logout()}
+
                         className="flex items-center gap-3 px-4 py-3 mt-6 text-slate-400 hover:text-red-500 transition-colors w-full"
                     >
                         <LogOut className="h-5 w-5" />
@@ -229,10 +233,8 @@ export default function DashboardLayout({
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={async () => {
-                                                    await useAuthStore.getState().logout();
-                                                    window.location.href = "/login";
-                                                }}
+                                                onClick={() => useAuthStore.getState().logout()}
+
                                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
                                             >
                                                 <LogOut className="h-4 w-4" />
@@ -276,10 +278,8 @@ export default function DashboardLayout({
                                 </Link>
                             ))}
                             <button
-                                onClick={async () => {
-                                    await useAuthStore.getState().logout();
-                                    window.location.href = "/login";
-                                }}
+                                onClick={() => useAuthStore.getState().logout()}
+
                                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 w-full transition-colors"
                             >
                                 <LogOut className="h-5 w-5" />

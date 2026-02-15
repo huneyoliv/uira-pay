@@ -19,16 +19,24 @@ interface AuthState {
     token: string | null;
     user: User | null;
     isAuthenticated: boolean;
+    _hasHydrated: boolean;
+    _logoutInProgress: boolean;
     login: (token: string | null, user: User) => void;
     logout: () => Promise<void>;
+    setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             token: null,
             user: null,
             isAuthenticated: false,
+            _hasHydrated: false,
+            _logoutInProgress: false,
+            setHasHydrated: (state) => {
+                set({ _hasHydrated: state });
+            },
             login: (token, user) => {
                 if (token) {
                     localStorage.setItem('auth-token', token);
@@ -36,20 +44,30 @@ export const useAuthStore = create<AuthState>()(
                 set({ token, user, isAuthenticated: true });
             },
             logout: async () => {
+                // Guard: prevent double logout
+                if (get()._logoutInProgress) return;
+                set({ _logoutInProgress: true });
+
                 try {
                     await api.post('/auth/logout');
                 } catch (error) {
-                    console.error('Logout failed', error);
-                } finally {
-                    localStorage.removeItem('auth-token');
-                    localStorage.removeItem('auth-storage'); // Clear persisted Zustand state
-                    set({ token: null, user: null, isAuthenticated: false });
-                    window.location.href = '/login'; // Force hard redirect to clear memory/state
+                    console.error('Logout API call failed (cookie still cleared)', error);
                 }
+
+                // Clear all auth state
+                localStorage.removeItem('auth-token');
+                localStorage.removeItem('auth-storage');
+                set({ token: null, user: null, isAuthenticated: false, _logoutInProgress: false });
+
+                // Hard redirect to login — ensures middleware sees no cookie on next request
+                window.location.href = '/login';
             },
         }),
         {
             name: 'auth-storage',
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
         }
     )
 );
