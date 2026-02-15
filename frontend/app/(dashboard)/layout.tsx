@@ -42,7 +42,7 @@ export default function DashboardLayout({
     // Backup client-side check
     useEffect(() => {
         if (!isAuthenticated) {
-            // router.push('/login'); // Middleware usually handles this, but good as backup
+            router.push('/login'); // Middleware usually handles this, but good as backup
         }
     }, [isAuthenticated, router]);
 
