@@ -99,6 +99,9 @@ export const locales = {
             codeExpires: "O código expira em",
             resendCode: "Reenviar código",
             resendIn: "Reenviar em",
+            termsAgreement: "Aceito os",
+            termsLink: "Termos de Uso",
+            termsError: "Você deve aceitar os termos de uso.",
         },
         transactions: {
             title: "Transações",
@@ -329,6 +332,9 @@ export const locales = {
             codeExpires: "Code expires in",
             resendCode: "Resend code",
             resendIn: "Resend in",
+            termsAgreement: "I accept the",
+            termsLink: "Terms of Service",
+            termsError: "You must accept the terms of service.",
         },
         transactions: {
             title: "Transactions",
@@ -559,6 +565,9 @@ export const locales = {
             codeExpires: "Le code expire dans",
             resendCode: "Renvoyer le code",
             resendIn: "Renvoyer dans",
+            termsAgreement: "J'accepte les",
+            termsLink: "Conditions d'Utilisation",
+            termsError: "Vous devez accepter les conditions d'utilisation.",
         },
         transactions: {
             title: "Transactions",
@@ -789,6 +798,9 @@ export const locales = {
             codeExpires: "El código expira en",
             resendCode: "Reenviar código",
             resendIn: "Reenviar en",
+            termsAgreement: "Acepto los",
+            termsLink: "Términos de Uso",
+            termsError: "Debes aceptar los términos de uso.",
         },
         transactions: {
             title: "Transacciones",

@@ -42,6 +42,7 @@ enum TenantStatus {
   PENDING
   ACTIVE
   REJECTED
+  BLOCKED
 }
 
 model Tenant {
@@ -75,6 +76,11 @@ model Tenant {
   twoFactorEnabled        Boolean  @default(false)
   twoFactorBackupCodes    String[]
   isAdmin                 Boolean  @default(false)
+  blockedAt               DateTime?
+  blockedReason           String?
+  documentRequested       Boolean  @default(false)
+  documentRequestMsg      String?
+  lastTermsAcceptedAt     DateTime?
   created_at              DateTime @default(now())
 
   wallets Wallet[]
@@ -166,4 +172,18 @@ model AuditLog {
   admin     Tenant   @relation(fields: [adminId], references: [id])
 
   @@map("audit_logs")
+}
+
+model LegalDocument {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  type         String   // "terms" | "privacy"
+  content_pt   String
+  content_en   String
+  content_es   String
+  content_fr   String
+  savedAt      DateTime @default(now())
+  effectiveAt  DateTime
+  createdById  String   @db.ObjectId
+
+  @@map("legal_documents")
 }

@@ -67,6 +67,7 @@ export default function RegisterPage() {
     const [verificationToken, setVerificationToken] = useState("");
     const [timer, setTimer] = useState(0);
     const [canResend, setCanResend] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const handleIdBlur = () => {
         if (!docNumber) {
@@ -211,6 +212,10 @@ export default function RegisterPage() {
         e.preventDefault();
         if (password !== confirmPassword) {
             setError(t.register.passwordMatch);
+            return;
+        }
+        if (!termsAccepted) {
+            setError(t.register.termsError || "Você deve aceitar os termos de uso.");
             return;
         }
         setLoading(true);
@@ -474,6 +479,19 @@ export default function RegisterPage() {
                             className="h-14 rounded-full border-slate-200 bg-slate-50 px-6 text-base text-slate-900 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-0 dark:bg-slate-900 dark:border-slate-800 dark:text-white dark:focus-visible:ring-white"
                         />
                     </div>
+                    <div className="flex items-start space-x-2 pt-2">
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            className="mt-1 h-4 w-4 rounded border-slate-300 text-black focus:ring-black dark:border-slate-800 dark:bg-slate-900 dark:focus:ring-white"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                        />
+                        <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400">
+                            {t.register.termsAgreement} <Link href="/terms" target="_blank" className="underline text-slate-900 dark:text-white hover:text-black">{t.register.termsLink}</Link>
+                        </label>
+                    </div>
+
                     {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
 
                     <div className="flex gap-3">

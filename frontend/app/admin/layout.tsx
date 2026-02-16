@@ -31,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "Tenants", href: "/admin/tenants", icon: Users },
         { name: "Transactions", href: "/admin/transactions", icon: CreditCard },
         { name: "Withdrawals", href: "/admin/withdrawals", icon: ArrowDownRight },
+        { name: "Legal Docs", href: "/admin/terms", icon: FileText },
         { name: "System Logs", href: "/admin/logs", icon: FileText },
     ];
 

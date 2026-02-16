@@ -17,6 +17,7 @@ interface User {
     twoFactorEnabled?: boolean;
     isAdmin?: boolean;
     status: string;
+    documentRequested?: boolean;
 }
 
 interface AuthState {

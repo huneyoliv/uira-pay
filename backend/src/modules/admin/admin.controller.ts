@@ -91,4 +91,41 @@ export class AdminController {
     async getSystemLogs(@Query('limit') limit: number = 50) {
         return this.adminService.getSystemLogs(Math.min(Number(limit), 200));
     }
+
+    @Get('pending-approvals')
+    async getPendingApprovals() {
+        return this.adminService.getPendingApprovals();
+    }
+
+    @Patch('tenants/:id/block')
+    async blockTenant(
+        @Param('id') id: string,
+        @Body('reason') reason: string,
+        @CurrentUser() admin: any,
+        @Req() req: Request,
+    ) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.blockTenant(id, reason, admin.id, req.ip);
+    }
+
+    @Patch('tenants/:id/unblock')
+    async unblockTenant(
+        @Param('id') id: string,
+        @CurrentUser() admin: any,
+        @Req() req: Request,
+    ) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.unblockTenant(id, admin.id, req.ip);
+    }
+
+    @Patch('tenants/:id/request-documents')
+    async requestDocuments(
+        @Param('id') id: string,
+        @Body('message') message: string,
+        @CurrentUser() admin: any,
+        @Req() req: Request,
+    ) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.requestDocuments(id, message, admin.id, req.ip);
+    }
 }

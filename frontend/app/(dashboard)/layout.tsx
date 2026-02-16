@@ -25,6 +25,8 @@ import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
 
 import { PendingRequirementsModal } from "@/components/pending-requirements-modal";
+import { DocumentRequestModal } from "@/components/document-request-modal";
+import { NewTermsBanner } from "@/components/new-terms-banner";
 
 export default function DashboardLayout({
     children,
@@ -107,6 +109,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
             <PendingRequirementsModal />
+            <DocumentRequestModal />
             {/* Sidebar - Desktop */}
             <aside className="hidden lg:flex w-[280px] flex-col bg-white dark:bg-[#0B0F19] border-r border-slate-100 dark:border-slate-800 fixed h-full z-20 transition-colors duration-300">
                 <div className="p-8">
@@ -223,6 +226,7 @@ export default function DashboardLayout({
                             </div>
                         </div>
                     )}
+                    <NewTermsBanner />
                     {children}
                 </main>
             </div>

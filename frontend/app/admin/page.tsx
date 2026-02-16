@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
-import { Users, CreditCard, Wallet, ArrowDownRight, TrendingUp, Activity } from "lucide-react";
+import { Users, CreditCard, Wallet, ArrowDownRight, TrendingUp, Activity, DollarSign, Bitcoin } from "lucide-react";
 
 interface DashboardMetrics {
     totalTenants: number;
@@ -19,18 +19,31 @@ interface DashboardMetrics {
     }>;
 }
 
+interface Balances {
+    efi: { balance: number; currency: string };
+    binance: {
+        assets: Array<{ asset: string; free: string; locked: string }>;
+        totalUSDT: number;
+    };
+}
+
 export default function AdminDashboard() {
     const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+    const [balances, setBalances] = useState<Balances | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchMetrics();
+        fetchData();
     }, []);
 
-    const fetchMetrics = async () => {
+    const fetchData = async () => {
         try {
-            const res = await api.get("/admin/dashboard");
-            setMetrics(res.data);
+            const [metricsRes, balancesRes] = await Promise.all([
+                api.get("/admin/dashboard"),
+                api.get("/admin/balances").catch(() => ({ data: null })),
+            ]);
+            setMetrics(metricsRes.data);
+            setBalances(balancesRes.data);
         } catch (err) {
             console.error("Failed to load dashboard:", err);
         } finally {
@@ -102,6 +115,51 @@ export default function AdminDashboard() {
                         </CardContent>
                     </Card>
                 ))}
+            </div>
+
+            {/* Balance Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Efí Balance */}
+                <Card className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white border-none rounded-2xl overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+                    <CardContent className="p-6 relative z-10">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 rounded-xl bg-white/10">
+                                <DollarSign className="h-5 w-5" />
+                            </div>
+                            <p className="text-emerald-100 text-sm font-medium">Efí (PIX) Balance</p>
+                        </div>
+                        <p className="text-3xl font-bold">
+                            R$ {(balances?.efi?.balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {/* Binance Balance */}
+                <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white border-none rounded-2xl overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+                    <CardContent className="p-6 relative z-10">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 rounded-xl bg-white/10">
+                                <Bitcoin className="h-5 w-5" />
+                            </div>
+                            <p className="text-amber-100 text-sm font-medium">Binance Balance</p>
+                        </div>
+                        <p className="text-3xl font-bold">
+                            $ {(balances?.binance?.totalUSDT || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            <span className="text-lg opacity-70 ml-1">USDT</span>
+                        </p>
+                        {balances?.binance?.assets && balances.binance.assets.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {balances.binance.assets.slice(0, 5).map((a) => (
+                                    <span key={a.asset} className="text-xs bg-white/10 px-2 py-1 rounded-lg">
+                                        {a.asset}: {parseFloat(a.free).toFixed(4)}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Volume Card */}

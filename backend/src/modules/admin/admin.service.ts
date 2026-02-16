@@ -1,11 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma.service';
+import { AdminEmailService } from './services/admin-email.service';
 
 @Injectable()
 export class AdminService {
     private readonly logger = new Logger(AdminService.name);
 
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly adminEmail: AdminEmailService,
+    ) { }
 
     async getDashboardMetrics() {
         const [totalTenants, activeTenants, pendingTenants, totalTransactions, pendingWithdrawals, volumeAgg, recentTenants] = await Promise.all([
@@ -246,6 +250,89 @@ export class AdminService {
         });
     }
 
+    async blockTenant(tenantId: string, reason: string, adminId: string, ipAddress?: string) {
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) throw new NotFoundException('Tenant not found');
+
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+                status: 'BLOCKED',
+                blockedAt: new Date(),
+                blockedReason: reason,
+            } as any,
+        });
+
+        await this.logAction(adminId, 'BLOCK_TENANT', tenantId, { reason }, ipAddress);
+        this.logger.log(`Tenant ${tenantId} blocked by admin ${adminId}: ${reason}`);
+
+        // Send email notification
+        const lang = this.normalizeLanguage((tenant as any).language);
+        this.adminEmail.sendAdminEmail((tenant as any).email, 'accountBlocked', lang, { reason }).catch(() => { });
+
+        return { success: true, message: 'Tenant blocked successfully' };
+    }
+
+    async unblockTenant(tenantId: string, adminId: string, ipAddress?: string) {
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) throw new NotFoundException('Tenant not found');
+
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+                status: 'ACTIVE',
+                blockedAt: null,
+                blockedReason: null,
+            } as any,
+        });
+
+        await this.logAction(adminId, 'UNBLOCK_TENANT', tenantId, {}, ipAddress);
+        this.logger.log(`Tenant ${tenantId} unblocked by admin ${adminId}`);
+
+        // Send email notification
+        const lang = this.normalizeLanguage((tenant as any).language);
+        this.adminEmail.sendAdminEmail((tenant as any).email, 'accountUnblocked', lang).catch(() => { });
+
+        return { success: true, message: 'Tenant unblocked successfully' };
+    }
+
+    async requestDocuments(tenantId: string, message: string, adminId: string, ipAddress?: string) {
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) throw new NotFoundException('Tenant not found');
+
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+                documentRequested: true,
+                documentRequestMsg: message,
+            } as any,
+        });
+
+        await this.logAction(adminId, 'REQUEST_DOCUMENTS', tenantId, { message }, ipAddress);
+        this.logger.log(`Documents requested for tenant ${tenantId} by admin ${adminId}`);
+
+        // Send email notification
+        const lang = this.normalizeLanguage((tenant as any).language);
+        this.adminEmail.sendAdminEmail((tenant as any).email, 'documentRequest', lang, { message }).catch(() => { });
+
+        return { success: true, message: 'Document request sent successfully' };
+    }
+
+    async getPendingApprovals() {
+        return this.prisma.tenant.findMany({
+            where: { status: 'PENDING' } as any,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                doc_number: true,
+                country: true,
+                created_at: true,
+            } as any,
+            orderBy: { created_at: 'asc' },
+        });
+    }
+
     private async logAction(adminId: string, action: string, targetId?: string, details?: any, ipAddress?: string) {
         try {
             await this.prisma.auditLog.create({
@@ -260,5 +347,16 @@ export class AdminService {
         } catch (error) {
             this.logger.error(`Failed to create audit log for ${action}`, error);
         }
+    }
+
+    private normalizeLanguage(lang: string | undefined): string {
+        if (!lang) return 'PT';
+        const map: Record<string, string> = {
+            'pt-BR': 'PT', 'pt': 'PT',
+            'en-US': 'EN', 'en': 'EN',
+            'es-ES': 'ES', 'es': 'ES',
+            'fr-FR': 'FR', 'fr': 'FR',
+        };
+        return map[lang] || lang.toUpperCase().split('-')[0] || 'PT';
     }
 }

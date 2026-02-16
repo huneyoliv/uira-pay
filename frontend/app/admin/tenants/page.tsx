@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { Search, Shield, ShieldCheck } from "lucide-react";
+import { Search, Shield, ShieldCheck, Ban, Unlock, FileUp } from "lucide-react";
 import Link from "next/link";
 
 interface Tenant {
@@ -18,7 +18,7 @@ interface Tenant {
     twoFactorEnabled: boolean;
     isAdmin: boolean;
     created_at: string;
-    status?: 'PENDING' | 'ACTIVE' | 'REJECTED';
+    status?: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'BLOCKED';
     wallets: Array<{ balance: number; currency: string }>;
 }
 
@@ -68,6 +68,57 @@ export default function AdminTenantsPage() {
             console.error("Failed to reject tenant:", err);
             alert("Failed to reject tenant");
         }
+    };
+
+    const handleBlock = async (id: string) => {
+        const reason = prompt("Enter the reason for blocking this account:");
+        if (!reason) return;
+        try {
+            await api.patch(`/admin/tenants/${id}/block`, { reason });
+            fetchTenants();
+        } catch (err) {
+            console.error("Failed to block tenant:", err);
+            alert("Failed to block tenant");
+        }
+    };
+
+    const handleUnblock = async (id: string) => {
+        if (!confirm("Are you sure you want to unblock this tenant?")) return;
+        try {
+            await api.patch(`/admin/tenants/${id}/unblock`);
+            fetchTenants();
+        } catch (err) {
+            console.error("Failed to unblock tenant:", err);
+            alert("Failed to unblock tenant");
+        }
+    };
+
+    const handleRequestDocuments = async (id: string) => {
+        const message = prompt("Enter the message to send to the tenant (e.g., 'Please upload your ID document'):");
+        if (!message) return;
+        try {
+            await api.patch(`/admin/tenants/${id}/request-documents`, { message });
+            fetchTenants();
+            alert("Document request sent successfully");
+        } catch (err) {
+            console.error("Failed to request documents:", err);
+            alert("Failed to request documents");
+        }
+    };
+
+    const getStatusBadge = (status: string | undefined) => {
+        const s = status || 'ACTIVE';
+        const styles: Record<string, string> = {
+            ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            PENDING: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+            REJECTED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+            BLOCKED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        };
+        return (
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${styles[s] || styles.ACTIVE}`}>
+                {s}
+            </span>
+        );
     };
 
     return (
@@ -130,16 +181,7 @@ export default function AdminTenantsPage() {
                                                 </Link>
                                             </td>
                                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{tenant.email}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${tenant.status === 'ACTIVE'
-                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                    : tenant.status === 'REJECTED'
-                                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                                    }`}>
-                                                    {tenant.status || 'ACTIVE'}
-                                                </span>
-                                            </td>
+                                            <td className="px-6 py-4">{getStatusBadge(tenant.status)}</td>
                                             <td className="px-6 py-4 font-mono text-sm">
                                                 {tenant.wallets?.[0]
                                                     ? `${Number(tenant.wallets[0].balance).toFixed(2)} ${tenant.wallets[0].currency}`
@@ -157,26 +199,64 @@ export default function AdminTenantsPage() {
                                                 {new Date(tenant.created_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                {tenant.status === 'PENDING' && (
-                                                    <div className="flex gap-2 justify-end">
+                                                <div className="flex gap-1.5 justify-end flex-wrap">
+                                                    {tenant.status === 'PENDING' && (
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="default"
+                                                                className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                                                onClick={() => handleApprove(tenant.id)}
+                                                            >
+                                                                Approve
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="h-7 text-xs"
+                                                                onClick={() => handleReject(tenant.id)}
+                                                            >
+                                                                Reject
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                    {tenant.status !== 'BLOCKED' && !tenant.isAdmin && (
                                                         <Button
                                                             size="sm"
-                                                            variant="default"
-                                                            className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
-                                                            onClick={() => handleApprove(tenant.id)}
+                                                            variant="outline"
+                                                            className="h-7 text-xs border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                                                            onClick={() => handleBlock(tenant.id)}
+                                                            title="Block tenant"
                                                         >
-                                                            Approve
+                                                            <Ban className="h-3 w-3 mr-1" />
+                                                            Block
                                                         </Button>
+                                                    )}
+                                                    {tenant.status === 'BLOCKED' && (
                                                         <Button
                                                             size="sm"
-                                                            variant="destructive"
-                                                            className="h-7 text-xs"
-                                                            onClick={() => handleReject(tenant.id)}
+                                                            variant="outline"
+                                                            className="h-7 text-xs border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20"
+                                                            onClick={() => handleUnblock(tenant.id)}
+                                                            title="Unblock tenant"
                                                         >
-                                                            Reject
+                                                            <Unlock className="h-3 w-3 mr-1" />
+                                                            Unblock
                                                         </Button>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                    {!tenant.isAdmin && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-7 text-xs border-amber-200 text-amber-600 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                                                            onClick={() => handleRequestDocuments(tenant.id)}
+                                                            title="Request documents"
+                                                        >
+                                                            <FileUp className="h-3 w-3 mr-1" />
+                                                            Docs
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

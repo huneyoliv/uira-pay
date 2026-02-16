@@ -1,4 +1,4 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Res } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, Res, UnauthorizedException } from '@nestjs/common';
 import type { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { RegisterTenantUseCase } from './application/register-tenant.usecase';
@@ -24,6 +24,7 @@ import { Disable2FAUseCase } from './application/totp/disable-2fa.usecase';
 import { Reset2FAUseCase } from './application/totp/reset-2fa.usecase';
 
 import { UseGuards, Req } from '@nestjs/common';
+import { PrismaService } from '../../../infra/database/prisma.service';
 import { JwtAuthGuard } from './infra/guards/jwt-auth.guard';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
 
@@ -32,6 +33,7 @@ import { JwtService } from '@nestjs/jwt';
 @Controller('auth')
 export class AuthController {
     constructor(
+        private readonly prisma: PrismaService,
         private readonly registerTenantUseCase: RegisterTenantUseCase,
         private readonly loginUseCase: LoginUseCase,
         private readonly sendVerificationCodeUseCase: SendVerificationCodeUseCase,
@@ -59,6 +61,16 @@ export class AuthController {
     async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
         const result = await this.loginUseCase.execute(dto);
 
+        // If 2FA is required, return temp token without setting JWT cookie
+        if (result.requires2FA) {
+            return {
+                message: '2FA verification required',
+                requires2FA: true,
+                tempToken: result.tempToken,
+                user: result.user,
+            };
+        }
+
         // SECURITY: Store JWT in HttpOnly Cookie
         const domain = process.env.DOMAIN || undefined;
         response.cookie('access_token', result.accessToken, {
@@ -71,6 +83,58 @@ export class AuthController {
         });
 
         return { message: 'Login successful', user: result.user };
+    }
+
+    @Post('login/2fa')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    async login2FA(
+        @Body('tempToken') tempToken: string,
+        @Body('code') code: string,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        // Verify the temp token
+        let payload: any;
+        try {
+            payload = this.jwtService.verify(tempToken, { secret: process.env.JWT_SECRET });
+        } catch (error) {
+            throw new UnauthorizedException('Invalid or expired session. Please login again.');
+        }
+
+        if (!payload || payload.purpose !== '2fa-pending') {
+            throw new UnauthorizedException('Invalid session token.');
+        }
+
+        // Validate the TOTP code
+        await this.validate2FAUseCase.execute(payload.sub, code);
+
+        // Get tenant for full token generation
+        const tenant = await this.prisma.tenant.findUnique({
+            where: { id: payload.sub },
+        });
+
+        if (!tenant) {
+            throw new UnauthorizedException('User not found.');
+        }
+
+        // Generate full access token
+        const accessToken = this.jwtService.sign(
+            { sub: tenant.id, email: (tenant as any).email, tokenVersion: (tenant as any).tokenVersion },
+            { secret: process.env.JWT_SECRET, expiresIn: '1d' },
+        );
+
+        // Set JWT cookie
+        const domain = process.env.DOMAIN || undefined;
+        response.cookie('access_token', accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: domain ? `.${domain}` : undefined,
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        return { message: '2FA verified successfully' };
     }
 
     @Post('send-verification')

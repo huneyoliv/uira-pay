@@ -51,6 +51,7 @@ export class RegisterTenantUseCase {
                 fiatCurrency: dto.fiatCurrency,
                 preference_locked_until: new Date(), // Not locked initially
                 status: 'PENDING',
+                lastTermsAcceptedAt: new Date(),
             } as any,
         });
 
