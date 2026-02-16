@@ -412,14 +412,14 @@ export default function SettingsPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center gap-4 flex-wrap">
-                        <div className="space-y-1.5 flex-1 min-w-[180px]">
-                            <Label className="text-slate-500">{t.language}</Label>
-                            <LanguageSelector className="w-full" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-2 flex flex-col items-center">
+                            <Label className="text-slate-500 text-center w-full">{t.language}</Label>
+                            <LanguageSelector className="w-full max-w-[220px]" />
                         </div>
-                        <div className="space-y-1.5 flex-1 min-w-[180px]">
-                            <Label className="text-slate-500">{t.theme}</Label>
-                            <ThemeToggle className="w-full" />
+                        <div className="space-y-2 flex flex-col items-center">
+                            <Label className="text-slate-500 text-center w-full">{t.theme}</Label>
+                            <ThemeToggle className="w-full max-w-[220px]" />
                         </div>
                     </div>
                 </CardContent>

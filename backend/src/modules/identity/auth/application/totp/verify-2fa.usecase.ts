@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../../../infra/database/prisma.service';
-import { verify } from 'otplib';
+import { verifySync } from 'otplib';
 import { EncryptionService } from '../encryption.service';
 
 @Injectable()
@@ -36,10 +36,10 @@ export class Verify2FAUseCase {
             throw new BadRequestException('Invalid 2FA configuration (decryption failed).');
         }
 
-        // Verify the TOTP code
-        const isValid = verify({ token: code, secret });
+        // Verify the TOTP code (verifySync returns { valid: boolean })
+        const result = verifySync({ token: code, secret });
 
-        if (!isValid) {
+        if (!result.valid) {
             throw new BadRequestException('Invalid verification code. Please try again.');
         }
 

@@ -172,7 +172,7 @@ export default function DashboardLayout({
             {/* Main Content */}
             <div className="flex-1 flex flex-col lg:pl-[280px]">
                 {/* Header */}
-                <header className="h-24 px-8 flex items-center justify-between bg-[#F8FAFC] dark:bg-[#020617] sticky top-0 z-10 transition-colors duration-300">
+                <header className="h-24 px-8 flex items-center justify-between bg-[#F8FAFC]/80 dark:bg-[#020617]/80 backdrop-blur-xl sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800 transition-colors duration-300">
                     <div className="flex items-center gap-4 lg:hidden">
                         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                             <Menu className="h-6 w-6 text-slate-600" />

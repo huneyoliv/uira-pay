@@ -53,16 +53,13 @@ export const useAuthStore = create<AuthState>()(
                 if (get()._logoutInProgress) return;
                 set({ _logoutInProgress: true });
 
-                try {
-                    await api.post('/auth/logout');
-                } catch (error) {
-                    console.error('Logout API call failed (cookie still cleared)', error);
-                }
-
-                // Clear all auth state
+                // Clear all auth state FIRST to ensure redirect always works
                 localStorage.removeItem('auth-token');
                 localStorage.removeItem('auth-storage');
                 set({ token: null, user: null, isAuthenticated: false, _logoutInProgress: false });
+
+                // Fire-and-forget API call to clear server-side cookie
+                api.post('/auth/logout').catch(() => { /* ignore */ });
 
                 // Hard redirect to login — ensures middleware sees no cookie on next request
                 window.location.href = '/login';
