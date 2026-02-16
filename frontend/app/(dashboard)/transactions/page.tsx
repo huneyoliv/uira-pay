@@ -203,7 +203,7 @@ export default function TransactionsPage() {
                                                 <div className="text-xs text-slate-400 font-mono">{tx.id.substring(0, 8)}...</div>
                                             </div>
                                         </div>
-                                        <div className={`font-bold ${tx.type === 'DEPOSIT' ? 'text-green-600' : 'text-slate-900'}`}>
+                                        <div className={`font-bold ${tx.type === 'DEPOSIT' ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'}`}>
                                             {tx.type === 'DEPOSIT' ? '+' : '-'} {
                                                 ['USDT', 'USDC', 'BTC', 'ETH'].includes(tx.currency)
                                                     ? `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(tx.amount)} ${tx.currency}`
@@ -251,7 +251,7 @@ export default function TransactionsPage() {
                                         <tr key={tx.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
                                             <td className="px-8 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${tx.type === 'DEPOSIT' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'
+                                                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${tx.type === 'DEPOSIT' ? 'bg-green-50 dark:bg-green-900/30 text-green-600' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600'
                                                         }`}>
                                                         {tx.type === 'DEPOSIT' ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                                                     </div>
@@ -276,7 +276,7 @@ export default function TransactionsPage() {
                                                     {tx.status}
                                                 </span>
                                             </td>
-                                            <td className={`px-8 py-4 text-right font-bold ${tx.type === 'DEPOSIT' ? 'text-green-600' : 'text-slate-900'
+                                            <td className={`px-8 py-4 text-right font-bold ${tx.type === 'DEPOSIT' ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'
                                                 }`}>
                                                 {tx.type === 'DEPOSIT' ? '+' : '-'} {
                                                     ['USDT', 'USDC', 'BTC', 'ETH'].includes(tx.currency)

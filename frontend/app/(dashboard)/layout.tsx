@@ -24,8 +24,6 @@ import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
 
 import { PendingRequirementsModal } from "@/components/pending-requirements-modal";
-import { LanguageSelector } from "@/components/language-selector";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardLayout({
     children,
@@ -34,20 +32,17 @@ export default function DashboardLayout({
 }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     const hasHydrated = useAuthStore((state) => state._hasHydrated);
     const router = useRouter();
 
-    // Backup client-side check — ONLY after Zustand has rehydrated from localStorage
     useEffect(() => {
         if (hasHydrated && !isAuthenticated) {
             router.push('/login');
         }
     }, [hasHydrated, isAuthenticated, router]);
 
-    // Show nothing until Zustand state is rehydrated — prevents flash redirect loop
     if (!hasHydrated) {
         return null;
     }
@@ -59,11 +54,7 @@ export default function DashboardLayout({
             settings: "Configurações",
             help: "Suporte",
             menu: "Menu",
-            mobileApp: "App Corporativo",
-            manageSales: "Gerencie suas operações globais.",
-            download: "Baixar Agora",
             logout: "Sair",
-            logoutAccount: "Sair da conta",
             searchPlaceholder: "Buscar transações, parceiros...",
             withdrawals: "Pagamentos"
         },
@@ -73,11 +64,7 @@ export default function DashboardLayout({
             settings: "Settings",
             help: "Support",
             menu: "Menu",
-            mobileApp: "Business App",
-            manageSales: "Manage global operations.",
-            download: "Download Now",
             logout: "Logout",
-            logoutAccount: "Logout account",
             searchPlaceholder: "Search transactions, partners...",
             withdrawals: "Payouts"
         },
@@ -87,11 +74,7 @@ export default function DashboardLayout({
             settings: "Paramètres",
             help: "Support",
             menu: "Menu",
-            mobileApp: "App Entreprise",
-            manageSales: "Gérez vos opérations mondiales.",
-            download: "Télécharger",
             logout: "Déconnexion",
-            logoutAccount: "Se déconnecter",
             searchPlaceholder: "Rechercher transactions, partenaires...",
             withdrawals: "Paiements"
         },
@@ -101,11 +84,7 @@ export default function DashboardLayout({
             settings: "Configuración",
             help: "Soporte",
             menu: "Menú",
-            mobileApp: "App Empresas",
-            manageSales: "Gestiona operaciones globales.",
-            download: "Descargar Ahora",
             logout: "Cerrar Sesión",
-            logoutAccount: "Cerrar sesión",
             searchPlaceholder: "Buscar transacciones, socios...",
             withdrawals: "Pagos"
         }
@@ -121,6 +100,8 @@ export default function DashboardLayout({
         { name: t.settings, href: "/settings", icon: Settings },
         { name: t.help, href: "/help", icon: HelpCircle },
     ];
+
+    const profilePhotoUrl = user?.profilePhotoUrl || undefined;
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -158,10 +139,8 @@ export default function DashboardLayout({
                 </div>
 
                 <div className="mt-auto p-8">
-
                     <button
                         onClick={() => useAuthStore.getState().logout()}
-
                         className="flex items-center gap-3 px-4 py-3 mt-6 text-slate-400 hover:text-red-500 transition-colors w-full"
                     >
                         <LogOut className="h-5 w-5" />
@@ -207,43 +186,12 @@ export default function DashboardLayout({
                                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{user?.name || "Usuário"}</p>
                                 <p className="text-xs text-slate-400">{user?.email || ""}</p>
                             </div>
-                            <div className="relative">
-                                <Avatar
-                                    className="h-12 w-12 border-2 border-white shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                                >
-                                    <AvatarImage src="https://github.com/shadcn.png" />
-                                    <AvatarFallback className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white">
-                                        {user?.name?.substring(0, 2).toUpperCase() || "U"}
-                                    </AvatarFallback>
-                                </Avatar>
-
-                                {isProfileMenuOpen && (
-                                    <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setIsProfileMenuOpen(false)} />
-                                        <div className="absolute right-0 top-14 w-64 bg-white dark:bg-[#0B0F19] rounded-xl shadow-lg border border-slate-100 dark:border-slate-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                            <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 mb-2 md:hidden">
-                                                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{user?.name || "Usuário"}</p>
-                                                <p className="text-xs text-slate-400 truncate">{user?.email || ""}</p>
-                                            </div>
-                                            <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 mb-2">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <LanguageSelector className="flex-1" />
-                                                    <ThemeToggle className="flex-1" />
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => useAuthStore.getState().logout()}
-
-                                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
-                                            >
-                                                <LogOut className="h-4 w-4" />
-                                                {t.logoutAccount}
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                                <AvatarImage src={profilePhotoUrl} />
+                                <AvatarFallback className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white">
+                                    {user?.name?.substring(0, 2).toUpperCase() || "U"}
+                                </AvatarFallback>
+                            </Avatar>
                         </div>
                     </div>
                 </header>
@@ -264,7 +212,6 @@ export default function DashboardLayout({
                                 <X className="h-5 w-5" />
                             </Button>
                         </div>
-                        {/* Mobile Nav Items */}
                         <nav className="space-y-2">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
@@ -285,7 +232,6 @@ export default function DashboardLayout({
                             })}
                             <button
                                 onClick={() => useAuthStore.getState().logout()}
-
                                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 w-full transition-colors"
                             >
                                 <LogOut className="h-5 w-5" />

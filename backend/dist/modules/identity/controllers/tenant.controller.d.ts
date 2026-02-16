@@ -15,4 +15,7 @@ export declare class TenantController {
     updateConfig(body: UpdateConfigDto, user: any): Promise<{
         success: boolean;
     }>;
+    updateProfilePhoto(user: any, file: Express.Multer.File): Promise<{
+        profilePhotoUrl: string;
+    }>;
 }

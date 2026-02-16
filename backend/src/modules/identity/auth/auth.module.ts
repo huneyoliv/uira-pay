@@ -17,9 +17,16 @@ import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
 import { ResetPasswordUseCase } from './application/reset-password.usecase';
 import { LogoutUseCase } from './application/logout.usecase';
 
+// 2FA Use Cases
+import { Setup2FAUseCase } from './application/totp/setup-2fa.usecase';
+import { Verify2FAUseCase } from './application/totp/verify-2fa.usecase';
+import { Validate2FAUseCase } from './application/totp/validate-2fa.usecase';
+import { Disable2FAUseCase } from './application/totp/disable-2fa.usecase';
+import { Reset2FAUseCase } from './application/totp/reset-2fa.usecase';
+
 @Module({
     imports: [
-        InfraModule, // For PrismaService
+        InfraModule,
         PassportModule,
         JwtModule.registerAsync({
             useFactory: () => {
@@ -53,7 +60,13 @@ import { LogoutUseCase } from './application/logout.usecase';
         ForgotPasswordUseCase,
         ResetPasswordUseCase,
         LogoutUseCase,
+        // 2FA
+        Setup2FAUseCase,
+        Verify2FAUseCase,
+        Validate2FAUseCase,
+        Disable2FAUseCase,
+        Reset2FAUseCase,
     ],
-    exports: [JwtStrategy, PassportModule],
+    exports: [JwtStrategy, PassportModule, Validate2FAUseCase],
 })
 export class AuthModule { }

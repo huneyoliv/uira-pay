@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/store/auth-store";
 import { getCountryData } from "@/lib/countries";
-import { Wallet, ArrowRight, AlertCircle, CheckCircle, ArrowLeft, Trash2, Save } from "lucide-react";
+import { Wallet, ArrowRight, AlertCircle, CheckCircle, ArrowLeft, Trash2, Save, Shield } from "lucide-react";
 import { api } from "@/lib/api";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
@@ -174,6 +174,8 @@ export default function WithdrawalsPage() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
+    const [totpCode, setTotpCode] = useState("");
+    const [needs2FA, setNeeds2FA] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -222,13 +224,21 @@ export default function WithdrawalsPage() {
                 throw new Error(t.insufficientBalance);
             }
 
-            await api.post("/withdrawals/request", {
+            const res = await api.post("/withdrawals/request", {
                 amount: amountNum,
                 network: network,
                 address: address,
                 save_wallet: !isBinance && saveWallet,
                 nickname: !isBinance && saveWallet ? nickname : undefined,
+                totpCode: totpCode || undefined,
             });
+
+            // Backend returns requiresTwoFactor if 2FA is needed but no code sent
+            if (res.data?.requiresTwoFactor) {
+                setNeeds2FA(true);
+                setLoading(false);
+                return;
+            }
 
             setSuccess(true);
             setAmount("");
@@ -438,6 +448,23 @@ export default function WithdrawalsPage() {
                                             onChange={(e) => setNickname(e.target.value)}
                                             placeholder="My Wallet"
                                             className="rounded-xl h-12"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* 2FA Code Input — shown when user has 2FA enabled */}
+                                {needs2FA && (
+                                    <div className="space-y-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-sm font-medium">
+                                            <Shield className="h-4 w-4" />
+                                            <span>2FA Required</span>
+                                        </div>
+                                        <Input
+                                            value={totpCode}
+                                            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                            placeholder="000000"
+                                            maxLength={6}
+                                            className="font-mono text-center text-lg tracking-[0.5em] rounded-xl h-12"
                                         />
                                     </div>
                                 )}

@@ -27,4 +27,9 @@ export class RequestWithdrawalDto {
     @IsOptional()
     @IsString()
     nickname?: string;
+
+    @ApiProperty({ example: '123456', required: false, description: '2FA TOTP code (required if 2FA is enabled)' })
+    @IsOptional()
+    @IsString()
+    totpCode?: string;
 }

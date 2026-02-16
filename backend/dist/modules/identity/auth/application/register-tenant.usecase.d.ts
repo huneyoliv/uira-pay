@@ -21,6 +21,10 @@ export declare class RegisterTenantUseCase {
             fiatCurrency: any;
             country: any;
             language: any;
+            theme: any;
+            profilePhotoUrl: null;
+            twoFactorEnabled: boolean;
+            isAdmin: boolean;
         };
     }>;
 }

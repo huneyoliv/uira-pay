@@ -5,6 +5,7 @@ import { CryptoFeeService } from '../providers/crypto-fee.service';
 import { RequestWithdrawalUseCase } from '../application/request-withdrawal.usecase';
 import { RequestWithdrawalDto } from '../dtos/request-withdrawal.dto';
 import { PrismaService } from '../../../infra/database/prisma.service';
+import { Validate2FAUseCase } from '../../identity/auth/application/totp/validate-2fa.usecase';
 
 @Controller('withdrawals')
 @UseGuards(JwtAuthGuard)
@@ -13,6 +14,7 @@ export class WithdrawalController {
         private readonly cryptoFeeService: CryptoFeeService,
         private readonly requestWithdrawalUseCase: RequestWithdrawalUseCase,
         private readonly prisma: PrismaService,
+        private readonly validate2FAUseCase: Validate2FAUseCase,
     ) { }
 
     @Get('fees')
@@ -31,6 +33,20 @@ export class WithdrawalController {
         @Body() body: RequestWithdrawalDto
     ) {
         const tenantId = req.user.id;
+
+        // SECURITY: 2FA validation is mandatory for withdrawals
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+
+        if ((tenant as any)?.twoFactorEnabled) {
+            if (!body.totpCode) {
+                return {
+                    requiresTwoFactor: true,
+                    message: 'Please provide your 2FA code to proceed with the withdrawal.',
+                };
+            }
+            await this.validate2FAUseCase.execute(tenantId, body.totpCode);
+        }
+
         return await this.requestWithdrawalUseCase.execute({
             tenantId,
             amount: body.amount,

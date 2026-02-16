@@ -25,6 +25,11 @@ const verify_code_usecase_1 = require("./application/verify-code.usecase");
 const forgot_password_usecase_1 = require("./application/forgot-password.usecase");
 const reset_password_usecase_1 = require("./application/reset-password.usecase");
 const logout_usecase_1 = require("./application/logout.usecase");
+const setup_2fa_usecase_1 = require("./application/totp/setup-2fa.usecase");
+const verify_2fa_usecase_1 = require("./application/totp/verify-2fa.usecase");
+const validate_2fa_usecase_1 = require("./application/totp/validate-2fa.usecase");
+const disable_2fa_usecase_1 = require("./application/totp/disable-2fa.usecase");
+const reset_2fa_usecase_1 = require("./application/totp/reset-2fa.usecase");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -65,8 +70,13 @@ exports.AuthModule = AuthModule = __decorate([
             forgot_password_usecase_1.ForgotPasswordUseCase,
             reset_password_usecase_1.ResetPasswordUseCase,
             logout_usecase_1.LogoutUseCase,
+            setup_2fa_usecase_1.Setup2FAUseCase,
+            verify_2fa_usecase_1.Verify2FAUseCase,
+            validate_2fa_usecase_1.Validate2FAUseCase,
+            disable_2fa_usecase_1.Disable2FAUseCase,
+            reset_2fa_usecase_1.Reset2FAUseCase,
         ],
-        exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule],
+        exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, validate_2fa_usecase_1.Validate2FAUseCase],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

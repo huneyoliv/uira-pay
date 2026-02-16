@@ -18,6 +18,7 @@ class RequestWithdrawalDto {
     address;
     save_wallet;
     nickname;
+    totpCode;
 }
 exports.RequestWithdrawalDto = RequestWithdrawalDto;
 __decorate([
@@ -51,4 +52,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RequestWithdrawalDto.prototype, "nickname", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '123456', required: false, description: '2FA TOTP code (required if 2FA is enabled)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RequestWithdrawalDto.prototype, "totpCode", void 0);
 //# sourceMappingURL=request-withdrawal.dto.js.map

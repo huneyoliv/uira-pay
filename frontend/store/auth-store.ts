@@ -13,6 +13,9 @@ interface User {
     country?: string;
     language?: string;
     theme?: string;
+    profilePhotoUrl?: string | null;
+    twoFactorEnabled?: boolean;
+    isAdmin?: boolean;
 }
 
 interface AuthState {

@@ -27,6 +27,7 @@ const crypto_fee_service_1 = require("./providers/crypto-fee.service");
 const request_withdrawal_usecase_1 = require("./application/request-withdrawal.usecase");
 const wallet_controller_1 = require("./controllers/wallet.controller");
 const withdraw_service_1 = require("./services/withdraw.service");
+const auth_module_1 = require("../identity/auth/auth.module");
 let FinanceModule = class FinanceModule {
 };
 exports.FinanceModule = FinanceModule;
@@ -36,6 +37,7 @@ exports.FinanceModule = FinanceModule = __decorate([
             (0, common_1.forwardRef)(() => payment_fiat_module_1.PaymentFiatModule),
             config_1.ConfigModule,
             (0, common_1.forwardRef)(() => payment_crypto_module_1.PaymentCryptoModule),
+            (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
         ],
         controllers: [tenant_controller_1.TenantController, withdrawal_controller_1.WithdrawalController, wallet_controller_1.WalletController],
         providers: [

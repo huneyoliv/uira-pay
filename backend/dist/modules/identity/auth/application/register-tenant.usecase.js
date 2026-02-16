@@ -79,6 +79,10 @@ let RegisterTenantUseCase = class RegisterTenantUseCase {
                 fiatCurrency: tenant.fiatCurrency,
                 country: tenant.country,
                 language: tenant.language || 'PT',
+                theme: tenant.theme || 'system',
+                profilePhotoUrl: null,
+                twoFactorEnabled: false,
+                isAdmin: false,
             }
         };
     }

@@ -22,12 +22,20 @@ const login_dto_1 = require("./application/dtos/login.dto");
 const send_verification_dto_1 = require("./application/dtos/send-verification.dto");
 const verify_code_dto_1 = require("./application/dtos/verify-code.dto");
 const reset_password_dto_1 = require("./application/dtos/reset-password.dto");
+const totp_dto_1 = require("./application/dtos/totp.dto");
 const send_verification_code_usecase_1 = require("./application/send-verification-code.usecase");
 const verify_code_usecase_1 = require("./application/verify-code.usecase");
 const forgot_password_usecase_1 = require("./application/forgot-password.usecase");
 const reset_password_usecase_1 = require("./application/reset-password.usecase");
 const logout_usecase_1 = require("./application/logout.usecase");
+const setup_2fa_usecase_1 = require("./application/totp/setup-2fa.usecase");
+const verify_2fa_usecase_1 = require("./application/totp/verify-2fa.usecase");
+const validate_2fa_usecase_1 = require("./application/totp/validate-2fa.usecase");
+const disable_2fa_usecase_1 = require("./application/totp/disable-2fa.usecase");
+const reset_2fa_usecase_1 = require("./application/totp/reset-2fa.usecase");
 const common_2 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("./infra/guards/jwt-auth.guard");
+const current_user_decorator_1 = require("./infra/decorators/current-user.decorator");
 const jwt_1 = require("@nestjs/jwt");
 let AuthController = class AuthController {
     registerTenantUseCase;
@@ -38,7 +46,12 @@ let AuthController = class AuthController {
     resetPasswordUseCase;
     logoutUseCase;
     jwtService;
-    constructor(registerTenantUseCase, loginUseCase, sendVerificationCodeUseCase, verifyCodeUseCase, forgotPasswordUseCase, resetPasswordUseCase, logoutUseCase, jwtService) {
+    setup2FAUseCase;
+    verify2FAUseCase;
+    validate2FAUseCase;
+    disable2FAUseCase;
+    reset2FAUseCase;
+    constructor(registerTenantUseCase, loginUseCase, sendVerificationCodeUseCase, verifyCodeUseCase, forgotPasswordUseCase, resetPasswordUseCase, logoutUseCase, jwtService, setup2FAUseCase, verify2FAUseCase, validate2FAUseCase, disable2FAUseCase, reset2FAUseCase) {
         this.registerTenantUseCase = registerTenantUseCase;
         this.loginUseCase = loginUseCase;
         this.sendVerificationCodeUseCase = sendVerificationCodeUseCase;
@@ -47,6 +60,11 @@ let AuthController = class AuthController {
         this.resetPasswordUseCase = resetPasswordUseCase;
         this.logoutUseCase = logoutUseCase;
         this.jwtService = jwtService;
+        this.setup2FAUseCase = setup2FAUseCase;
+        this.verify2FAUseCase = verify2FAUseCase;
+        this.validate2FAUseCase = validate2FAUseCase;
+        this.disable2FAUseCase = disable2FAUseCase;
+        this.reset2FAUseCase = reset2FAUseCase;
     }
     async register(dto, response) {
         const result = await this.registerTenantUseCase.execute(dto);
@@ -89,11 +107,9 @@ let AuthController = class AuthController {
                     const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
                     if (payload && payload.sub) {
                         await this.logoutUseCase.execute(payload.sub);
-                        console.log(`[Logout] Token revoked for user ${payload.sub}`);
                     }
                 }
                 catch (tokenError) {
-                    console.warn('[Logout] Token invalid or expired. Proceeding to clear cookies.', tokenError.message);
                 }
             }
         }
@@ -123,6 +139,21 @@ let AuthController = class AuthController {
     async resetPassword(dto) {
         await this.resetPasswordUseCase.execute(dto.email, dto.code, dto.newPassword);
         return { message: 'Password reset successfully' };
+    }
+    async setup2FA(user) {
+        return this.setup2FAUseCase.execute(user.id);
+    }
+    async verify2FA(user, dto) {
+        return this.verify2FAUseCase.execute(user.id, dto.code);
+    }
+    async validate2FA(user, dto) {
+        return this.validate2FAUseCase.execute(user.id, dto.code);
+    }
+    async disable2FA(user, dto) {
+        return this.disable2FAUseCase.execute(user.id, dto.password, dto.code);
+    }
+    async reset2FA(user, dto) {
+        return this.reset2FAUseCase.execute(user.id, dto.backupCode);
     }
 };
 exports.AuthController = AuthController;
@@ -187,6 +218,60 @@ __decorate([
     __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.Post)('2fa/setup'),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 60000 } }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "setup2FA", null);
+__decorate([
+    (0, common_1.Post)('2fa/verify'),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, throttler_1.Throttle)({ default: { limit: 5, ttl: 60000 } }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, totp_dto_1.Verify2FADto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verify2FA", null);
+__decorate([
+    (0, common_1.Post)('2fa/validate'),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, totp_dto_1.Validate2FADto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "validate2FA", null);
+__decorate([
+    (0, common_1.Post)('2fa/disable'),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 60000 } }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, totp_dto_1.Disable2FADto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "disable2FA", null);
+__decorate([
+    (0, common_1.Post)('2fa/reset'),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 60000 } }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, totp_dto_1.Reset2FADto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "reset2FA", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [register_tenant_usecase_1.RegisterTenantUseCase,
@@ -196,6 +281,11 @@ exports.AuthController = AuthController = __decorate([
         forgot_password_usecase_1.ForgotPasswordUseCase,
         reset_password_usecase_1.ResetPasswordUseCase,
         logout_usecase_1.LogoutUseCase,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        setup_2fa_usecase_1.Setup2FAUseCase,
+        verify_2fa_usecase_1.Verify2FAUseCase,
+        validate_2fa_usecase_1.Validate2FAUseCase,
+        disable_2fa_usecase_1.Disable2FAUseCase,
+        reset_2fa_usecase_1.Reset2FAUseCase])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

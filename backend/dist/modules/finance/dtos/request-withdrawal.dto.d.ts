@@ -4,4 +4,5 @@ export declare class RequestWithdrawalDto {
     address: string;
     save_wallet?: boolean;
     nickname?: string;
+    totpCode?: string;
 }

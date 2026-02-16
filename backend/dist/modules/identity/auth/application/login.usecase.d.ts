@@ -19,6 +19,10 @@ export declare class LoginUseCase {
             fiatCurrency: any;
             country: any;
             language: any;
+            theme: any;
+            profilePhotoUrl: any;
+            twoFactorEnabled: any;
+            isAdmin: any;
         };
     }>;
 }

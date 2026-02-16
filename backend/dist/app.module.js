@@ -19,6 +19,7 @@ const payment_crypto_module_1 = require("./modules/payment-crypto/payment-crypto
 const jobs_module_1 = require("./modules/jobs/jobs.module");
 const infra_module_1 = require("./infra/infra.module");
 const upload_module_1 = require("./modules/upload/upload.module");
+const admin_module_1 = require("./modules/admin/admin.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +37,7 @@ exports.AppModule = AppModule = __decorate([
             payment_crypto_module_1.PaymentCryptoModule,
             jobs_module_1.JobsModule,
             upload_module_1.UploadModule,
+            admin_module_1.AdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

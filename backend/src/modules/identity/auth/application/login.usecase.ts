@@ -47,6 +47,10 @@ export class LoginUseCase {
                 fiatCurrency: (tenant as any).fiatCurrency,
                 country: (tenant as any).country,
                 language: (tenant as any).language || 'PT',
+                theme: (tenant as any).theme || 'system',
+                profilePhotoUrl: (tenant as any).profilePhotoUrl || null,
+                twoFactorEnabled: (tenant as any).twoFactorEnabled || false,
+                isAdmin: (tenant as any).isAdmin || false,
             }
         };
     }

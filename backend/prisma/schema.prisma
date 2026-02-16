@@ -39,24 +39,29 @@ enum ConversionStatus {
 }
 
 model Tenant {
-  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
-  name                  String
-  doc_number            String
-  email                 String   @unique
-  default_currency      Currency?
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  doc_number              String
+  email                   String   @unique
+  default_currency        Currency?
   preference_locked_until DateTime
-  password              String
-  documentUrl           String?
-  country               String?
-  fiatCurrency          String?
-  language              String   @default("PT")
-  theme                 String   @default("system")
-  tokenVersion          Int      @default(1)
-  created_at            DateTime @default(now())
+  password                String
+  documentUrl             String?
+  profilePhotoUrl         String?
+  country                 String?
+  fiatCurrency            String?
+  language                String   @default("PT")
+  theme                   String   @default("system")
+  tokenVersion            Int      @default(1)
+  twoFactorSecret         String?
+  twoFactorEnabled        Boolean  @default(false)
+  twoFactorBackupCodes    String[]
+  isAdmin                 Boolean  @default(false)
+  created_at              DateTime @default(now())
 
   wallets Wallet[]
   orders  Order[]
-  saved_wallets SavedWallet[] // Relation to SavedWallet
+  saved_wallets SavedWallet[]
 
   @@map("tenants")
 }

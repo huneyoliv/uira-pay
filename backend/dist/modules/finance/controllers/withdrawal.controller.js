@@ -20,14 +20,17 @@ const crypto_fee_service_1 = require("../providers/crypto-fee.service");
 const request_withdrawal_usecase_1 = require("../application/request-withdrawal.usecase");
 const request_withdrawal_dto_1 = require("../dtos/request-withdrawal.dto");
 const prisma_service_1 = require("../../../infra/database/prisma.service");
+const validate_2fa_usecase_1 = require("../../identity/auth/application/totp/validate-2fa.usecase");
 let WithdrawalController = class WithdrawalController {
     cryptoFeeService;
     requestWithdrawalUseCase;
     prisma;
-    constructor(cryptoFeeService, requestWithdrawalUseCase, prisma) {
+    validate2FAUseCase;
+    constructor(cryptoFeeService, requestWithdrawalUseCase, prisma, validate2FAUseCase) {
         this.cryptoFeeService = cryptoFeeService;
         this.requestWithdrawalUseCase = requestWithdrawalUseCase;
         this.prisma = prisma;
+        this.validate2FAUseCase = validate2FAUseCase;
     }
     async getFees(req) {
         const tenantId = req.user.id;
@@ -37,6 +40,16 @@ let WithdrawalController = class WithdrawalController {
     }
     async requestWithdrawal(req, body) {
         const tenantId = req.user.id;
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (tenant?.twoFactorEnabled) {
+            if (!body.totpCode) {
+                return {
+                    requiresTwoFactor: true,
+                    message: 'Please provide your 2FA code to proceed with the withdrawal.',
+                };
+            }
+            await this.validate2FAUseCase.execute(tenantId, body.totpCode);
+        }
         return await this.requestWithdrawalUseCase.execute({
             tenantId,
             amount: body.amount,
@@ -69,6 +82,7 @@ exports.WithdrawalController = WithdrawalController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [crypto_fee_service_1.CryptoFeeService,
         request_withdrawal_usecase_1.RequestWithdrawalUseCase,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        validate_2fa_usecase_1.Validate2FAUseCase])
 ], WithdrawalController);
 //# sourceMappingURL=withdrawal.controller.js.map

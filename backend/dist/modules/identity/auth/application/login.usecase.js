@@ -47,6 +47,10 @@ let LoginUseCase = class LoginUseCase {
                 fiatCurrency: tenant.fiatCurrency,
                 country: tenant.country,
                 language: tenant.language || 'PT',
+                theme: tenant.theme || 'system',
+                profilePhotoUrl: tenant.profilePhotoUrl || null,
+                twoFactorEnabled: tenant.twoFactorEnabled || false,
+                isAdmin: tenant.isAdmin || false,
             }
         };
     }

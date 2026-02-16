@@ -20,12 +20,14 @@ import { CryptoFeeService } from './providers/crypto-fee.service';
 import { RequestWithdrawalUseCase } from './application/request-withdrawal.usecase';
 import { WalletController } from './controllers/wallet.controller';
 import { WithdrawService } from './services/withdraw.service';
+import { AuthModule } from '../identity/auth/auth.module';
 
 @Module({
     imports: [
         forwardRef(() => PaymentFiatModule),
         ConfigModule,
         forwardRef(() => PaymentCryptoModule),
+        forwardRef(() => AuthModule),
     ],
     controllers: [TenantController, WithdrawalController, WalletController],
     providers: [

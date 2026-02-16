@@ -76,6 +76,10 @@ export class RegisterTenantUseCase {
                 fiatCurrency: (tenant as any).fiatCurrency,
                 country: (tenant as any).country,
                 language: (tenant as any).language || 'PT',
+                theme: (tenant as any).theme || 'system',
+                profilePhotoUrl: null,
+                twoFactorEnabled: false,
+                isAdmin: false,
             }
         };
     }
