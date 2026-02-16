@@ -4,10 +4,10 @@ export declare class WalletController {
     constructor(prisma: PrismaService);
     getSavedWallets(req: any): Promise<{
         id: string;
+        address: string;
         created_at: Date;
         tenant_id: string;
         network: string;
-        address: string;
         nickname: string | null;
     }[]>;
     deleteSavedWallet(req: any, id: string): Promise<{

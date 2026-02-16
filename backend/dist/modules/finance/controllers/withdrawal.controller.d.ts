@@ -15,11 +15,11 @@ export declare class WithdrawalController {
             description: string | null;
             type: import(".prisma/client").$Enums.TransactionType;
             id: string;
+            status: import(".prisma/client").$Enums.TransactionStatus;
             created_at: Date;
             amount: number;
             fee: number;
             tx_hash: string | null;
-            status: import(".prisma/client").$Enums.TransactionStatus;
             wallet_id: string;
         };
         updatedWallet: {

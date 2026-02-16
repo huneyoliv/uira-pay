@@ -81,7 +81,7 @@ let TenantController = class TenantController {
             throw new common_1.ForbiddenException('Tenant not found');
         }
         const currentTenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
-        if (body.defaultCurrency && currentTenant && currentTenant.preference_locked_until > new Date()) {
+        if (body.defaultCurrency && currentTenant?.preference_locked_until && currentTenant.preference_locked_until > new Date()) {
             throw new common_1.ForbiddenException(`Mudança bloqueada até ${currentTenant.preference_locked_until.toISOString()}`);
         }
         if (body.docNumber) {

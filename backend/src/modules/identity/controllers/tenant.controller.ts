@@ -48,7 +48,7 @@ export class TenantController {
 
         const currentTenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
 
-        if (body.defaultCurrency && currentTenant && currentTenant.preference_locked_until > new Date()) {
+        if (body.defaultCurrency && currentTenant?.preference_locked_until && currentTenant.preference_locked_until > new Date()) {
             throw new ForbiddenException(`Mudança bloqueada até ${currentTenant.preference_locked_until.toISOString()}`);
         }
 

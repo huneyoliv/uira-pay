@@ -38,20 +38,38 @@ enum ConversionStatus {
   FAILED
 }
 
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
 model Tenant {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
   name                    String
-  doc_number              String
   email                   String   @unique
-  default_currency        Currency?
-  preference_locked_until DateTime
   password                String
-  documentUrl             String?
+  doc_type                String
+  doc_number              String   @unique
+  address                 String?
+  city                    String?
+  state                   String?
+  zip_code                String?
+  country                 String
+  phone                   String?
+  website                 String?
+  webhook_url             String?
+  logo_url                String?
   profilePhotoUrl         String?
-  country                 String?
-  fiatCurrency            String?
-  language                String   @default("PT")
-  theme                   String   @default("system")
+  status                  TenantStatus @default(PENDING)
+  
+  // Preferences
+  language                String   @default("pt-BR") // pt-BR, en-US, es-ES, fr-FR
+  theme                   String   @default("system") // light, dark, system
+  fiatCurrency            String   @default("BRL") // Display currency (BRL, USD, EUR)
+  default_currency        Currency? @default(USDT)
+  preference_locked_until DateTime?
+  
   tokenVersion            Int      @default(1)
   twoFactorSecret         String?
   twoFactorEnabled        Boolean  @default(false)

@@ -15,7 +15,7 @@ export declare class LoginUseCase {
             email: any;
             doc_number: string;
             default_currency: import(".prisma/client").$Enums.Currency | null;
-            preference_locked_until: Date;
+            preference_locked_until: Date | null;
             fiatCurrency: any;
             country: any;
             language: any;

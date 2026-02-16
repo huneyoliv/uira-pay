@@ -10,21 +10,12 @@ export declare class RegisterTenantUseCase {
     private readonly jwtService;
     constructor(prisma: PrismaService, passwordHasher: IPasswordHasher, tokenProvider: ITokenProvider, jwtService: JwtService);
     execute(dto: RegisterTenantDto): Promise<{
-        accessToken: string;
+        message: string;
         user: {
             id: string;
             name: string;
             email: any;
-            doc_number: string;
-            default_currency: import(".prisma/client").$Enums.Currency | null;
-            preference_locked_until: Date;
-            fiatCurrency: any;
-            country: any;
-            language: any;
-            theme: any;
-            profilePhotoUrl: null;
-            twoFactorEnabled: boolean;
-            isAdmin: boolean;
+            status: string;
         };
     }>;
 }

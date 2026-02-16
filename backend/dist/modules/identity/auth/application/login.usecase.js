@@ -34,6 +34,13 @@ let LoginUseCase = class LoginUseCase {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        const status = tenant.status;
+        if (status === 'PENDING') {
+            throw new common_1.UnauthorizedException('Account pending approval by administrator.');
+        }
+        if (status === 'REJECTED') {
+            throw new common_1.UnauthorizedException('Account has been rejected. Contact support.');
+        }
         const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, tokenVersion: tenant.tokenVersion });
         return {
             accessToken,

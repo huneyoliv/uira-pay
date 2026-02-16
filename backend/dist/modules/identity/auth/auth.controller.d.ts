@@ -33,22 +33,13 @@ export declare class AuthController {
     private readonly disable2FAUseCase;
     private readonly reset2FAUseCase;
     constructor(registerTenantUseCase: RegisterTenantUseCase, loginUseCase: LoginUseCase, sendVerificationCodeUseCase: SendVerificationCodeUseCase, verifyCodeUseCase: VerifyCodeUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, resetPasswordUseCase: ResetPasswordUseCase, logoutUseCase: LogoutUseCase, jwtService: JwtService, setup2FAUseCase: Setup2FAUseCase, verify2FAUseCase: Verify2FAUseCase, validate2FAUseCase: Validate2FAUseCase, disable2FAUseCase: Disable2FAUseCase, reset2FAUseCase: Reset2FAUseCase);
-    register(dto: RegisterTenantDto, response: Response): Promise<{
+    register(dto: RegisterTenantDto): Promise<{
         message: string;
         user: {
             id: string;
             name: string;
             email: any;
-            doc_number: string;
-            default_currency: import(".prisma/client").$Enums.Currency | null;
-            preference_locked_until: Date;
-            fiatCurrency: any;
-            country: any;
-            language: any;
-            theme: any;
-            profilePhotoUrl: null;
-            twoFactorEnabled: boolean;
-            isAdmin: boolean;
+            status: string;
         };
     }>;
     login(dto: LoginDto, response: Response): Promise<{
@@ -59,7 +50,7 @@ export declare class AuthController {
             email: any;
             doc_number: string;
             default_currency: import(".prisma/client").$Enums.Currency | null;
-            preference_locked_until: Date;
+            preference_locked_until: Date | null;
             fiatCurrency: any;
             country: any;
             language: any;

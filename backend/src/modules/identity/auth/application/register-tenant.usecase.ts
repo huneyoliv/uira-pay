@@ -50,6 +50,7 @@ export class RegisterTenantUseCase {
                 country: dto.country,
                 fiatCurrency: dto.fiatCurrency,
                 preference_locked_until: new Date(), // Not locked initially
+                status: 'PENDING',
             } as any,
         });
 
@@ -62,24 +63,14 @@ export class RegisterTenantUseCase {
             } as any,
         });
 
-        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: (tenant as any).email, tokenVersion: (tenant as any).tokenVersion });
-
+        // Do not return token. Account is pending.
         return {
-            accessToken,
+            message: 'Registration successful. Your account is pending approval by an administrator.',
             user: {
                 id: tenant.id,
                 name: tenant.name,
                 email: (tenant as any).email,
-                doc_number: tenant.doc_number,
-                default_currency: tenant.default_currency,
-                preference_locked_until: tenant.preference_locked_until,
-                fiatCurrency: (tenant as any).fiatCurrency,
-                country: (tenant as any).country,
-                language: (tenant as any).language || 'PT',
-                theme: (tenant as any).theme || 'system',
-                profilePhotoUrl: null,
-                twoFactorEnabled: false,
-                isAdmin: false,
+                status: 'PENDING',
             }
         };
     }

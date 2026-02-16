@@ -22,9 +22,9 @@ export declare class OrderController {
     }>;
     getOrder(id: string, user: any): Promise<{
         id: string;
+        status: import(".prisma/client").$Enums.OrderStatus;
         created_at: Date;
         tenant_id: string;
-        status: import(".prisma/client").$Enums.OrderStatus;
         txid: string | null;
         fiat_amount: number;
         crypto_amount_est: number;

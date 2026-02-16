@@ -57,6 +57,7 @@ let RegisterTenantUseCase = class RegisterTenantUseCase {
                 country: dto.country,
                 fiatCurrency: dto.fiatCurrency,
                 preference_locked_until: new Date(),
+                status: 'PENDING',
             },
         });
         await this.prisma.wallet.create({
@@ -66,23 +67,13 @@ let RegisterTenantUseCase = class RegisterTenantUseCase {
                 balance: 0,
             },
         });
-        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, tokenVersion: tenant.tokenVersion });
         return {
-            accessToken,
+            message: 'Registration successful. Your account is pending approval by an administrator.',
             user: {
                 id: tenant.id,
                 name: tenant.name,
                 email: tenant.email,
-                doc_number: tenant.doc_number,
-                default_currency: tenant.default_currency,
-                preference_locked_until: tenant.preference_locked_until,
-                fiatCurrency: tenant.fiatCurrency,
-                country: tenant.country,
-                language: tenant.language || 'PT',
-                theme: tenant.theme || 'system',
-                profilePhotoUrl: null,
-                twoFactorEnabled: false,
-                isAdmin: false,
+                status: 'PENDING',
             }
         };
     }

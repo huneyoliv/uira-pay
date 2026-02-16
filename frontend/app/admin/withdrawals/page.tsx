@@ -111,15 +111,7 @@ export default function AdminWithdrawalsPage() {
                                         </p>
                                     </div>
                                     <div className="flex gap-2 shrink-0">
-                                        <Button
-                                            size="sm"
-                                            onClick={() => handleApprove(w.id)}
-                                            disabled={actionLoading === w.id}
-                                            className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4"
-                                        >
-                                            {actionLoading === w.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
-                                            Approve
-                                        </Button>
+                                        {/* Automatic withdrawals - Validated by system job */}
                                         <Button
                                             size="sm"
                                             variant="outline"
@@ -128,7 +120,7 @@ export default function AdminWithdrawalsPage() {
                                             className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20 rounded-lg px-4"
                                         >
                                             <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                                            Reject
+                                            Reject / Refund
                                         </Button>
                                     </div>
                                 </div>

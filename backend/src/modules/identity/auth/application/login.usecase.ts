@@ -33,6 +33,14 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        const status = (tenant as any).status;
+        if (status === 'PENDING') {
+            throw new UnauthorizedException('Account pending approval by administrator.');
+        }
+        if (status === 'REJECTED') {
+            throw new UnauthorizedException('Account has been rejected. Contact support.');
+        }
+
         const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: (tenant as any).email, tokenVersion: (tenant as any).tokenVersion });
 
         return {

@@ -49,21 +49,8 @@ export class AuthController {
 
     @Post('register')
     @Throttle({ default: { limit: 3, ttl: 60000 } })
-    async register(@Body() dto: RegisterTenantDto, @Res({ passthrough: true }) response: Response) {
-        const result = await this.registerTenantUseCase.execute(dto);
-
-        // SECURITY: Store JWT in HttpOnly Cookie
-        const domain = process.env.DOMAIN || undefined;
-        response.cookie('access_token', result.accessToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            domain: domain ? `.${domain}` : undefined,
-            path: '/',
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
-
-        return { message: 'Registered successfully', user: result.user };
+    async register(@Body() dto: RegisterTenantDto) {
+        return this.registerTenantUseCase.execute(dto);
     }
 
     @Post('login')

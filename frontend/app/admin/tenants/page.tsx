@@ -18,6 +18,7 @@ interface Tenant {
     twoFactorEnabled: boolean;
     isAdmin: boolean;
     created_at: string;
+    status?: 'PENDING' | 'ACTIVE' | 'REJECTED';
     wallets: Array<{ balance: number; currency: string }>;
 }
 
@@ -47,6 +48,28 @@ export default function AdminTenantsPage() {
         }
     };
 
+    const handleApprove = async (id: string) => {
+        if (!confirm("Are you sure you want to approve this tenant?")) return;
+        try {
+            await api.patch(`/admin/tenants/${id}/approve`);
+            fetchTenants();
+        } catch (err) {
+            console.error("Failed to approve tenant:", err);
+            alert("Failed to approve tenant");
+        }
+    };
+
+    const handleReject = async (id: string) => {
+        if (!confirm("Are you sure you want to reject this tenant?")) return;
+        try {
+            await api.patch(`/admin/tenants/${id}/reject`);
+            fetchTenants();
+        } catch (err) {
+            console.error("Failed to reject tenant:", err);
+            alert("Failed to reject tenant");
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-4">
@@ -73,16 +96,18 @@ export default function AdminTenantsPage() {
                                 <tr>
                                     <th className="text-left px-6 py-3 font-medium">Name</th>
                                     <th className="text-left px-6 py-3 font-medium">Email</th>
+                                    <th className="text-left px-6 py-3 font-medium">Status</th>
                                     <th className="text-left px-6 py-3 font-medium">Balance</th>
                                     <th className="text-left px-6 py-3 font-medium">2FA</th>
                                     <th className="text-left px-6 py-3 font-medium">Joined</th>
+                                    <th className="text-right px-6 py-3 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {loading ? (
                                     [...Array(5)].map((_, i) => (
                                         <tr key={i}>
-                                            {[1, 2, 3, 4, 5].map((j) => (
+                                            {[1, 2, 3, 4, 5, 6, 7].map((j) => (
                                                 <td key={j} className="px-6 py-4">
                                                     <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse w-3/4" />
                                                 </td>
@@ -91,7 +116,7 @@ export default function AdminTenantsPage() {
                                     ))
                                 ) : tenants.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                                             No tenants found
                                         </td>
                                     </tr>
@@ -101,10 +126,20 @@ export default function AdminTenantsPage() {
                                             <td className="px-6 py-4">
                                                 <Link href={`/admin/tenants/${tenant.id}`} className="font-medium hover:underline">
                                                     {tenant.name}
-                                                    {tenant.isAdmin && <span className="ml-2 text-[10px] bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded-full font-bold">ADMIN</span>}
+                                                    {tenant.isAdmin && <span className="ml-2 text-[10px] bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 px-1.5 py-0.5 rounded-full font-bold">ADMIN</span>}
                                                 </Link>
                                             </td>
                                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{tenant.email}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${tenant.status === 'ACTIVE'
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                        : tenant.status === 'REJECTED'
+                                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    }`}>
+                                                    {tenant.status || 'ACTIVE'}
+                                                </span>
+                                            </td>
                                             <td className="px-6 py-4 font-mono text-sm">
                                                 {tenant.wallets?.[0]
                                                     ? `${Number(tenant.wallets[0].balance).toFixed(2)} ${tenant.wallets[0].currency}`
@@ -120,6 +155,28 @@ export default function AdminTenantsPage() {
                                             </td>
                                             <td className="px-6 py-4 text-slate-400 text-xs">
                                                 {new Date(tenant.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                {tenant.status === 'PENDING' && (
+                                                    <div className="flex gap-2 justify-end">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="default"
+                                                            className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                                            onClick={() => handleApprove(tenant.id)}
+                                                        >
+                                                            Approve
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            className="h-7 text-xs"
+                                                            onClick={() => handleReject(tenant.id)}
+                                                        >
+                                                            Reject
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))

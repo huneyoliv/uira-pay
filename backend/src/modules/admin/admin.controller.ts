@@ -34,6 +34,16 @@ export class AdminController {
         return this.adminService.suspendTenant(id, true);
     }
 
+    @Patch('tenants/:id/approve')
+    async approveTenant(@Param('id') id: string) {
+        return this.adminService.approveTenant(id);
+    }
+
+    @Patch('tenants/:id/reject')
+    async rejectTenant(@Param('id') id: string) {
+        return this.adminService.rejectTenant(id);
+    }
+
     @Get('transactions')
     async getTransactions(
         @Query('page') page: number = 1,

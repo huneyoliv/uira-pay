@@ -77,6 +77,7 @@ export class AdminService {
                     twoFactorEnabled: true,
                     isAdmin: true,
                     created_at: true,
+                    status: true,
                     wallets: {
                         select: { balance: true, currency: true },
                     },
@@ -122,6 +123,24 @@ export class AdminService {
 
         this.logger.log(`Tenant ${tenantId} ${suspended ? 'suspended' : 'activated'}`);
         return { success: true, suspended };
+    }
+
+    async approveTenant(tenantId: string) {
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: { status: 'ACTIVE' },
+        });
+        this.logger.log(`Tenant ${tenantId} approved`);
+        return { success: true };
+    }
+
+    async rejectTenant(tenantId: string) {
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: { status: 'REJECTED' },
+        });
+        this.logger.log(`Tenant ${tenantId} rejected`);
+        return { success: true };
     }
 
     async getAllTransactions(page: number = 1, limit: number = 20, type?: string, status?: string) {

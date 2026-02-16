@@ -66,18 +66,8 @@ let AuthController = class AuthController {
         this.disable2FAUseCase = disable2FAUseCase;
         this.reset2FAUseCase = reset2FAUseCase;
     }
-    async register(dto, response) {
-        const result = await this.registerTenantUseCase.execute(dto);
-        const domain = process.env.DOMAIN || undefined;
-        response.cookie('access_token', result.accessToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            domain: domain ? `.${domain}` : undefined,
-            path: '/',
-            maxAge: 24 * 60 * 60 * 1000
-        });
-        return { message: 'Registered successfully', user: result.user };
+    async register(dto) {
+        return this.registerTenantUseCase.execute(dto);
     }
     async login(dto, response) {
         const result = await this.loginUseCase.execute(dto);
@@ -161,9 +151,8 @@ __decorate([
     (0, common_1.Post)('register'),
     (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 60000 } }),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [register_tenant_dto_1.RegisterTenantDto, Object]),
+    __metadata("design:paramtypes", [register_tenant_dto_1.RegisterTenantDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([
