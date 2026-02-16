@@ -14,26 +14,28 @@ export class LoginUseCase {
 
     async execute(dto: LoginDto) {
 
+        console.log(`[LoginDebug] Attempting login for: ${dto.email}`);
         const tenant = await this.prisma.tenant.findUnique({
             where: { email: dto.email } as any,
         });
 
         if (!tenant) {
-
+            console.log(`[LoginDebug] Tenant not found for: ${dto.email}`);
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        console.log(`[LoginDebug] Tenant found: ${tenant.id}, status: ${(tenant as any).status}`);
 
         // console.log('[LoginDebug] Stored hash:', (tenant as any).password); // Be careful with logs in prod
         const isPasswordValid = await this.passwordHasher.compare(dto.password, (tenant as any).password);
 
-
         if (!isPasswordValid) {
-
+            console.log(`[LoginDebug] Password mismatch for: ${dto.email}`);
             throw new UnauthorizedException('Invalid credentials');
         }
 
         const status = (tenant as any).status;
+        console.log(`[LoginDebug] Password valid. Account status: ${status}`);
         if (status === 'PENDING') {
             throw new UnauthorizedException('Account pending approval by administrator.');
         }
