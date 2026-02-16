@@ -120,6 +120,22 @@ export default function DashboardLayout({
                         <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 px-4">{t.menu}</div>
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
+                            const isPending = user?.status === "PENDING";
+                            const isRestricted = isPending && (item.href === "/transactions" || item.href === "/withdrawals");
+
+                            if (isRestricted) {
+                                return (
+                                    <div
+                                        key={item.href}
+                                        className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-300 dark:text-slate-600 cursor-not-allowed opacity-50"
+                                        title="Account pending approval"
+                                    >
+                                        <item.icon className="h-5 w-5 text-slate-300 dark:text-slate-600" />
+                                        <span className="font-medium">{item.name}</span>
+                                    </div>
+                                );
+                            }
+
                             return (
                                 <Link
                                     key={item.href}
@@ -198,6 +214,14 @@ export default function DashboardLayout({
 
                 {/* Page Content */}
                 <main className="flex-1 px-8 pb-8 overflow-y-auto">
+                    {user?.status === 'PENDING' && (
+                        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center gap-3 text-amber-800 dark:text-amber-200">
+                            <Clock className="h-5 w-5 flex-shrink-0" />
+                            <div className="text-sm font-medium">
+                                {lang === 'PT' ? 'Sua conta está aguardando aprovação. Algumas funcionalidades estão limitadas.' : 'Your account is pending approval. Some features are limited.'}
+                            </div>
+                        </div>
+                    )}
                     {children}
                 </main>
             </div>
@@ -215,6 +239,21 @@ export default function DashboardLayout({
                         <nav className="space-y-2">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
+                                const isPending = user?.status === "PENDING";
+                                const isRestricted = isPending && (item.href === "/transactions" || item.href === "/withdrawals");
+
+                                if (isRestricted) {
+                                    return (
+                                        <div
+                                            key={item.href}
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 dark:text-slate-600 opacity-50"
+                                        >
+                                            <item.icon className="h-5 w-5 text-slate-300 dark:text-slate-600" />
+                                            <span className="font-medium">{item.name}</span>
+                                        </div>
+                                    );
+                                }
+
                                 return (
                                     <Link
                                         key={item.href}

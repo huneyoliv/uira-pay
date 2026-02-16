@@ -36,9 +36,7 @@ export class LoginUseCase {
 
         const status = (tenant as any).status;
         console.log(`[LoginDebug] Password valid. Account status: ${status}`);
-        if (status === 'PENDING') {
-            throw new UnauthorizedException('Account pending approval by administrator.');
-        }
+
         if (status === 'REJECTED') {
             throw new UnauthorizedException('Account has been rejected. Contact support.');
         }

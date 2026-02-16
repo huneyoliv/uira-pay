@@ -184,19 +184,30 @@ export default function DashboardPage() {
         <div className="flex gap-3">
           <Button
             variant="outline"
-            className="rounded-full h-11 px-6 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+            className="rounded-full h-11 px-6 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold disabled:opacity-50"
             onClick={() => alert(t.withdrawSoon)}
+            disabled={user?.status === 'PENDING'}
           >
             {t.withdraw}
           </Button>
-          <Link href="/new-transaction">
+          {user?.status === 'PENDING' ? (
             <Button
-              className="rounded-full h-11 px-6 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black font-semibold shadow-lg shadow-black/20 dark:shadow-white/10"
+              disabled
+              className="rounded-full h-11 px-6 bg-slate-200 text-slate-400 font-semibold cursor-not-allowed"
             >
               <Plus className="mr-2 h-4 w-4" />
               {t.newTransaction}
             </Button>
-          </Link>
+          ) : (
+            <Link href="/new-transaction">
+              <Button
+                className="rounded-full h-11 px-6 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black font-semibold shadow-lg shadow-black/20 dark:shadow-white/10"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t.newTransaction}
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
