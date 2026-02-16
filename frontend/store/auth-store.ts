@@ -16,6 +16,7 @@ interface User {
     profilePhotoUrl?: string | null;
     twoFactorEnabled?: boolean;
     isAdmin?: boolean;
+    status: string;
 }
 
 interface AuthState {
