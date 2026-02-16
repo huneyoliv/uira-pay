@@ -80,6 +80,7 @@ model Tenant {
   wallets Wallet[]
   orders  Order[]
   saved_wallets SavedWallet[]
+  auditLogs     AuditLog[]
 
   @@map("tenants")
 }
@@ -151,4 +152,18 @@ model VerificationCode {
   createdAt DateTime @default(now())
 
   @@map("verification_codes")
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId   String   @db.ObjectId
+  action    String
+  targetId  String?  @db.ObjectId
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  admin     Tenant   @relation(fields: [adminId], references: [id])
+
+  @@map("audit_logs")
 }

@@ -35,13 +35,13 @@ export class AdminController {
     }
 
     @Patch('tenants/:id/approve')
-    async approveTenant(@Param('id') id: string) {
-        return this.adminService.approveTenant(id);
+    async approveTenant(@Param('id') id: string, @CurrentUser() admin: any) {
+        return this.adminService.approveTenant(id, admin.id);
     }
 
     @Patch('tenants/:id/reject')
-    async rejectTenant(@Param('id') id: string) {
-        return this.adminService.rejectTenant(id);
+    async rejectTenant(@Param('id') id: string, @CurrentUser() admin: any) {
+        return this.adminService.rejectTenant(id, admin.id);
     }
 
     @Get('transactions')
@@ -50,8 +50,10 @@ export class AdminController {
         @Query('limit') limit: number = 20,
         @Query('type') type: string,
         @Query('status') status: string,
+        @Query('startDate') startDate: string,
+        @Query('endDate') endDate: string,
     ) {
-        return this.adminService.getAllTransactions(Number(page), Number(limit), type, status);
+        return this.adminService.getAllTransactions(Number(page), Number(limit), type, status, startDate, endDate);
     }
 
     @Get('withdrawals/pending')
@@ -70,11 +72,11 @@ export class AdminController {
         @Body('reason') reason: string,
         @CurrentUser() admin: any
     ) {
-        return this.adminService.rejectWithdrawal(id, reason);
+        return this.adminService.rejectWithdrawal(id, reason, admin.id);
     }
 
     @Get('logs')
-    async getSystemLogs() {
-        return { logs: [] }; // Placeholder for now
+    async getSystemLogs(@Query('limit') limit: number = 50) {
+        return this.adminService.getSystemLogs(Number(limit));
     }
 }

@@ -8,62 +8,35 @@ export class AdminService {
     constructor(private readonly prisma: PrismaService) { }
 
     async getDashboardMetrics() {
-        const [
-            totalTenants,
-            totalTransactions,
-            totalVolume,
-            pendingWithdrawals,
-            recentTenants,
-        ] = await Promise.all([
-            this.prisma.tenant.count(),
-            this.prisma.transaction.count(),
-            this.prisma.transaction.aggregate({
-                where: { status: 'COMPLETED', type: 'DEPOSIT' },
-                _sum: { amount: true },
-            }),
-            this.prisma.transaction.count({
-                where: { status: 'PENDING', type: 'WITHDRAWAL' },
-            }),
-            this.prisma.tenant.findMany({
-                orderBy: { created_at: 'desc' },
-                take: 5,
-                select: { id: true, name: true, email: true, created_at: true },
-            }),
-        ]);
-
-        // Active tenants (had a transaction in last 30 days)
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const activeTenants = await this.prisma.transaction.findMany({
-            where: { created_at: { gte: thirtyDaysAgo } },
-            select: { wallet: { select: { tenant_id: true } } },
-            distinct: ['wallet_id'],
+        const totalTenants = await this.prisma.tenant.count();
+        const activeTenants = await this.prisma.tenant.count({ where: { status: 'ACTIVE' } });
+        const pendingTenants = await this.prisma.tenant.count({ where: { status: 'PENDING' } });
+        const totalTransactions = await this.prisma.transaction.count();
+        const pendingWithdrawals = await this.prisma.transaction.count({
+            where: { type: 'WITHDRAWAL', status: 'PENDING' }
         });
 
         return {
             totalTenants,
+            activeTenants,
+            pendingTenants,
             totalTransactions,
-            totalVolume: totalVolume._sum.amount || 0,
             pendingWithdrawals,
-            activeTenants: activeTenants.length,
-            recentTenants,
         };
     }
 
-    async getTenants(page: number = 1, limit: number = 20, search?: string) {
+    async getTenants(page: number, limit: number, search: string) {
         const skip = (page - 1) * limit;
-
-        const where: any = search ? {
+        const where = search ? {
             OR: [
                 { name: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
-            ],
+            ]
         } : {};
 
         const [tenants, total] = await Promise.all([
             this.prisma.tenant.findMany({
-                where,
+                where: where as any,
                 skip,
                 take: limit,
                 orderBy: { created_at: 'desc' },
@@ -71,84 +44,86 @@ export class AdminService {
                     id: true,
                     name: true,
                     email: true,
-                    doc_number: true,
-                    default_currency: true,
-                    country: true,
-                    twoFactorEnabled: true,
-                    isAdmin: true,
-                    created_at: true,
                     status: true,
-                    wallets: {
-                        select: { balance: true, currency: true },
-                    },
-                },
+                    created_at: true,
+                    isAdmin: true,
+                }
             }),
-            this.prisma.tenant.count({ where }),
+            this.prisma.tenant.count({ where: where as any }),
         ]);
 
         return {
-            tenants,
-            total,
-            page,
-            totalPages: Math.ceil(total / limit),
+            data: tenants,
+            meta: {
+                total,
+                page,
+                last_page: Math.ceil(total / limit),
+            }
         };
     }
 
-    async getTenantDetail(tenantId: string) {
-        const tenant = await this.prisma.tenant.findUnique({
-            where: { id: tenantId },
+    async getTenantDetail(id: string) {
+        // Enriched detail view with wallets
+        return this.prisma.tenant.findUnique({
+            where: { id },
             include: {
                 wallets: true,
-                orders: { orderBy: { created_at: 'desc' }, take: 10 },
-            },
+            }
         });
-
-        const recentTransactions = await this.prisma.transaction.findMany({
-            where: { wallet: { tenant_id: tenantId } },
-            orderBy: { created_at: 'desc' },
-            take: 20,
-        });
-
-        return { tenant, recentTransactions };
     }
 
-    async suspendTenant(tenantId: string, suspended: boolean) {
-        // We use tokenVersion increment to invalidate all sessions when suspending
-        if (suspended) {
-            await this.prisma.tenant.update({
-                where: { id: tenantId },
-                data: { tokenVersion: { increment: 1 } },
-            });
-        }
-
-        this.logger.log(`Tenant ${tenantId} ${suspended ? 'suspended' : 'activated'}`);
-        return { success: true, suspended };
-    }
-
-    async approveTenant(tenantId: string) {
+    async suspendTenant(id: string, suspend: boolean) {
+        // TODO: Implement actual suspension logic (e.g., status = REJECTED or separate flag)
+        // For now, let's assume REJECTED acts as suspended
         await this.prisma.tenant.update({
+            where: { id },
+            data: { status: suspend ? 'REJECTED' : 'ACTIVE' },
+        });
+        await this.logAction('SYSTEM', 'SUSPEND_TENANT', id, { suspended: suspend });
+        return { success: true };
+    }
+
+    async approveTenant(tenantId: string, adminId: string = 'SYSTEM') {
+        const tenant = await this.prisma.tenant.update({
             where: { id: tenantId },
             data: { status: 'ACTIVE' },
         });
-        this.logger.log(`Tenant ${tenantId} approved`);
+
+        await this.logAction(adminId, 'APPROVE_TENANT', tenantId, { email: tenant.email });
+        this.logger.log(`Tenant ${tenantId} approved by ${adminId}`);
         return { success: true };
     }
 
-    async rejectTenant(tenantId: string) {
-        await this.prisma.tenant.update({
+    async rejectTenant(tenantId: string, adminId: string = 'SYSTEM') {
+        const tenant = await this.prisma.tenant.update({
             where: { id: tenantId },
             data: { status: 'REJECTED' },
         });
-        this.logger.log(`Tenant ${tenantId} rejected`);
+
+        await this.logAction(adminId, 'REJECT_TENANT', tenantId, { email: tenant.email });
+        this.logger.log(`Tenant ${tenantId} rejected by ${adminId}`);
         return { success: true };
     }
 
-    async getAllTransactions(page: number = 1, limit: number = 20, type?: string, status?: string) {
+    async getAllTransactions(
+        page: number,
+        limit: number,
+        type?: string,
+        status?: string,
+        startDate?: string,
+        endDate?: string
+    ) {
         const skip = (page - 1) * limit;
 
         const where: any = {};
-        if (type) where.type = type;
-        if (status) where.status = status;
+        if (type && type !== 'ALL') where.type = type;
+        if (status && status !== 'ALL') where.status = status;
+
+        if (startDate || endDate) {
+            where.created_at = {};
+            if (startDate) where.created_at.gte = new Date(startDate);
+            if (endDate) where.created_at.lte = new Date(endDate);
+        }
 
         const [transactions, total] = await Promise.all([
             this.prisma.transaction.findMany({
@@ -158,72 +133,106 @@ export class AdminService {
                 orderBy: { created_at: 'desc' },
                 include: {
                     wallet: {
-                        select: {
-                            tenant_id: true,
-                            tenant: { select: { name: true, email: true } },
-                        },
-                    },
-                },
+                        include: {
+                            tenant: {
+                                select: { name: true, email: true }
+                            }
+                        }
+                    }
+                }
             }),
             this.prisma.transaction.count({ where }),
         ]);
 
         return {
-            transactions,
-            total,
-            page,
-            totalPages: Math.ceil(total / limit),
+            data: transactions,
+            meta: {
+                total,
+                page,
+                last_page: Math.ceil(total / limit),
+            }
         };
     }
 
     async getPendingWithdrawals() {
         return this.prisma.transaction.findMany({
-            where: { status: 'PENDING', type: 'WITHDRAWAL' },
-            orderBy: { created_at: 'asc' },
+            where: {
+                type: 'WITHDRAWAL',
+                status: 'PENDING',
+            },
             include: {
                 wallet: {
-                    select: {
-                        tenant_id: true,
-                        tenant: { select: { name: true, email: true } },
-                    },
-                },
+                    include: {
+                        tenant: {
+                            select: { name: true, email: true }
+                        }
+                    }
+                }
             },
+            orderBy: { created_at: 'asc' }
         });
     }
 
-    async approveWithdrawal(transactionId: string) {
+    async approveWithdrawal(id: string) {
+        // Withdrawals are automatic now, but if we need manual override:
         await this.prisma.transaction.update({
-            where: { id: transactionId },
-            data: { status: 'COMPLETED' },
+            where: { id },
+            data: { status: 'COMPLETED' }
         });
-        this.logger.log(`Withdrawal ${transactionId} approved by admin`);
+        await this.logAction('SYSTEM', 'APPROVE_WITHDRAWAL', id, {});
+        // In real system, trigger blockchain transfer here if not already done
         return { success: true };
     }
 
-    async rejectWithdrawal(transactionId: string, reason?: string) {
-        const transaction = await this.prisma.transaction.findUnique({
-            where: { id: transactionId },
-            include: { wallet: true },
+    async rejectWithdrawal(id: string, reason: string, adminId: string = 'SYSTEM') {
+        const tx = await this.prisma.transaction.findUnique({
+            where: { id },
+            include: { wallet: true }
         });
 
-        if (transaction) {
-            // Refund the amount back to the wallet
-            await this.prisma.$transaction([
-                this.prisma.wallet.update({
-                    where: { id: transaction.wallet_id },
-                    data: { balance: { increment: transaction.amount + (transaction as any).fee } },
-                }),
-                this.prisma.transaction.update({
-                    where: { id: transactionId },
-                    data: {
-                        status: 'FAILED',
-                        description: reason || 'Rejected by admin',
-                    },
-                }),
-            ]);
-        }
+        if (!tx) throw new Error('Transaction not found');
 
-        this.logger.log(`Withdrawal ${transactionId} rejected by admin. Reason: ${reason || 'N/A'}`);
+        // Refund balance
+        await this.prisma.wallet.update({
+            where: { id: tx.wallet_id },
+            data: { balance: { increment: tx.amount + tx.fee } }
+        });
+
+        await this.prisma.transaction.update({
+            where: { id },
+            data: { status: 'FAILED', description: `Rejected by admin: ${reason}` }
+        });
+
+        await this.logAction(adminId, 'REJECT_WITHDRAWAL', id, { reason, amount: tx.amount });
+
         return { success: true };
+    }
+
+    async getSystemLogs(limit: number = 50) {
+        return this.prisma.auditLog.findMany({
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                admin: {
+                    select: { email: true }
+                }
+            }
+        });
+    }
+
+    private async logAction(adminId: string, action: string, targetId?: string, details?: any) {
+        try {
+            await this.prisma.auditLog.create({
+                data: {
+                    adminId, // Ensure this ID exists in Tenant table and is an admin
+                    action,
+                    targetId,
+                    details: details || {},
+                }
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create audit log for ${action}`, error);
+            // Don't block main flow if logging fails
+        }
     }
 }

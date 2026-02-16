@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, X } from "lucide-react";
 
 interface Transaction {
     id: string;
@@ -26,13 +27,18 @@ export default function AdminTransactionsPage() {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+
+    // Filters
     const [typeFilter, setTypeFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, typeFilter, statusFilter]);
+    }, [page, typeFilter, statusFilter, startDate, endDate]);
 
     const fetchTransactions = async () => {
         try {
@@ -40,11 +46,13 @@ export default function AdminTransactionsPage() {
             const params = new URLSearchParams({ page: String(page), limit: "20" });
             if (typeFilter !== "all") params.set("type", typeFilter);
             if (statusFilter !== "all") params.set("status", statusFilter);
+            if (startDate) params.set("startDate", startDate);
+            if (endDate) params.set("endDate", endDate);
 
             const res = await api.get(`/admin/transactions?${params}`);
-            setTransactions(res.data.transactions);
-            setTotal(res.data.total);
-            setTotalPages(res.data.totalPages);
+            setTransactions(res.data.data); // Fixed: backend returns { data: [], meta: {} }
+            setTotal(res.data.meta.total);
+            setTotalPages(res.data.meta.last_page);
         } catch (err) {
             console.error("Failed to load transactions:", err);
         } finally {
@@ -52,16 +60,24 @@ export default function AdminTransactionsPage() {
         }
     };
 
+    const clearFilters = () => {
+        setTypeFilter("all");
+        setStatusFilter("all");
+        setStartDate("");
+        setEndDate("");
+        setPage(1);
+    }
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold">Transactions</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{total} total transactions</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                     <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-                        <SelectTrigger className="w-[140px] rounded-xl h-9 text-xs">
+                        <SelectTrigger className="w-[130px] rounded-xl h-9 text-xs bg-white dark:bg-slate-900">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -70,8 +86,9 @@ export default function AdminTransactionsPage() {
                             <SelectItem value="WITHDRAWAL">Withdrawals</SelectItem>
                         </SelectContent>
                     </Select>
+
                     <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-                        <SelectTrigger className="w-[140px] rounded-xl h-9 text-xs">
+                        <SelectTrigger className="w-[130px] rounded-xl h-9 text-xs bg-white dark:bg-slate-900">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -82,10 +99,30 @@ export default function AdminTransactionsPage() {
                             <SelectItem value="FAILED">Failed</SelectItem>
                         </SelectContent>
                     </Select>
+
+                    <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                        className="w-[130px] h-9 text-xs rounded-xl bg-white dark:bg-slate-900"
+                    />
+                    <span className="text-slate-400">-</span>
+                    <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                        className="w-[130px] h-9 text-xs rounded-xl bg-white dark:bg-slate-900"
+                    />
+
+                    {(typeFilter !== "all" || statusFilter !== "all" || startDate || endDate) && (
+                        <Button variant="ghost" size="icon" onClick={clearFilters} className="h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <X className="w-4 h-4 text-slate-500" />
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            <Card className="bg-white dark:bg-[#0B0F19] border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+            <Card className="bg-white dark:bg-[#0B0F19] border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -131,7 +168,8 @@ export default function AdminTransactionsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs">
-                                                {tx.wallet?.tenant?.name || tx.wallet?.tenant_id?.slice(0, 8)}
+                                                {tx.wallet?.tenant?.name || "Unknown"}
+                                                <div className="text-[10px] text-slate-400">{tx.wallet?.tenant?.email}</div>
                                             </td>
                                             <td className="px-6 py-4 font-mono font-medium text-xs">
                                                 {Number(tx.amount).toFixed(2)} {tx.currency}
@@ -147,7 +185,7 @@ export default function AdminTransactionsPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-slate-400 text-xs">
-                                                {new Date(tx.created_at).toLocaleDateString()}
+                                                {new Date(tx.created_at).toLocaleString()}
                                             </td>
                                         </tr>
                                     ))
