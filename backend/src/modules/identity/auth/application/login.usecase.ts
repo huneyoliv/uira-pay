@@ -33,6 +33,13 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        // Check if tenant is approved
+        const status = (tenant as any).status;
+        if (status !== 'APPROVED') {
+            console.log(`[LoginDebug] Tenant status is ${status}. Access denied.`);
+            throw new UnauthorizedException('Your account is pending approval.');
+        }
+
         const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: (tenant as any).email, tokenVersion: (tenant as any).tokenVersion });
 
         return {
