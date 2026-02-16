@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ interface Metrics {
   sales24h: number;
 }
 
+
 interface Transaction {
   id: string;
   type: string;
@@ -31,127 +33,61 @@ interface Transaction {
   date: string;
 }
 
+
 const translations: any = {
   PT: {
-    title: "Visão Geral",
-    subtitle: "Controle financeiro completo para sua empresa.",
-    importData: "Importar Operações",
-    newTransaction: "Nova Operação",
+    dashboard: "Painel",
+    totalBalance: "Saldo Total",
+    pendingBalance: "Saldo Pendente",
+    recentTransactions: "Transações Recentes",
+    newTransaction: "Nova Transação",
+    status: "Status",
+    date: "Data",
+    amount: "Valor",
+    type: "Tipo",
+    pending: "Pendente",
+    completed: "Concluído",
+    failed: "Falhou",
+    viewAll: "Ver todas",
+    withdrawSoon: "Em breve você poderá realizar saques diretamente para sua conta Bancária!",
     withdraw: "Novo Pagamento",
-    totalRevenue: "Receita Total",
-    updatedNow: "Atualizado agora",
-    tenantBalance: "Saldo Disponível",
-    totalAccumulated: "Total acumulado",
-    sales24h: "Volume 24h",
-    onTime: "Em tempo real",
-    revenueAnalysis: "Análise de Fluxo",
-    newReport: "+ Relatório",
-    chartComingSoon: "Gráfico de fluxo em breve.",
-    waitingHistory: "Aguardando histórico.",
-    recentTransactions: "Últimas Operações",
-    noTransactions: "Nenhuma operação recente.",
-    deposit: "Entrada",
-    withdrawal: "Saída",
-    viewAll: "Ver Extrato Completo",
-    importSoon: "Importação em breve!",
-    withdrawSoon: "Pagamentos em breve!",
+    pendingUserMessage: "Sua conta está em análise. Você poderá visualizar seus dados, mas transações e saques estão desabilitados até a aprovação."
   },
   EN: {
-    title: "Overview",
-    subtitle: "Complete financial control for your business.",
-    importData: "Import Operations",
-    newTransaction: "New Operation",
+    dashboard: "Dashboard",
+    totalBalance: "Total Balance",
+    pendingBalance: "Pending Balance",
+    recentTransactions: "Recent Transactions",
+    newTransaction: "New Transaction",
+    status: "Status",
+    date: "Date",
+    amount: "Amount",
+    type: "Type",
+    pending: "Pending",
+    completed: "Completed",
+    failed: "Failed",
+    viewAll: "View all",
+    withdrawSoon: "Soon you will be able to make withdrawals directly to your bank account!",
     withdraw: "New Payout",
-    totalRevenue: "Total Revenue",
-    updatedNow: "Updated just now",
-    tenantBalance: "Available Balance",
-    totalAccumulated: "Total accumulated",
-    sales24h: "Volume 24h",
-    onTime: "Real-time",
-    revenueAnalysis: "Cash Flow Analysis",
-    newReport: "+ New Report",
-    chartComingSoon: "Cash flow chart coming soon.",
-    waitingHistory: "Waiting for history.",
-    recentTransactions: "Recent Operations",
-    noTransactions: "No recent operations.",
-    deposit: "Inflow",
-    withdrawal: "Outflow",
-    viewAll: "View Full Statement",
-    importSoon: "Import coming soon!",
-    withdrawSoon: "Payouts coming soon!",
-  },
-  FR: {
-    title: "Vue d'ensemble",
-    subtitle: "Contrôle financier complet pour votre entreprise.",
-    importData: "Importer Opérations",
-    newTransaction: "Nouvelle Opération",
-    withdraw: "Nouveau Paiement",
-    totalRevenue: "Recettes Totales",
-    updatedNow: "Mis à jour",
-    tenantBalance: "Solde Disponible",
-    totalAccumulated: "Total cumulé",
-    sales24h: "Volume 24h",
-    onTime: "Temps réel",
-    revenueAnalysis: "Analyse des Flux",
-    newReport: "+ Rapport",
-    chartComingSoon: "Graphique de flux bientôt.",
-    waitingHistory: "En attente d'historique.",
-    recentTransactions: "Dernières Opérations",
-    noTransactions: "Aucune opération récente.",
-    deposit: "Entrée",
-    withdrawal: "Sortie",
-    viewAll: "Voir Tout",
-    importSoon: "Importation bientôt !",
-    withdrawSoon: "Paiements bientôt !",
-  },
-  ES: {
-    title: "Visión General",
-    subtitle: "Control financiero completo para su empresa.",
-    importData: "Importar Operaciones",
-    newTransaction: "Nueva Operación",
-    withdraw: "Nuevo Pago",
-    totalRevenue: "Ingresos Totales",
-    updatedNow: "Actualizado ahora",
-    tenantBalance: "Saldo Disponible",
-    totalAccumulated: "Total acumulado",
-    sales24h: "Volumen 24h",
-    onTime: "En tiempo real",
-    revenueAnalysis: "Análisis de Flujo",
-    newReport: "+ Informe",
-    chartComingSoon: "Gráfico próximamente.",
-    waitingHistory: "Esperando historial.",
-    recentTransactions: "Últimas Operaciones",
-    noTransactions: "Ninguna operación reciente.",
-    deposit: "Entrada",
-    withdrawal: "Salida",
-    viewAll: "Ver Extracto",
-    importSoon: "¡Importación pronto!",
-    withdrawSoon: "¡Pagos pronto!",
+    pendingUserMessage: "Your account is under review. You can view your data, but transactions and withdrawals are disabled until approval."
   }
 };
+
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const user = useAuthStore((state) => state.user);
+  const [lang, setLang] = useState('PT');
+  const { user } = useAuthStore();
 
-  // Determine language based on user preference or country
-  const countryData = user?.country ? getCountryData(user.country) : { lang: 'PT' };
-  const lang = user?.language || countryData.lang || 'PT';
-  const localeMap: Record<string, string> = { PT: 'pt-BR', EN: 'en-US', ES: 'es-ES', FR: 'fr-FR' };
-  const locale = localeMap[lang as string] || 'pt-BR';
-  const t = translations[lang as string] || translations['EN'];
-  const currency = user?.fiatCurrency || 'BRL';
-  // Use tenant's preferred currency (USDT/USDC), defaulting to USDT if not set
-  const cryptoCurrency = user?.default_currency || 'USDT';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [metricsRes, transactionsRes] = await Promise.all([
-          api.get("/tenant/dashboard/metrics"),
-          api.get("/tenant/dashboard/transactions"),
+          api.get("/metrics"),
+          api.get("/transactions")
         ]);
         setMetrics(metricsRes.data);
         setTransactions(transactionsRes.data);
@@ -162,28 +98,57 @@ export default function DashboardPage() {
       }
     };
 
+
     fetchData();
+
+
+    // Simple language detection
+    const browserLang = navigator.language.toUpperCase();
+    if (browserLang.startsWith('EN')) setLang('EN');
   }, []);
+
+
+  const t = translations[lang as string] || translations['EN'];
+
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
+
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      {user?.status === 'PENDING' && (
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg shadow-sm">
+          <div className="flex items-center space-x-3">
+            <Clock className="h-5 w-5 text-amber-500" />
+            <p className="text-amber-800 font-medium">
+              {t.pendingUserMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t.title}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">{t.subtitle}</p>
+          <h1 className="text-3xl font-bold text-slate-900">{t.dashboard}</h1>
+          <p className="text-slate-500 mt-1">
+            {new Date().toLocaleDateString(lang === 'PT' ? 'pt-BR' : 'en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
         </div>
         <div className="flex gap-3">
-          <Button
-            variant="outline"
+          <Button 
+            variant="outline" 
             className="rounded-full h-11 px-6 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold disabled:opacity-50"
             onClick={() => alert(t.withdrawSoon)}
             disabled={user?.status === 'PENDING'}
@@ -191,18 +156,13 @@ export default function DashboardPage() {
             {t.withdraw}
           </Button>
           {user?.status === 'PENDING' ? (
-            <Button
-              disabled
-              className="rounded-full h-11 px-6 bg-slate-200 text-slate-400 font-semibold cursor-not-allowed"
-            >
+            <Button disabled className="rounded-full h-11 px-6 bg-slate-900 text-white hover:bg-slate-800 font-semibold shadow-lg shadow-slate-200 opacity-50">
               <Plus className="mr-2 h-4 w-4" />
               {t.newTransaction}
             </Button>
           ) : (
             <Link href="/new-transaction">
-              <Button
-                className="rounded-full h-11 px-6 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black font-semibold shadow-lg shadow-black/20 dark:shadow-white/10"
-              >
+              <Button className="rounded-full h-11 px-6 bg-slate-900 text-white hover:bg-slate-800 font-semibold shadow-lg shadow-slate-200">
                 <Plus className="mr-2 h-4 w-4" />
                 {t.newTransaction}
               </Button>
@@ -211,137 +171,132 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Primary Card - Total Revenue */}
-        <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl shadow-black/20 dark:shadow-slate-900/50 rounded-[32px] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-gray-100 dark:text-gray-300">{t.totalRevenue}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-              <ArrowUpRight className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-4xl font-bold mb-2">
-              {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.totalSales || 0)} <span className="text-lg text-gray-300 dark:text-gray-400 font-medium">{cryptoCurrency}</span>
-            </div>
-            <div className="flex items-center text-xs text-green-100 bg-white/10 w-fit px-2 py-1 rounded-full">
-              <Plus className="h-3 w-3 mr-1" />
-              {t.updatedNow}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Secondary Card - Tenant Balance */}
-        <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px]">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">{t.tenantBalance}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
-              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="border-none shadow-xl shadow-slate-100 bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+              {t.totalBalance}
+            </CardTitle>
+            <div className="h-10 w-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+              <ArrowUpRight className="h-5 w-5 text-indigo-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
-              {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.balance || 0)} <span className="text-lg text-slate-500 dark:text-slate-400 font-medium">{cryptoCurrency}</span>
+            <div className="text-3xl font-black text-slate-900">
+              $ {metrics?.balance.toLocaleString() ?? "0.00"}
             </div>
-            <div className="flex items-center text-xs text-slate-400 border border-slate-100 w-fit px-2 py-1 rounded-full">
+            <p className="text-xs font-semibold text-emerald-500 mt-2 flex items-center">
               <Plus className="h-3 w-3 mr-1" />
-              {t.totalAccumulated}
-            </div>
+              12.5% from last month
+            </p>
           </CardContent>
         </Card>
 
-        {/* Secondary Card - Sales 24h */}
-        <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px]">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">{t.sales24h}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
-              <Clock className="h-4 w-4 text-slate-400" />
+
+        <Card className="border-none shadow-xl shadow-slate-100 bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+              {t.pendingBalance}
+            </CardTitle>
+            <div className="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center">
+              <Clock className="h-5 w-5 text-amber-500" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
-              {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.sales24h || 0)} <span className="text-lg text-slate-500 dark:text-slate-400 font-medium">{cryptoCurrency}</span>
+            <div className="text-3xl font-black text-slate-900">
+              $ 1,240.00
             </div>
-            <div className="flex items-center text-xs text-slate-400 border border-slate-100 w-fit px-2 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-              {t.onTime}
+            <p className="text-xs font-semibold text-slate-400 mt-2">
+              Expected in next 48h
+            </p>
+          </CardContent>
+        </Card>
+
+
+        <Card className="border-none shadow-xl shadow-slate-100 bg-indigo-600 text-white lg:col-span-1 md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-bold text-indigo-100 uppercase tracking-wider">
+              Transaction Volume
+            </CardTitle>
+            <div className="h-10 w-10 bg-indigo-500/30 rounded-xl flex items-center justify-center">
+              <MoreHorizontal className="h-5 w-5 text-white" />
             </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black">
+              $ {metrics?.totalSales.toLocaleString() ?? "0.00"}
+            </div>
+            <p className="text-xs font-semibold text-indigo-200 mt-2">
+              Lifetime processing
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Analytics Chart Placeholder */}
-        <Card className="col-span-2 bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] p-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">{t.revenueAnalysis}</CardTitle>
-            </div>
-            <Button variant="outline" size="sm" className="rounded-full text-xs h-8">
-              {t.newReport}
-            </Button>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center h-[300px] text-slate-400 text-sm">
-            <div className="text-center">
-              <div className="mb-2">📊</div>
-              <p>{t.chartComingSoon}</p>
-              <p className="text-xs text-slate-300">{t.waitingHistory}</p>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Recent Transactions List */}
-        <Card className="col-span-1 bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] p-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">{t.recentTransactions}</CardTitle>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+      <Card className="border-none shadow-xl shadow-slate-100 bg-white overflow-hidden">
+        <CardHeader className="border-b border-slate-50 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-bold text-slate-900">
+              {t.recentTransactions}
+            </CardTitle>
+            <Button variant="ghost" className="text-indigo-600 font-bold hover:text-indigo-700 hover:bg-indigo-50">
+              {t.viewAll}
             </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6 mt-2">
-              {transactions.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-8">{t.noTransactions}</p>
-              ) : (
-                transactions.slice(0, 5).map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${tx.type === 'DEPOSIT' ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 group-hover:bg-green-100 dark:group-hover:bg-green-900/30' : 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30'
-                        }`}>
-                        {tx.type === 'DEPOSIT' ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">{t.status}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">{t.date}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">{t.amount}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">{t.type}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        tx.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 
+                        tx.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                      }`}>
+                        {tx.status === 'COMPLETED' ? t.completed : tx.status === 'PENDING' ? t.pending : t.failed}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-600">
+                      {new Date(tx.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-slate-900">
+                      $ {tx.amount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        {tx.type === 'SALE' ? (
+                          <div className="h-8 w-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                            <ArrowDownRight className="h-4 w-4 text-emerald-600" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 bg-indigo-50 rounded-lg flex items-center justify-center">
+                            <ArrowUpRight className="h-4 w-4 text-indigo-600" />
+                          </div>
+                        )}
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                          {tx.type}
+                        </span>
                       </div>
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white text-sm">{tx.type === 'DEPOSIT' ? t.deposit : t.withdrawal}</p>
-                        <p className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString(locale)}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-bold text-sm ${tx.type === 'DEPOSIT' ? 'text-green-600' : 'text-slate-900 dark:text-white'}`}>
-                        {tx.type === 'DEPOSIT' ? '+' : '-'} {
-                          ['USDT', 'USDC', 'BTC', 'ETH'].includes(tx.currency)
-                            ? `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(tx.amount)} ${tx.currency}`
-                            : new Intl.NumberFormat(locale, { style: "currency", currency: tx.currency }).format(tx.amount)
-                        }
-                      </p>
-                      <p className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 w-fit ml-auto mt-1">
-                        {tx.status}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <Link href="/transactions" className="block mt-6">
-              <Button variant="outline" className="w-full rounded-2xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200">
-                {t.viewAll}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+            }
