@@ -11,7 +11,6 @@ import { PaymentCryptoModule } from './modules/payment-crypto/payment-crypto.mod
 import { JobsModule } from './modules/jobs/jobs.module';
 import { InfraModule } from './infra/infra.module';
 import { UploadModule } from './modules/upload/upload.module';
-import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import { AdminModule } from './modules/admin/admin.module';
     PaymentCryptoModule,
     JobsModule,
     UploadModule,
-    AdminModule,
   ],
   controllers: [AppController],
   providers: [

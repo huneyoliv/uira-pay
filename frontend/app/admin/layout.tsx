@@ -23,10 +23,6 @@ export default function AdminLayout({
                         <Users size={20} />
                         <span>Tenants</span>
                     </Link>
-                    <Link href="/admin/approvals" className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <FileText size={20} />
-                        <span>Approvals</span>
-                    </Link>
                     <Link href="/admin/logs" className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                         <FileText size={20} />
                         <span>Logs</span>
