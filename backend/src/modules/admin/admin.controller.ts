@@ -1,9 +1,14 @@
 
-import { Controller, Get, Patch, UseGuards, Query, Param, Body, Post } from '@nestjs/common';
+import { Controller, Get, Patch, UseGuards, Query, Param, Body, Req, BadRequestException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../identity/auth/infra/guards/jwt-auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { CurrentUser } from '../identity/auth/infra/decorators/current-user.decorator';
+import type { Request } from 'express';
+
+function isValidObjectId(id: string): boolean {
+    return /^[a-f\d]{24}$/i.test(id);
+}
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -21,27 +26,31 @@ export class AdminController {
         @Query('limit') limit: number = 10,
         @Query('search') search: string = '',
     ) {
-        return this.adminService.getTenants(Number(page), Number(limit), search);
+        return this.adminService.getTenants(Number(page), Math.min(Number(limit), 100), search);
     }
 
     @Get('tenants/:id')
     async getTenantDetails(@Param('id') id: string) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
         return this.adminService.getTenantDetail(id);
     }
 
     @Patch('tenants/:id/suspend')
-    async suspendTenant(@Param('id') id: string) {
-        return this.adminService.suspendTenant(id, true);
+    async suspendTenant(@Param('id') id: string, @CurrentUser() admin: any, @Req() req: Request) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.suspendTenant(id, true, admin.id, req.ip);
     }
 
     @Patch('tenants/:id/approve')
-    async approveTenant(@Param('id') id: string, @CurrentUser() admin: any) {
-        return this.adminService.approveTenant(id, admin.id);
+    async approveTenant(@Param('id') id: string, @CurrentUser() admin: any, @Req() req: Request) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.approveTenant(id, admin.id, req.ip);
     }
 
     @Patch('tenants/:id/reject')
-    async rejectTenant(@Param('id') id: string, @CurrentUser() admin: any) {
-        return this.adminService.rejectTenant(id, admin.id);
+    async rejectTenant(@Param('id') id: string, @CurrentUser() admin: any, @Req() req: Request) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid tenant ID');
+        return this.adminService.rejectTenant(id, admin.id, req.ip);
     }
 
     @Get('transactions')
@@ -53,7 +62,7 @@ export class AdminController {
         @Query('startDate') startDate: string,
         @Query('endDate') endDate: string,
     ) {
-        return this.adminService.getAllTransactions(Number(page), Number(limit), type, status, startDate, endDate);
+        return this.adminService.getAllTransactions(Number(page), Math.min(Number(limit), 100), type, status, startDate, endDate);
     }
 
     @Get('withdrawals/pending')
@@ -62,21 +71,24 @@ export class AdminController {
     }
 
     @Patch('withdrawals/:id/approve')
-    async approveWithdrawal(@Param('id') id: string, @CurrentUser() admin: any) {
-        return this.adminService.approveWithdrawal(id);
+    async approveWithdrawal(@Param('id') id: string, @CurrentUser() admin: any, @Req() req: Request) {
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid withdrawal ID');
+        return this.adminService.approveWithdrawal(id, admin.id, req.ip);
     }
 
     @Patch('withdrawals/:id/reject')
     async rejectWithdrawal(
         @Param('id') id: string,
         @Body('reason') reason: string,
-        @CurrentUser() admin: any
+        @CurrentUser() admin: any,
+        @Req() req: Request,
     ) {
-        return this.adminService.rejectWithdrawal(id, reason, admin.id);
+        if (!isValidObjectId(id)) throw new BadRequestException('Invalid withdrawal ID');
+        return this.adminService.rejectWithdrawal(id, reason, admin.id, req.ip);
     }
 
     @Get('logs')
     async getSystemLogs(@Query('limit') limit: number = 50) {
-        return this.adminService.getSystemLogs(Number(limit));
+        return this.adminService.getSystemLogs(Math.min(Number(limit), 200));
     }
 }

@@ -132,10 +132,10 @@ export default function AdminTenantsPage() {
                                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{tenant.email}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${tenant.status === 'ACTIVE'
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                        : tenant.status === 'REJECTED'
-                                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : tenant.status === 'REJECTED'
+                                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                                     }`}>
                                                     {tenant.status || 'ACTIVE'}
                                                 </span>

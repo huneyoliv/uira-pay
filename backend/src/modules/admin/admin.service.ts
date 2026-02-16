@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma.service';
 
 @Injectable()
@@ -8,13 +8,22 @@ export class AdminService {
     constructor(private readonly prisma: PrismaService) { }
 
     async getDashboardMetrics() {
-        const totalTenants = await this.prisma.tenant.count();
-        const activeTenants = await this.prisma.tenant.count({ where: { status: 'ACTIVE' } });
-        const pendingTenants = await this.prisma.tenant.count({ where: { status: 'PENDING' } });
-        const totalTransactions = await this.prisma.transaction.count();
-        const pendingWithdrawals = await this.prisma.transaction.count({
-            where: { type: 'WITHDRAWAL', status: 'PENDING' }
-        });
+        const [totalTenants, activeTenants, pendingTenants, totalTransactions, pendingWithdrawals, volumeAgg, recentTenants] = await Promise.all([
+            this.prisma.tenant.count(),
+            this.prisma.tenant.count({ where: { status: 'ACTIVE' } }),
+            this.prisma.tenant.count({ where: { status: 'PENDING' } }),
+            this.prisma.transaction.count(),
+            this.prisma.transaction.count({ where: { type: 'WITHDRAWAL', status: 'PENDING' } }),
+            this.prisma.transaction.aggregate({
+                where: { type: 'DEPOSIT', status: 'COMPLETED' },
+                _sum: { amount: true },
+            }),
+            this.prisma.tenant.findMany({
+                take: 5,
+                orderBy: { created_at: 'desc' },
+                select: { id: true, name: true, email: true, created_at: true },
+            }),
+        ]);
 
         return {
             totalTenants,
@@ -22,6 +31,8 @@ export class AdminService {
             pendingTenants,
             totalTransactions,
             pendingWithdrawals,
+            totalVolume: volumeAgg._sum.amount || 0,
+            recentTenants,
         };
     }
 
@@ -44,63 +55,80 @@ export class AdminService {
                     id: true,
                     name: true,
                     email: true,
+                    doc_number: true,
+                    default_currency: true,
+                    country: true,
+                    twoFactorEnabled: true,
+                    isAdmin: true,
                     status: true,
                     created_at: true,
-                    isAdmin: true,
+                    wallets: {
+                        select: { balance: true, currency: true },
+                    },
                 }
             }),
             this.prisma.tenant.count({ where: where as any }),
         ]);
 
         return {
-            data: tenants,
-            meta: {
-                total,
-                page,
-                last_page: Math.ceil(total / limit),
-            }
+            tenants,
+            total,
+            totalPages: Math.ceil(total / limit),
         };
     }
 
     async getTenantDetail(id: string) {
-        // Enriched detail view with wallets
-        return this.prisma.tenant.findUnique({
+        const tenant = await this.prisma.tenant.findUnique({
             where: { id },
-            include: {
-                wallets: true,
-            }
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                doc_number: true,
+                default_currency: true,
+                country: true,
+                twoFactorEnabled: true,
+                isAdmin: true,
+                status: true,
+                created_at: true,
+                profilePhotoUrl: true,
+                wallets: {
+                    select: { id: true, balance: true, currency: true },
+                },
+            },
         });
+
+        if (!tenant) throw new NotFoundException('Tenant not found');
+        return tenant;
     }
 
-    async suspendTenant(id: string, suspend: boolean) {
-        // TODO: Implement actual suspension logic (e.g., status = REJECTED or separate flag)
-        // For now, let's assume REJECTED acts as suspended
+    async suspendTenant(id: string, suspend: boolean, adminId: string, ipAddress?: string) {
         await this.prisma.tenant.update({
             where: { id },
             data: { status: suspend ? 'REJECTED' : 'ACTIVE' },
         });
-        await this.logAction('SYSTEM', 'SUSPEND_TENANT', id, { suspended: suspend });
+        await this.logAction(adminId, 'SUSPEND_TENANT', id, { suspended: suspend }, ipAddress);
         return { success: true };
     }
 
-    async approveTenant(tenantId: string, adminId: string = 'SYSTEM') {
+    async approveTenant(tenantId: string, adminId: string, ipAddress?: string) {
         const tenant = await this.prisma.tenant.update({
             where: { id: tenantId },
             data: { status: 'ACTIVE' },
         });
 
-        await this.logAction(adminId, 'APPROVE_TENANT', tenantId, { email: tenant.email });
+        await this.logAction(adminId, 'APPROVE_TENANT', tenantId, { email: tenant.email }, ipAddress);
         this.logger.log(`Tenant ${tenantId} approved by ${adminId}`);
         return { success: true };
     }
 
-    async rejectTenant(tenantId: string, adminId: string = 'SYSTEM') {
+    async rejectTenant(tenantId: string, adminId: string, ipAddress?: string) {
         const tenant = await this.prisma.tenant.update({
             where: { id: tenantId },
             data: { status: 'REJECTED' },
         });
 
-        await this.logAction(adminId, 'REJECT_TENANT', tenantId, { email: tenant.email });
+        await this.logAction(adminId, 'REJECT_TENANT', tenantId, { email: tenant.email }, ipAddress);
         this.logger.log(`Tenant ${tenantId} rejected by ${adminId}`);
         return { success: true };
     }
@@ -173,24 +201,22 @@ export class AdminService {
         });
     }
 
-    async approveWithdrawal(id: string) {
-        // Withdrawals are automatic now, but if we need manual override:
+    async approveWithdrawal(id: string, adminId: string, ipAddress?: string) {
         await this.prisma.transaction.update({
             where: { id },
             data: { status: 'COMPLETED' }
         });
-        await this.logAction('SYSTEM', 'APPROVE_WITHDRAWAL', id, {});
-        // In real system, trigger blockchain transfer here if not already done
+        await this.logAction(adminId, 'APPROVE_WITHDRAWAL', id, {}, ipAddress);
         return { success: true };
     }
 
-    async rejectWithdrawal(id: string, reason: string, adminId: string = 'SYSTEM') {
+    async rejectWithdrawal(id: string, reason: string, adminId: string, ipAddress?: string) {
         const tx = await this.prisma.transaction.findUnique({
             where: { id },
             include: { wallet: true }
         });
 
-        if (!tx) throw new Error('Transaction not found');
+        if (!tx) throw new NotFoundException('Transaction not found');
 
         // Refund balance
         await this.prisma.wallet.update({
@@ -203,7 +229,7 @@ export class AdminService {
             data: { status: 'FAILED', description: `Rejected by admin: ${reason}` }
         });
 
-        await this.logAction(adminId, 'REJECT_WITHDRAWAL', id, { reason, amount: tx.amount });
+        await this.logAction(adminId, 'REJECT_WITHDRAWAL', id, { reason, amount: tx.amount }, ipAddress);
 
         return { success: true };
     }
@@ -220,19 +246,19 @@ export class AdminService {
         });
     }
 
-    private async logAction(adminId: string, action: string, targetId?: string, details?: any) {
+    private async logAction(adminId: string, action: string, targetId?: string, details?: any, ipAddress?: string) {
         try {
             await this.prisma.auditLog.create({
                 data: {
-                    adminId, // Ensure this ID exists in Tenant table and is an admin
+                    adminId,
                     action,
                     targetId,
                     details: details || {},
+                    ipAddress: ipAddress || null,
                 }
             });
         } catch (error) {
             this.logger.error(`Failed to create audit log for ${action}`, error);
-            // Don't block main flow if logging fails
         }
     }
 }

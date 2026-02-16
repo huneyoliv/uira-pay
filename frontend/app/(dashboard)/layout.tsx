@@ -13,7 +13,8 @@ import {
     Zap,
     Menu,
     X,
-    ArrowDownRight
+    ArrowDownRight,
+    Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

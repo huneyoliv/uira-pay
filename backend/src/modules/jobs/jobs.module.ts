@@ -7,6 +7,7 @@ import { CheckPendingOrdersJob } from './check-pending-orders.job';
 import { GasMonitorJob } from './gas-monitor.job';
 import { LiquidityManagerJob } from './liquidity-manager.job';
 import { CheckPendingWithdrawalsJob } from './check-pending-withdrawals.job';
+import { CleanupExpiredCodesJob } from './cleanup-expired-codes.job';
 import { PrismaService } from '../../infra/database/prisma.service';
 
 @Module({
@@ -21,7 +22,9 @@ import { PrismaService } from '../../infra/database/prisma.service';
         GasMonitorJob,
         LiquidityManagerJob,
         CheckPendingWithdrawalsJob,
+        CleanupExpiredCodesJob,
         PrismaService,
     ],
 })
 export class JobsModule { }
+
