@@ -30,6 +30,7 @@ const verify_2fa_usecase_1 = require("./application/totp/verify-2fa.usecase");
 const validate_2fa_usecase_1 = require("./application/totp/validate-2fa.usecase");
 const disable_2fa_usecase_1 = require("./application/totp/disable-2fa.usecase");
 const reset_2fa_usecase_1 = require("./application/totp/reset-2fa.usecase");
+const encryption_service_1 = require("./application/encryption.service");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -75,6 +76,7 @@ exports.AuthModule = AuthModule = __decorate([
             validate_2fa_usecase_1.Validate2FAUseCase,
             disable_2fa_usecase_1.Disable2FAUseCase,
             reset_2fa_usecase_1.Reset2FAUseCase,
+            encryption_service_1.EncryptionService,
         ],
         exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, validate_2fa_usecase_1.Validate2FAUseCase],
     })

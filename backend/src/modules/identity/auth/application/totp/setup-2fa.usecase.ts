@@ -3,10 +3,14 @@ import { PrismaService } from '../../../../../infra/database/prisma.service';
 import { TOTP, generateSecret, generateURI } from 'otplib';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
+import { EncryptionService } from '../encryption.service';
 
 @Injectable()
 export class Setup2FAUseCase {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly encryptionService: EncryptionService,
+    ) { }
 
     async execute(tenantId: string) {
         const tenant = await this.prisma.tenant.findUnique({
@@ -21,10 +25,10 @@ export class Setup2FAUseCase {
             throw new BadRequestException('2FA is already enabled. Disable it first to reconfigure.');
         }
 
-        // Generate TOTP secret (20 bytes = 160 bits, RFC 4226 recommended)
+        // Generate TOTP secret
         const secret = generateSecret();
 
-        // Generate 8 backup codes (8 chars each, alphanumeric)
+        // Generate 8 backup codes
         const rawBackupCodes: string[] = [];
         const hashedBackupCodes: string[] = [];
 
@@ -34,20 +38,23 @@ export class Setup2FAUseCase {
             hashedBackupCodes.push(await bcrypt.hash(code, 10));
         }
 
-        // Store the secret temporarily (not yet enabled)
+        // Encrypt secret before storage
+        const encryptedSecret = this.encryptionService.encrypt(secret);
+
+        // Store the encrypted secret temporarily
         await this.prisma.tenant.update({
             where: { id: tenantId },
             data: {
-                twoFactorSecret: secret,
+                twoFactorSecret: encryptedSecret,
                 twoFactorBackupCodes: hashedBackupCodes,
             } as any,
         });
 
-        // Generate OTP Auth URI for authenticator apps
+        // Generate OTP Auth URI using the RAW secret (for user scanner)
         const otpAuthUrl = `otpauth://totp/UIR%C3%81%20Payments:${encodeURIComponent((tenant as any).email)}?secret=${secret}&issuer=UIR%C3%81%20Payments&algorithm=SHA1&digits=6&period=30`;
 
         return {
-            secret,
+            secret, // Return raw secret for manual entry
             otpAuthUrl,
             backupCodes: rawBackupCodes,
         };

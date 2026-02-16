@@ -2,10 +2,14 @@ import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/
 import { PrismaService } from '../../../../../infra/database/prisma.service';
 import { verify } from 'otplib';
 import * as bcrypt from 'bcrypt';
+import { EncryptionService } from '../encryption.service';
 
 @Injectable()
 export class Disable2FAUseCase {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly encryptionService: EncryptionService,
+    ) { }
 
     async execute(tenantId: string, password: string, code: string) {
         const tenant = await this.prisma.tenant.findUnique({
@@ -27,7 +31,20 @@ export class Disable2FAUseCase {
         }
 
         // SECURITY: Require valid TOTP code
-        const secret = (tenant as any).twoFactorSecret;
+        const encryptedSecret = (tenant as any).twoFactorSecret;
+        if (!encryptedSecret) {
+            // Fallback or error state
+            throw new BadRequestException('2FA state corrupted.');
+        }
+
+        // Decrypt secret
+        let secret: string;
+        try {
+            secret = this.encryptionService.decrypt(encryptedSecret);
+        } catch (error) {
+            throw new BadRequestException('Decryption failed.');
+        }
+
         const isValid = verify({ token: code, secret });
 
         if (!isValid) {
