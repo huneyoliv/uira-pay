@@ -49,7 +49,7 @@ model Tenant {
   name                    String
   email                   String   @unique
   password                String
-  doc_type                String
+  doc_type                String?
   doc_number              String   @unique
   address                 String?
   city                    String?
