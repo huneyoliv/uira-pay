@@ -37,13 +37,13 @@ let OrderController = class OrderController {
         const MAX_ORDER_AMOUNT = 50000;
         const MAX_PENDING_ORDERS = 5;
         if (body.amount > MAX_ORDER_AMOUNT) {
-            throw new common_1.NotFoundException(`Maximum order amount is R$ ${MAX_ORDER_AMOUNT.toLocaleString()}`);
+            throw new common_1.BadRequestException(`Maximum order amount is R$ ${MAX_ORDER_AMOUNT.toLocaleString()}`);
         }
         const pendingCount = await this.prisma.order.count({
             where: { tenant_id: user.id, status: 'PENDING' },
         });
         if (pendingCount >= MAX_PENDING_ORDERS) {
-            throw new common_1.NotFoundException(`Maximum of ${MAX_PENDING_ORDERS} pending orders allowed`);
+            throw new common_1.BadRequestException(`Maximum of ${MAX_PENDING_ORDERS} pending orders allowed`);
         }
         const tenant = await this.prisma.tenant.findUnique({ where: { id: user.id } });
         const currency = tenant?.fiatCurrency || 'BRL';

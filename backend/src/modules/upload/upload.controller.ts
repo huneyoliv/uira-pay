@@ -44,6 +44,7 @@ export class UploadController {
     }
 
     @Get(':filename')
+    @UseGuards(JwtAuthGuard)
     serveFile(@Param('filename') filename: string, @Res() res: Response) {
         // SECURITY: Sanitize filename to prevent path traversal attacks (e.g. ../../etc/passwd)
         const sanitized = basename(filename);

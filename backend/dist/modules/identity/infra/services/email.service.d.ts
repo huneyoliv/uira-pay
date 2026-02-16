@@ -1,8 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 export declare class EmailService {
     private readonly configService;
-    private readonly apiKey;
+    private readonly logger;
     private readonly apiUrl;
     constructor(configService: ConfigService);
-    sendVerificationEmail(to: string, code: string): Promise<void>;
+    private getApiKey;
+    private getDomain;
+    sendVerificationEmail(to: string, code: string, language?: string): Promise<void>;
+    sendPasswordResetEmail(to: string, code: string, language?: string): Promise<void>;
 }

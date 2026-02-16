@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../identity/auth/infra/guards/jwt-auth.guard';
 import { CryptoFeeService } from '../providers/crypto-fee.service';
 import { RequestWithdrawalUseCase } from '../application/request-withdrawal.usecase';
+import { RequestWithdrawalDto } from '../dtos/request-withdrawal.dto';
 import { PrismaService } from '../../../infra/database/prisma.service';
 
 @Controller('withdrawals')
@@ -23,9 +25,10 @@ export class WithdrawalController {
     }
 
     @Post('request')
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     async requestWithdrawal(
         @Request() req: any,
-        @Body() body: { amount: number; network: string; address: string; save_wallet?: boolean; nickname?: string }
+        @Body() body: RequestWithdrawalDto
     ) {
         const tenantId = req.user.id;
         return await this.requestWithdrawalUseCase.execute({

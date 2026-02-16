@@ -1,5 +1,6 @@
 import { CryptoFeeService } from '../providers/crypto-fee.service';
 import { RequestWithdrawalUseCase } from '../application/request-withdrawal.usecase';
+import { RequestWithdrawalDto } from '../dtos/request-withdrawal.dto';
 import { PrismaService } from '../../../infra/database/prisma.service';
 export declare class WithdrawalController {
     private readonly cryptoFeeService;
@@ -7,22 +8,16 @@ export declare class WithdrawalController {
     private readonly prisma;
     constructor(cryptoFeeService: CryptoFeeService, requestWithdrawalUseCase: RequestWithdrawalUseCase, prisma: PrismaService);
     getFees(req: any): Promise<import("../providers/crypto-fee.service").NetworkFee[]>;
-    requestWithdrawal(req: any, body: {
-        amount: number;
-        network: string;
-        address: string;
-        save_wallet?: boolean;
-        nickname?: string;
-    }): Promise<{
+    requestWithdrawal(req: any, body: RequestWithdrawalDto): Promise<{
         transaction: {
             description: string | null;
             type: import(".prisma/client").$Enums.TransactionType;
             id: string;
+            status: import(".prisma/client").$Enums.TransactionStatus;
             created_at: Date;
             amount: number;
             fee: number;
             tx_hash: string | null;
-            status: import(".prisma/client").$Enums.TransactionStatus;
             wallet_id: string;
         };
         updatedWallet: {

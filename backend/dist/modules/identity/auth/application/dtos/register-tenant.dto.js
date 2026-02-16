@@ -45,7 +45,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'StrongPass@123', description: 'Password (min 6 chars)' }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(6),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.Matches)(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
+        message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+    }),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "password", void 0);
 __decorate([

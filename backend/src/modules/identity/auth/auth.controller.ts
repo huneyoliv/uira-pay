@@ -5,6 +5,9 @@ import { RegisterTenantUseCase } from './application/register-tenant.usecase';
 import { LoginUseCase } from './application/login.usecase';
 import { RegisterTenantDto } from './application/dtos/register-tenant.dto';
 import { LoginDto } from './application/dtos/login.dto';
+import { SendVerificationDto } from './application/dtos/send-verification.dto';
+import { VerifyCodeDto } from './application/dtos/verify-code.dto';
+import { ResetPasswordDto } from './application/dtos/reset-password.dto';
 
 import { SendVerificationCodeUseCase } from './application/send-verification-code.usecase';
 import { VerifyCodeUseCase } from './application/verify-code.usecase';
@@ -36,10 +39,12 @@ export class AuthController {
         const result = await this.registerTenantUseCase.execute(dto);
 
         // SECURITY: Store JWT in HttpOnly Cookie
+        const domain = process.env.DOMAIN || undefined;
         response.cookie('access_token', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
+            domain: domain ? `.${domain}` : undefined,
             path: '/',
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
@@ -53,7 +58,7 @@ export class AuthController {
     async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
         const result = await this.loginUseCase.execute(dto);
 
-        console.log('[LoginDebug] Controller: Case executed. Signing token...');
+
         // SECURITY: Store JWT in HttpOnly Cookie
         // Using SameSite: None + Secure to ensure cross-subdomain/cross-site delivery works
         const domain = process.env.DOMAIN || undefined; // e.g., 'swaptune.me'
@@ -66,22 +71,22 @@ export class AuthController {
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
-        console.log(`[LoginDebug] Controller: Cookie set with domain: ${domain ? '.' + domain : 'HostOnly'}, SameSite: None. Returning response 200.`);
+
         return { message: 'Login successful', user: result.user };
     }
 
     @Post('send-verification')
     @Throttle({ default: { limit: 3, ttl: 60000 } })
-    async sendVerification(@Body() body: { email: string; language?: string }) {
-        await this.sendVerificationCodeUseCase.execute(body.email, body.language || 'PT');
+    async sendVerification(@Body() dto: SendVerificationDto) {
+        await this.sendVerificationCodeUseCase.execute(dto.email, dto.language || 'PT');
         return { message: 'Verification code sent' };
     }
 
     @Post('verify-code')
     @HttpCode(HttpStatus.OK)
     @Throttle({ default: { limit: 5, ttl: 60000 } })
-    async verifyCode(@Body() body: { email: string; code: string }) {
-        return this.verifyCodeUseCase.execute(body.email, body.code);
+    async verifyCode(@Body() dto: VerifyCodeDto) {
+        return this.verifyCodeUseCase.execute(dto.email, dto.code);
     }
 
     @Post('logout')
@@ -137,8 +142,8 @@ export class AuthController {
 
     @Post('reset-password')
     @Throttle({ default: { limit: 3, ttl: 60000 } })
-    async resetPassword(@Body() body: any) {
-        await this.resetPasswordUseCase.execute(body.email, body.code, body.newPassword);
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        await this.resetPasswordUseCase.execute(dto.email, dto.code, dto.newPassword);
         return { message: 'Password reset successfully' };
     }
 }

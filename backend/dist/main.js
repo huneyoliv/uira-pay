@@ -40,9 +40,16 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api/docs', app, document);
     const configService = app.get(config_1.ConfigService);
-    const frontendUrl = configService.get('FRONTEND_URL');
+    const domain = configService.get('DOMAIN');
+    const frontendUrl = domain ? `https://${domain}` : null;
     app.enableCors({
-        origin: frontendUrl || 'http://localhost:3001',
+        origin: [
+            'https://swaptune.me',
+            'https://www.swaptune.me',
+            'http://localhost:3000',
+            'http://localhost:3001',
+            frontendUrl
+        ].filter(Boolean),
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders: 'Content-Type, Accept, Authorization',

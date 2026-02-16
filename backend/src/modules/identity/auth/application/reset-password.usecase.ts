@@ -28,10 +28,13 @@ export class ResetPasswordUseCase {
         // 2. Hash new password
         const hashedPassword = await this.passwordHasher.hash(newPassword);
 
-        // 3. Update User Password
+        // 3. Update User Password & Invalidate All Sessions
         await this.prisma.tenant.update({
             where: { email },
-            data: { password: hashedPassword },
+            data: {
+                password: hashedPassword,
+                tokenVersion: { increment: 1 }, // SECURITY: Revoke all existing sessions after password reset
+            },
         });
 
         // 4. Delete used code

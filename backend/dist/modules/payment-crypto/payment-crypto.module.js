@@ -11,14 +11,13 @@ const common_1 = require("@nestjs/common");
 const finance_module_1 = require("../finance/finance.module");
 const binance_provider_1 = require("./infra/binance.provider");
 const withdraw_usecase_1 = require("./application/withdraw.usecase");
-const withdraw_controller_1 = require("./controllers/withdraw.controller");
 let PaymentCryptoModule = class PaymentCryptoModule {
 };
 exports.PaymentCryptoModule = PaymentCryptoModule;
 exports.PaymentCryptoModule = PaymentCryptoModule = __decorate([
     (0, common_1.Module)({
         imports: [(0, common_1.forwardRef)(() => finance_module_1.FinanceModule)],
-        controllers: [withdraw_controller_1.WithdrawController],
+        controllers: [],
         providers: [binance_provider_1.BinanceProvider, withdraw_usecase_1.WithdrawUseCase],
         exports: [withdraw_usecase_1.WithdrawUseCase, binance_provider_1.BinanceProvider],
     })

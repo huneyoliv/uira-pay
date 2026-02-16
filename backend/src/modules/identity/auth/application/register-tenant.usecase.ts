@@ -62,7 +62,7 @@ export class RegisterTenantUseCase {
             } as any,
         });
 
-        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: (tenant as any).email });
+        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: (tenant as any).email, tokenVersion: (tenant as any).tokenVersion });
 
         return {
             accessToken,

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Param, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { CalculateExchangeUseCase } from '../../finance/application/calculate-exchange.usecase';
@@ -26,7 +26,7 @@ export class OrderController {
         const MAX_PENDING_ORDERS = 5;
 
         if (body.amount > MAX_ORDER_AMOUNT) {
-            throw new NotFoundException(`Maximum order amount is R$ ${MAX_ORDER_AMOUNT.toLocaleString()}`);
+            throw new BadRequestException(`Maximum order amount is R$ ${MAX_ORDER_AMOUNT.toLocaleString()}`);
         }
 
         // Check pending orders limit
@@ -34,7 +34,7 @@ export class OrderController {
             where: { tenant_id: user.id, status: 'PENDING' },
         });
         if (pendingCount >= MAX_PENDING_ORDERS) {
-            throw new NotFoundException(`Maximum of ${MAX_PENDING_ORDERS} pending orders allowed`);
+            throw new BadRequestException(`Maximum of ${MAX_PENDING_ORDERS} pending orders allowed`);
         }
 
         // 0. Get Tenant Currency

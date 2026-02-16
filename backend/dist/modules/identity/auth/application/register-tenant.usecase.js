@@ -66,7 +66,7 @@ let RegisterTenantUseCase = class RegisterTenantUseCase {
                 balance: 0,
             },
         });
-        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email });
+        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, tokenVersion: tenant.tokenVersion });
         return {
             accessToken,
             user: {

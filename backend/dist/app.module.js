@@ -28,7 +28,7 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             throttler_1.ThrottlerModule.forRoot([{
                     ttl: 60000,
-                    limit: 10,
+                    limit: 100,
                 }]),
             infra_module_1.InfraModule,
             auth_module_1.AuthModule,

@@ -14,9 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WithdrawalController = void 0;
 const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
 const jwt_auth_guard_1 = require("../../identity/auth/infra/guards/jwt-auth.guard");
 const crypto_fee_service_1 = require("../providers/crypto-fee.service");
 const request_withdrawal_usecase_1 = require("../application/request-withdrawal.usecase");
+const request_withdrawal_dto_1 = require("../dtos/request-withdrawal.dto");
 const prisma_service_1 = require("../../../infra/database/prisma.service");
 let WithdrawalController = class WithdrawalController {
     cryptoFeeService;
@@ -55,10 +57,11 @@ __decorate([
 ], WithdrawalController.prototype, "getFees", null);
 __decorate([
     (0, common_1.Post)('request'),
+    (0, throttler_1.Throttle)({ default: { limit: 5, ttl: 60000 } }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, request_withdrawal_dto_1.RequestWithdrawalDto]),
     __metadata("design:returntype", Promise)
 ], WithdrawalController.prototype, "requestWithdrawal", null);
 exports.WithdrawalController = WithdrawalController = __decorate([

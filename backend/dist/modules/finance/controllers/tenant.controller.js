@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TenantController = void 0;
 const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
 const prisma_service_1 = require("../../../infra/database/prisma.service");
 const jwt_auth_guard_1 = require("../../identity/auth/infra/guards/jwt-auth.guard");
 let TenantController = class TenantController {
@@ -86,6 +87,7 @@ let TenantController = class TenantController {
 exports.TenantController = TenantController;
 __decorate([
     (0, common_1.Get)('dashboard/metrics'),
+    (0, throttler_1.Throttle)({ default: { limit: 20, ttl: 60000 } }),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -93,6 +95,7 @@ __decorate([
 ], TenantController.prototype, "getMetrics", null);
 __decorate([
     (0, common_1.Get)('dashboard/transactions'),
+    (0, throttler_1.Throttle)({ default: { limit: 20, ttl: 60000 } }),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

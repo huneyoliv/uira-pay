@@ -3,14 +3,25 @@ import { RegisterTenantUseCase } from './application/register-tenant.usecase';
 import { LoginUseCase } from './application/login.usecase';
 import { RegisterTenantDto } from './application/dtos/register-tenant.dto';
 import { LoginDto } from './application/dtos/login.dto';
+import { SendVerificationDto } from './application/dtos/send-verification.dto';
+import { VerifyCodeDto } from './application/dtos/verify-code.dto';
+import { ResetPasswordDto } from './application/dtos/reset-password.dto';
 import { SendVerificationCodeUseCase } from './application/send-verification-code.usecase';
 import { VerifyCodeUseCase } from './application/verify-code.usecase';
+import { ForgotPasswordUseCase } from './application/forgot-password.usecase';
+import { ResetPasswordUseCase } from './application/reset-password.usecase';
+import { LogoutUseCase } from './application/logout.usecase';
+import { JwtService } from '@nestjs/jwt';
 export declare class AuthController {
     private readonly registerTenantUseCase;
     private readonly loginUseCase;
     private readonly sendVerificationCodeUseCase;
     private readonly verifyCodeUseCase;
-    constructor(registerTenantUseCase: RegisterTenantUseCase, loginUseCase: LoginUseCase, sendVerificationCodeUseCase: SendVerificationCodeUseCase, verifyCodeUseCase: VerifyCodeUseCase);
+    private readonly forgotPasswordUseCase;
+    private readonly resetPasswordUseCase;
+    private readonly logoutUseCase;
+    private readonly jwtService;
+    constructor(registerTenantUseCase: RegisterTenantUseCase, loginUseCase: LoginUseCase, sendVerificationCodeUseCase: SendVerificationCodeUseCase, verifyCodeUseCase: VerifyCodeUseCase, forgotPasswordUseCase: ForgotPasswordUseCase, resetPasswordUseCase: ResetPasswordUseCase, logoutUseCase: LogoutUseCase, jwtService: JwtService);
     register(dto: RegisterTenantDto, response: Response): Promise<{
         message: string;
         user: {
@@ -39,16 +50,19 @@ export declare class AuthController {
             language: any;
         };
     }>;
-    sendVerification(email: string): Promise<{
+    sendVerification(dto: SendVerificationDto): Promise<{
         message: string;
     }>;
-    verifyCode(body: {
-        email: string;
-        code: string;
-    }): Promise<{
+    verifyCode(dto: VerifyCodeDto): Promise<{
         verificationToken: string;
     }>;
-    logout(response: Response): Promise<{
+    logout(req: any, response: Response): Promise<{
+        message: string;
+    }>;
+    forgotPassword(email: string): Promise<{
+        message: string;
+    }>;
+    resetPassword(dto: ResetPasswordDto): Promise<{
         message: string;
     }>;
 }

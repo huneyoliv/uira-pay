@@ -22,6 +22,9 @@ const infra_module_1 = require("../../../infra/infra.module");
 const email_service_1 = require("../infra/services/email.service");
 const send_verification_code_usecase_1 = require("./application/send-verification-code.usecase");
 const verify_code_usecase_1 = require("./application/verify-code.usecase");
+const forgot_password_usecase_1 = require("./application/forgot-password.usecase");
+const reset_password_usecase_1 = require("./application/reset-password.usecase");
+const logout_usecase_1 = require("./application/logout.usecase");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -59,6 +62,9 @@ exports.AuthModule = AuthModule = __decorate([
             email_service_1.EmailService,
             send_verification_code_usecase_1.SendVerificationCodeUseCase,
             verify_code_usecase_1.VerifyCodeUseCase,
+            forgot_password_usecase_1.ForgotPasswordUseCase,
+            reset_password_usecase_1.ResetPasswordUseCase,
+            logout_usecase_1.LogoutUseCase,
         ],
         exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule],
     })

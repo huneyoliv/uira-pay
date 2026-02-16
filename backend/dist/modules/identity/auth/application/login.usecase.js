@@ -34,7 +34,7 @@ let LoginUseCase = class LoginUseCase {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email });
+        const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, tokenVersion: tenant.tokenVersion });
         return {
             accessToken,
             user: {
