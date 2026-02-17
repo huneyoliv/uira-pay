@@ -12,7 +12,7 @@ export class UploadController {
     constructor(private readonly configService: ConfigService) { }
 
     @Post()
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard) -- Removed to allow upload during registration
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
             destination: './uploads',
