@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateConfigDto } from '../dtos/update-config.dto';
+import { CompanyProfileDto } from '../dtos/company-profile.dto';
 import { IWalletRepository } from '../../finance/domain/wallet.repository.interface';
 import { PrismaService } from '../../../infra/database/prisma.service';
 import { JwtAuthGuard } from '../auth/infra/guards/jwt-auth.guard';
@@ -12,6 +13,7 @@ import { CurrentUser } from '../auth/infra/decorators/current-user.decorator';
 import { diskStorage } from 'multer';
 import * as crypto from 'crypto';
 import * as path from 'path';
+import { validateCompanyID } from '../validators';
 
 @Controller('me')
 @UseGuards(JwtAuthGuard)
@@ -78,6 +80,62 @@ export class TenantController {
         await this.prisma.tenant.update({
             where: { id: tenantId },
             data: dataToUpdate,
+        });
+
+        return { success: true };
+    }
+
+    @Patch('company-profile')
+    async updateCompanyProfile(@Body() body: CompanyProfileDto, @CurrentUser() user: any) {
+        const tenantId = user.id;
+
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) {
+            throw new BadRequestException('Tenant not found');
+        }
+
+        // Only allow if doc_number is still PENDING (not yet filled)
+        if (!tenant.doc_number.startsWith('PENDING-')) {
+            throw new ForbiddenException('Company profile has already been completed');
+        }
+
+        // Validate docNumber using country-specific algorithm (double verification: front + back)
+        const cleanDocNumber = body.docNumber.replace(/[^\d\w]/g, '');
+        if (!validateCompanyID(cleanDocNumber, body.country)) {
+            throw new BadRequestException(`Invalid document number for country ${body.country}`);
+        }
+
+        // Validate defaultCurrency
+        if (!['USDT', 'USDC'].includes(body.defaultCurrency)) {
+            throw new BadRequestException('Default currency must be USDT or USDC');
+        }
+
+        // Check uniqueness of doc_number
+        const existingTenant = await this.prisma.tenant.findFirst({
+            where: {
+                doc_number: body.docNumber,
+                id: { not: tenantId },
+            } as any,
+        });
+        if (existingTenant) {
+            throw new BadRequestException('Document number already in use by another account');
+        }
+
+        // Lock preference for 6 months
+        const lockUntil = new Date();
+        lockUntil.setMonth(lockUntil.getMonth() + 6);
+
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+                name: body.name,
+                doc_number: body.docNumber,
+                documentUrl: body.documentUrl,
+                country: body.country,
+                fiatCurrency: body.fiatCurrency,
+                default_currency: body.defaultCurrency,
+                preference_locked_until: lockUntil,
+            } as any,
         });
 
         return { success: true };

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterTenantDto {
@@ -7,10 +7,10 @@ export class RegisterTenantDto {
     @IsString()
     name: string;
 
-    @ApiProperty({ example: '12345678000195', description: 'Document number (CNPJ/CPF)' })
-    @IsNotEmpty()
+    @ApiProperty({ example: '12345678000195', description: 'Document number (CNPJ/CPF)', required: false })
+    @IsOptional()
     @IsString()
-    docNumber: string;
+    docNumber?: string;
 
     @ApiProperty({ example: 'contact@mycompany.com', description: 'Company email' })
     @IsNotEmpty()
@@ -26,20 +26,20 @@ export class RegisterTenantDto {
     })
     password: string;
 
-    @ApiProperty({ example: 'https://example.com/doc.pdf', description: 'URL to the document' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'https://example.com/doc.pdf', description: 'URL to the document', required: false })
+    @IsOptional()
     @IsString()
-    documentUrl: string;
+    documentUrl?: string;
 
-    @ApiProperty({ example: 'BR', description: 'Country code used for validation' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'BR', description: 'Country code used for validation', required: false })
+    @IsOptional()
     @IsString()
-    country: string;
+    country?: string;
 
-    @ApiProperty({ example: 'BRL', description: 'Fiat currency' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'BRL', description: 'Fiat currency', required: false })
+    @IsOptional()
     @IsString()
-    fiatCurrency: string;
+    fiatCurrency?: string;
 
     @ApiProperty({ description: 'Email verification token from /auth/verify-code' })
     @IsNotEmpty()

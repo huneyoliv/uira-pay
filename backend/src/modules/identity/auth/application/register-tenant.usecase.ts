@@ -40,15 +40,18 @@ export class RegisterTenantUseCase {
 
         const hashedPassword = await this.passwordHasher.hash(dto.password);
 
+        // Generate a unique placeholder for doc_number if not provided
+        const tempDocNumber = dto.docNumber || `PENDING-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
         const tenant = await this.prisma.tenant.create({
             data: {
                 name: dto.name,
-                doc_number: dto.docNumber,
+                doc_number: tempDocNumber,
                 email: dto.email,
                 password: hashedPassword,
-                documentUrl: dto.documentUrl,
-                country: dto.country,
-                fiatCurrency: dto.fiatCurrency,
+                documentUrl: dto.documentUrl || null,
+                country: dto.country || null,
+                fiatCurrency: dto.fiatCurrency || null,
                 preference_locked_until: new Date(), // Not locked initially
                 status: 'PENDING',
                 lastTermsAcceptedAt: new Date(),

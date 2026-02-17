@@ -62,6 +62,7 @@ model Tenant {
   webhook_url             String?
   logo_url                String?
   profilePhotoUrl         String?
+  documentUrl             String?
   status                  TenantStatus @default(PENDING)
   
   // Preferences
