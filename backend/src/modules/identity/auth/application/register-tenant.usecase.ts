@@ -45,7 +45,7 @@ export class RegisterTenantUseCase {
 
         const tenant = await this.prisma.tenant.create({
             data: {
-                name: dto.name,
+                name: dto.name || null,
                 doc_number: tempDocNumber,
                 email: dto.email,
                 password: hashedPassword,

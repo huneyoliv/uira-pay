@@ -2,10 +2,10 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, Matches } from 'c
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterTenantDto {
-    @ApiProperty({ example: 'My Company', description: 'Company name' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'My Company', description: 'Company name', required: false })
+    @IsOptional()
     @IsString()
-    name: string;
+    name?: string;
 
     @ApiProperty({ example: '12345678000195', description: 'Document number (CNPJ/CPF)', required: false })
     @IsOptional()

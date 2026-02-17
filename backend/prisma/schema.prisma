@@ -47,7 +47,7 @@ enum TenantStatus {
 
 model Tenant {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String
+  name                    String?
   email                   String   @unique
   password                String
   doc_type                String?
@@ -56,7 +56,7 @@ model Tenant {
   city                    String?
   state                   String?
   zip_code                String?
-  country                 String
+  country                 String?
   phone                   String?
   website                 String?
   webhook_url             String?

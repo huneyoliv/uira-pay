@@ -52,7 +52,6 @@ export default function RegisterPage() {
 
     const [email, setEmail] = useState("");
     const [verificationCode, setVerificationCode] = useState("");
-    const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [verificationToken, setVerificationToken] = useState("");
@@ -129,10 +128,6 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name) {
-            setError(t.register.companyName ? "Preencha o nome da empresa." : "Enter your company name.");
-            return;
-        }
         if (password !== confirmPassword) {
             setError(t.register.passwordMatch);
             return;
@@ -145,7 +140,7 @@ export default function RegisterPage() {
         setError("");
         try {
             await api.post("/auth/register", {
-                name, email, password, verificationToken
+                email, password, verificationToken
             });
             router.push("/login");
         } catch (err: any) {
@@ -251,19 +246,9 @@ export default function RegisterPage() {
                 </form>
             )}
 
-            {/* Step 3: Name + Password */}
+            {/* Step 3: Password */}
             {step === 3 && (
                 <form onSubmit={handleRegister} className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">{t.register.companyName}</Label>
-                        <Input
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            className="h-14 rounded-full border-slate-200 bg-slate-50 px-6 text-base text-slate-900 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-0 dark:bg-slate-900 dark:border-slate-800 dark:text-white dark:focus-visible:ring-white"
-                        />
-                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="password" className="text-sm font-semibold text-slate-700 ml-1">{t.register.passwordLabel}</Label>
                         <Input
