@@ -7,6 +7,7 @@ services:
     restart: always
     network_mode: host
     environment:
+      - DOMAIN=${DOMAIN}
       - PORT=8000
       # OCI Vault OCID mappings — VaultService fetches values at runtime via Instance Principals
       - OCI_SECRET_TWO_FACTOR_ENCRYPTION_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tzia3wuulxoxnz2kjne6jesoju3vxmyjqfu33luf3h2ft3va
