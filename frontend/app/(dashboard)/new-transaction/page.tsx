@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '@/lib/api';
 import { Card } from '@/components/ui/card';
@@ -25,6 +25,7 @@ const translations: any = {
         paymentConfirmed: "Pagamento Confirmado!",
         convertedTo: "convertidos para",
         newTransaction: "Nova Transação",
+        typeAmount: "Digite o valor no teclado",
     },
     EN: {
         title: "New Transaction",
@@ -39,6 +40,7 @@ const translations: any = {
         paymentConfirmed: "Payment Confirmed!",
         convertedTo: "converted to",
         newTransaction: "New Transaction",
+        typeAmount: "Type amount on keyboard",
     },
     FR: {
         title: "Nouvelle Transaction",
@@ -53,6 +55,7 @@ const translations: any = {
         paymentConfirmed: "Paiement Confirmé !",
         convertedTo: "convertis en",
         newTransaction: "Nouvelle Transaction",
+        typeAmount: "Tapez le montant au clavier",
     },
     ES: {
         title: "Nueva Transacción",
@@ -67,6 +70,7 @@ const translations: any = {
         paymentConfirmed: "¡Pago Confirmado!",
         convertedTo: "convertidos a",
         newTransaction: "Nueva Transacción",
+        typeAmount: "Escribe el monto en el teclado",
     }
 };
 
@@ -77,6 +81,7 @@ export default function NewTransactionPage() {
     const [orderId, setOrderId] = useState<string | null>(null);
     const user = useAuthStore((state) => state.user);
     const [loading, setLoading] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     // Determine language
     const countryData = user?.country ? getCountryData(user.country) : { lang: 'PT' };
@@ -85,6 +90,63 @@ export default function NewTransactionPage() {
     const locale = localeMap[lang as string] || 'pt-BR';
     const t = translations[lang] || translations['EN'];
     const currency = user?.fiatCurrency || 'BRL';
+
+    // Detect mobile
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Handle key press logic
+    const handleKeyPress = useCallback((key: string) => {
+        if (status !== 'IDLE') return;
+
+        setAmount((prev) => {
+            if (key === 'C' || key === 'Backspace') {
+                if (key === 'Backspace') {
+                    if (prev.length <= 1) return '0';
+                    return prev.slice(0, -1);
+                }
+                return '0';
+            }
+            if (prev === '0' && key !== '.') return key;
+            if (key === '.' && prev.includes('.')) return prev;
+            // Limit decimals
+            if (prev.includes('.') && prev.split('.')[1].length >= 2) return prev;
+            // Limit total length to prevent overflow
+            if (prev.replace('.', '').length >= 10) return prev;
+            return prev + key;
+        });
+    }, [status]);
+
+    // Keyboard input for desktop
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (status !== 'IDLE') return;
+
+            // Prevent default for keys we handle
+            if (/^[0-9.]$/.test(e.key) || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Enter') {
+                e.preventDefault();
+            }
+
+            if (/^[0-9.]$/.test(e.key)) {
+                handleKeyPress(e.key);
+            } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                handleKeyPress('Backspace');
+            } else if (e.key === 'Enter') {
+                if (parseFloat(amount) > 0 && !loading) {
+                    handleGeneratePix();
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [status, handleKeyPress, amount, loading]);
 
     // Polling for status
     useEffect(() => {
@@ -105,19 +167,6 @@ export default function NewTransactionPage() {
         return () => clearInterval(interval);
     }, [status, orderId]);
 
-    const handleKeyPress = (key: string) => {
-        if (status !== 'IDLE') return;
-
-        setAmount((prev) => {
-            if (key === 'C') return '0';
-            if (prev === '0' && key !== '.') return key;
-            if (key === '.' && prev.includes('.')) return prev;
-            // Limit decimals
-            if (prev.includes('.') && prev.split('.')[1].length >= 2) return prev;
-            return prev + key;
-        });
-    };
-
     const handleGeneratePix = async () => {
         if (parseFloat(amount) <= 0) return;
 
@@ -129,7 +178,6 @@ export default function NewTransactionPage() {
             setStatus('WAITING');
         } catch (error) {
             console.error("Error creating order", error);
-            // Handle error (show toast or alert)
         } finally {
             setLoading(false);
         }
@@ -171,14 +219,14 @@ export default function NewTransactionPage() {
     }
 
     return (
-        <div className="max-w-md mx-auto py-8">
-            <div className="mb-8 text-center">
+        <div className="max-w-md mx-auto pt-4 pb-8 px-4">
+            <div className="mb-6 text-center">
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t.title}</h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-1">{t.subtitle}</p>
             </div>
 
-            <Card className="bg-white border-none shadow-sm rounded-[32px] p-6 overflow-hidden relative">
-                <div className="mb-8 text-center relative z-10">
+            <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] p-6 overflow-hidden relative">
+                <div className="mb-6 text-center relative z-10">
                     <p className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-2">{t.amountToReceive}</p>
                     <div className="text-5xl font-bold text-black dark:text-white tracking-tight">
                         {new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(parseFloat(amount))}
@@ -207,27 +255,36 @@ export default function NewTransactionPage() {
                         </Button>
                     </div>
                 ) : (
-                    <div className="space-y-6 relative z-10">
+                    <div className="space-y-5 relative z-10">
                         <span className="text-sm font-medium text-slate-500">
-                            {t.convertingTo} <span className="font-bold text-slate-900">{user?.default_currency || 'USDT'}</span>
+                            {t.convertingTo} <span className="font-bold text-slate-900 dark:text-white">{user?.default_currency || 'USDT'}</span>
                         </span>
 
-                        <div className="grid grid-cols-3 gap-3">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'C'].map((key) => (
-                                <button
-                                    key={key}
-                                    onClick={() => handleKeyPress(key.toString())}
-                                    className={cn(
-                                        "h-14 text-xl font-bold rounded-2xl transition-all active:scale-95 duration-200",
-                                        key === 'C'
-                                            ? "bg-red-50 text-red-500 hover:bg-red-100"
-                                            : "bg-slate-50 text-slate-700 hover:bg-slate-100"
-                                    )}
-                                >
-                                    {key}
-                                </button>
-                            ))}
-                        </div>
+                        {/* Virtual keypad - only on mobile */}
+                        {isMobile ? (
+                            <div className="grid grid-cols-3 gap-3">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'C'].map((key) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => handleKeyPress(key.toString())}
+                                        className={cn(
+                                            "h-14 text-xl font-bold rounded-2xl transition-all active:scale-95 duration-200",
+                                            key === 'C'
+                                                ? "bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                                                : "bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                        )}
+                                    >
+                                        {key}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-sm text-slate-400 dark:text-slate-500 animate-pulse">
+                                    ⌨️ {t.typeAmount}
+                                </p>
+                            </div>
+                        )}
 
                         <Button
                             className="w-full h-14 text-lg rounded-full bg-black hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200 text-white shadow-lg shadow-black/20 font-bold transition-all"
