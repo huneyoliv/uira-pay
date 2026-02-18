@@ -167,47 +167,59 @@ export class TenantController {
         @CurrentUser() user: any,
         @UploadedFile() file: Express.Multer.File,
     ) {
+        const logger = new (require('@nestjs/common').Logger)('ProfilePhoto');
+
         if (!file) {
             throw new BadRequestException('No file uploaded');
         }
 
-        // SECURITY: Validate magic bytes to prevent MIME spoofing
-        const fs = require('fs');
-        const buffer = fs.readFileSync(file.path);
-        const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
-        const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
-
-        if (!jpegMagic && !pngMagic) {
-            fs.unlinkSync(file.path);
-            throw new BadRequestException('Invalid file content. Only real PNG/JPEG images are accepted.');
-        }
-
-        // Delete previous profile photo if exists
-        const currentTenant = await this.prisma.tenant.findUnique({ where: { id: user.id } });
-        if (currentTenant && (currentTenant as any).profilePhotoUrl) {
-            try {
-                const previousUrl: string = (currentTenant as any).profilePhotoUrl;
-                const previousFilename = previousUrl.split('/').pop();
-                if (previousFilename) {
-                    const previousPath = path.join('./uploads', previousFilename);
-                    if (fs.existsSync(previousPath)) {
-                        fs.unlinkSync(previousPath);
-                    }
-                }
-            } catch (err) {
-                // Don't fail the upload if we can't delete the old photo
-                console.warn('Failed to delete previous profile photo:', err.message);
+        try {
+            // Ensure uploads directory exists
+            const fs = require('fs');
+            if (!fs.existsSync('./uploads')) {
+                fs.mkdirSync('./uploads', { recursive: true });
             }
+
+            // SECURITY: Validate magic bytes to prevent MIME spoofing
+            const buffer = fs.readFileSync(file.path);
+            const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
+            const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+
+            if (!jpegMagic && !pngMagic) {
+                fs.unlinkSync(file.path);
+                throw new BadRequestException('Invalid file content. Only real PNG/JPEG images are accepted.');
+            }
+
+            // Delete previous profile photo if exists
+            const currentTenant = await this.prisma.tenant.findUnique({ where: { id: user.id } });
+            if (currentTenant && (currentTenant as any).profilePhotoUrl) {
+                try {
+                    const previousUrl: string = (currentTenant as any).profilePhotoUrl;
+                    const previousFilename = previousUrl.split('/').pop();
+                    if (previousFilename) {
+                        const previousPath = path.join('./uploads', previousFilename);
+                        if (fs.existsSync(previousPath)) {
+                            fs.unlinkSync(previousPath);
+                        }
+                    }
+                } catch (err) {
+                    logger.warn(`Failed to delete previous profile photo: ${err.message}`);
+                }
+            }
+
+            const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
+            const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
+
+            await this.prisma.tenant.update({
+                where: { id: user.id },
+                data: { profilePhotoUrl } as any,
+            });
+
+            return { profilePhotoUrl };
+        } catch (err) {
+            if (err instanceof BadRequestException) throw err;
+            logger.error(`Profile photo upload failed for user ${user.id}: ${err.message}`, err.stack);
+            throw new BadRequestException(`Upload failed: ${err.message}`);
         }
-
-        const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
-        const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
-
-        await this.prisma.tenant.update({
-            where: { id: user.id },
-            data: { profilePhotoUrl } as any,
-        });
-
-        return { profilePhotoUrl };
     }
 }
