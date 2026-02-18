@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowRight, ArrowLeft, Mail } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -142,7 +142,7 @@ export default function RegisterPage() {
             await api.post("/auth/register", {
                 email, password, verificationToken
             });
-            router.push("/login");
+            setStep(4); // Show success screen
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || "Erro ao criar conta.");
         } finally {
@@ -166,11 +166,13 @@ export default function RegisterPage() {
                         {step === 2 && t.register.step2Title}
                         {step === 3 && t.register.step5Title}
                     </h2>
-                    <p className="text-slate-500 text-lg">
-                        {step === 1 && t.register.step1Subtitle}
-                        {step === 2 && `${t.register.step2Subtitle} ${email}`}
-                        {step === 3 && t.register.step5Subtitle}
-                    </p>
+                    {step < 4 && (
+                        <p className="text-slate-500 text-lg">
+                            {step === 1 && t.register.step1Subtitle}
+                            {step === 2 && `${t.register.step2Subtitle} ${email}`}
+                            {step === 3 && t.register.step5Subtitle}
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -291,6 +293,28 @@ export default function RegisterPage() {
                         {loading ? <Loader2 className="animate-spin h-5 w-5" /> : t.register.submitButton}
                     </Button>
                 </form>
+            )}
+            {/* Step 4: Success */}
+            {step === 4 && (
+                <div className="flex flex-col items-center text-center space-y-6 py-8">
+                    <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+                        <CheckCircle2 className="h-10 w-10 text-green-600" />
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {(t.register as any).successTitle || "Conta criada com sucesso!"}
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-lg">
+                            {(t.register as any).successMessage || "Sua conta foi criada. Faça login para acessar o painel."}
+                        </p>
+                    </div>
+                    <Button
+                        onClick={() => router.push("/login")}
+                        className="h-14 w-full bg-black text-white rounded-full font-bold hover:bg-slate-800 transition-all text-base"
+                    >
+                        {(t.register as any).goToLogin || "Ir para o Login"} <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </div>
             )}
         </AuthLayout>
     );

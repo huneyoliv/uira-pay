@@ -102,6 +102,9 @@ export const locales = {
             termsAgreement: "Aceito os",
             termsLink: "Termos de Uso",
             termsError: "Você deve aceitar os termos de uso.",
+            successTitle: "Conta criada com sucesso!",
+            successMessage: "Sua conta foi criada. Faça login para acessar o painel.",
+            goToLogin: "Ir para o Login",
         },
         transactions: {
             title: "Transações",
@@ -335,6 +338,9 @@ export const locales = {
             termsAgreement: "I accept the",
             termsLink: "Terms of Service",
             termsError: "You must accept the terms of service.",
+            successTitle: "Account created successfully!",
+            successMessage: "Your account has been created. Log in to access the dashboard.",
+            goToLogin: "Go to Login",
         },
         transactions: {
             title: "Transactions",
@@ -568,6 +574,9 @@ export const locales = {
             termsAgreement: "J'accepte les",
             termsLink: "Conditions d'Utilisation",
             termsError: "Vous devez accepter les conditions d'utilisation.",
+            successTitle: "Compte créé avec succès !",
+            successMessage: "Votre compte a été créé. Connectez-vous pour accéder au tableau de bord.",
+            goToLogin: "Aller à la connexion",
         },
         transactions: {
             title: "Transactions",
@@ -801,6 +810,9 @@ export const locales = {
             termsAgreement: "Acepto los",
             termsLink: "Términos de Uso",
             termsError: "Debes aceptar los términos de uso.",
+            successTitle: "¡Cuenta creada con éxito!",
+            successMessage: "Tu cuenta ha sido creada. Inicia sesión para acceder al panel.",
+            goToLogin: "Ir al inicio de sesión",
         },
         transactions: {
             title: "Transacciones",
