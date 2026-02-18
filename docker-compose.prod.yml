@@ -5,7 +5,10 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY}-backend:main
     container_name: uira_backend
     restart: always
-    network_mode: host
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /home/ubuntu/uira-pay/uploads:/usr/src/app/uploads
     environment:
@@ -25,6 +28,8 @@ services:
       - OCI_SECRET_BINANCE_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziatm6qwxululpzdubxpttarosk5uy4gx6igg3uyyvraudq
       - OCI_SECRET_BINANCE_SECRET_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziauijciokebbpzqbnx2qtfbmitmqf2fymu3ue2sw3dmm7a
       - OCI_SECRET_RESEND_API_KEY=ocid1.vaultsecret.oc1.sa-saopaulo-1.amaaaaaakqk4tziam2pgmrp3q4wopu2haee3cpl5h7pnomoyh5et7lax7yra
+    networks:
+      - uira_network
 
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY}-frontend:main
@@ -32,6 +37,8 @@ services:
     restart: always
     ports:
       - "9000:3000"
+    networks:
+      - uira_network
 
 networks:
   uira_network:

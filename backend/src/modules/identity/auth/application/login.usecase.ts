@@ -67,6 +67,7 @@ export class LoginUseCase {
         if ((tenant as any).twoFactorEnabled) {
             const tempToken = this.tokenProvider.sign(
                 { sub: tenant.id, email: (tenant as any).email, purpose: '2fa-pending' },
+                { expiresIn: '5m' },
             );
 
             return {

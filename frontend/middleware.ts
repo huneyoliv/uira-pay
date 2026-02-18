@@ -5,6 +5,23 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('access_token')?.value;
     const { pathname } = request.nextUrl;
 
+    // Basic JWT validation (structure + expiration check without secret)
+    let isTokenValid = false;
+    if (token) {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+            try {
+                const payload = JSON.parse(atob(parts[1]));
+                // Check if token has not expired
+                if (payload.exp && payload.exp > Date.now() / 1000) {
+                    isTokenValid = true;
+                }
+            } catch {
+                // Invalid base64 or JSON — treat as no token
+            }
+        }
+    }
+
     // Define protected routes
     const protectedRoutes = ['/dashboard', '/admin', '/transactions', '/settings', '/withdrawals'];
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
@@ -13,16 +30,14 @@ export function middleware(request: NextRequest) {
     const authRoutes = ['/login', '/register'];
     const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-    // 1. If trying to access protected route without token -> Redirect to login
-    if (isProtectedRoute && !token) {
+    // 1. If trying to access protected route without valid token -> Redirect to login
+    if (isProtectedRoute && !isTokenValid) {
         const loginUrl = new URL('/login', request.url);
-        // Optional: Add redirect param to return after login
-        // loginUrl.searchParams.set('redirect', pathname); 
         return NextResponse.redirect(loginUrl);
     }
 
-    // 2. If trying to access auth routes (login/register) WITH token -> Redirect to dashboard
-    if (isAuthRoute && token) {
+    // 2. If trying to access auth routes (login/register) WITH valid token -> Redirect to dashboard
+    if (isAuthRoute && isTokenValid) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
