@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
@@ -8,8 +8,9 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @Get()
-  @ApiOperation({ summary: 'Get Hello' })
+  @ApiOperation({ summary: 'Health Check' })
+  @Header('Content-Type', 'text/html')
   getHello(): string {
-    return this.appService.getHello();
+    return '<html><head><title>Uirá Pay</title></head><body>OK</body></html>';
   }
 }
