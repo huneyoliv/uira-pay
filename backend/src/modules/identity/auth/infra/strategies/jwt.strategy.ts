@@ -42,6 +42,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException('Token revoked');
         }
 
+        // SECURITY: Reject tokens from blocked accounts
+        if (user.blockedAt) {
+            this.logger.warn(`Blocked account attempted access: ${payload.sub}`);
+            throw new UnauthorizedException('Account is blocked');
+        }
+
         return { id: payload.sub, email: payload.email };
     }
 }
