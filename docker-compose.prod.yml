@@ -6,6 +6,8 @@ services:
     container_name: uira_backend
     restart: always
     network_mode: host
+    volumes:
+      - /home/ubuntu/uira-pay/uploads:/usr/src/app/uploads
     environment:
       - DOMAIN=${DOMAIN}
       - PORT=8000
