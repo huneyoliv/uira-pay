@@ -9,6 +9,7 @@ services:
     volumes:
       - /home/ubuntu/uira-pay/uploads:/usr/src/app/uploads
     environment:
+      - NODE_ENV=production
       - DOMAIN=${DOMAIN}
       - PORT=8000
       # OCI Vault OCID mappings — VaultService fetches values at runtime via Instance Principals

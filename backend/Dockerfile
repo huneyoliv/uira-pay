@@ -31,7 +31,7 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 
 # SECURITY: Run as non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-RUN chown -R appuser:appgroup /usr/src/app
+RUN mkdir -p /usr/src/app/uploads && chown -R appuser:appgroup /usr/src/app
 USER appuser
 
 EXPOSE 8080
