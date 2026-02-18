@@ -37,27 +37,32 @@ async function bootstrap() {
     transform: true,
   }));
 
-  const config = new DocumentBuilder()
-    .setTitle('Uirá Payments API')
-    .setDescription('The Uirá Payments API description')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  // Swagger: only enable in development
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Uirá Payments API')
+      .setDescription('The Uirá Payments API description')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   // Enable CORS with Credentials for Frontend
   const configService = app.get(ConfigService);
   const domain = configService.get<string>('DOMAIN');
   const frontendUrl = domain ? `https://${domain}` : null;
+  const corsOrigins: (string | null)[] = [
+    'https://swaptune.me',
+    'https://www.swaptune.me',
+    frontendUrl,
+  ];
+  if (process.env.NODE_ENV !== 'production') {
+    corsOrigins.push('http://localhost:3000', 'http://localhost:3001');
+  }
   app.enableCors({
-    origin: [
-      'https://swaptune.me',
-      'https://www.swaptune.me',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      frontendUrl
-    ].filter(Boolean),
+    origin: corsOrigins.filter(Boolean),
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',

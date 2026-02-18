@@ -26,6 +26,11 @@ COPY --from=builder /usr/src/app/.next ./.next
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package.json ./package.json
 
+# SECURITY: Run as non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /usr/src/app
+USER appuser
+
 EXPOSE 3000
 
 CMD ["npm", "start"]

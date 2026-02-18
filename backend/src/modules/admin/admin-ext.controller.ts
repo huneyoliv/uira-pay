@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { AdminGuard } from './guards/admin.guard';
+import { JwtAuthGuard } from '../identity/auth/infra/guards/jwt-auth.guard';
 import { CurrentUser } from '../identity/auth/infra/decorators/current-user.decorator';
 import { EfiService } from './services/efi.service';
 import { BinanceService } from './services/binance.service';
@@ -8,7 +9,7 @@ import { AdminEmailService } from './services/admin-email.service';
 import { PrismaService } from '../../infra/database/prisma.service';
 
 @Controller('admin')
-@UseGuards(AdminGuard)
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminExtController {
 
     constructor(

@@ -27,7 +27,12 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 # RUN apk add --no-cache python3 make g++
 
 # Add openssl for Prisma
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# SECURITY: Run as non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN chown -R appuser:appgroup /usr/src/app
+USER appuser
 
 EXPOSE 8080
 

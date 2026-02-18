@@ -32,6 +32,9 @@ export class EncryptionService {
         }
 
         // Fallback: generate ephemeral key (data encrypted with this key won't survive restarts)
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('FATAL: TWO_FACTOR_ENCRYPTION_KEY is not configured. 2FA cannot function without a persistent encryption key.');
+        }
         if (!this.ephemeralKey) {
             this.logger.warn('No encryption key configured. Generating ephemeral key. 2FA secrets will NOT persist across restarts!');
             this.ephemeralKey = crypto.randomBytes(32);
