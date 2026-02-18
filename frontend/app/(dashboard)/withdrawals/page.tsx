@@ -301,34 +301,33 @@ export default function WithdrawalsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Button
                             variant="outline"
-                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[24px] dark:bg-slate-900"
+                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[24px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('binance')}
                         >
-                            <div className="relative w-12 h-12">
-                                <Image
-                                    src="/binance-logo.png"
-                                    alt="Binance Logo"
-                                    fill
-                                    className="object-contain"
-                                />
-                            </div>
-                            <div className="text-center">
+                            <Image
+                                src="/binance-logo.png"
+                                alt="Binance Logo"
+                                width={48}
+                                height={48}
+                                className="object-contain"
+                            />
+                            <div className="text-center w-full overflow-hidden">
                                 <span className="block text-xl font-bold text-slate-800 dark:text-white">{t.binanceOption}</span>
-                                <span className="text-sm text-slate-500">{t.binanceZeroFee}</span>
+                                <span className="block text-sm text-slate-500 truncate px-2">{t.binanceZeroFee}</span>
                             </div>
                         </Button>
 
                         <Button
                             variant="outline"
-                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[24px] dark:bg-slate-900"
+                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[24px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('other')}
                         >
                             <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                                 <Wallet className="h-6 w-6 text-slate-600" />
                             </div>
-                            <div className="text-center">
+                            <div className="text-center w-full overflow-hidden">
                                 <span className="block text-xl font-bold text-slate-800 dark:text-white">{t.otherOption}</span>
-                                <span className="text-sm text-slate-500">{t.otherDesc}</span>
+                                <span className="block text-sm text-slate-500 truncate px-2">{t.otherDesc}</span>
                             </div>
                         </Button>
                     </div>
