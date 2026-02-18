@@ -27,7 +27,9 @@ async function bootstrap() {
   expressApp.set('trust proxy', true);
 
   app.use(cookieParser());
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
