@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, MessageCircle, FileText, ExternalLink } from "lucide-react";
+import { Mail, FileText, ExternalLink } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { getCountryData } from "@/lib/countries";
 
@@ -13,15 +13,9 @@ const translations: any = {
         docs: "Documentação",
         docsDesc: "Guias detalhados sobre como usar a plataforma.",
         accessDocs: "Acessar Docs",
-        liveChat: "Chat ao Vivo",
-        liveChatDesc: "Fale com nossa equipe de suporte em tempo real.",
-        startChat: "Iniciar Chat",
         email: "Email",
         emailDesc: "Envie um email para suporte@uira.com",
         sendEmail: "Enviar Email",
-        needHelp: "Ainda precisa de ajuda?",
-        needHelpDesc: "Nossa equipe está disponível de segunda a sexta, das 9h às 18h para te ajudar com qualquer dúvida.",
-        talkToExpert: "Falar com Especialista",
     },
     EN: {
         title: "Help & Support",
@@ -29,15 +23,9 @@ const translations: any = {
         docs: "Documentation",
         docsDesc: "Detailed guides on how to use the platform.",
         accessDocs: "Access Docs",
-        liveChat: "Live Chat",
-        liveChatDesc: "Talk to our support team in real-time.",
-        startChat: "Start Chat",
         email: "Email",
         emailDesc: "Send an email to support@uira.com",
         sendEmail: "Send Email",
-        needHelp: "Still need help?",
-        needHelpDesc: "Our team is available Monday to Friday, 9am to 6pm to help you with any questions.",
-        talkToExpert: "Talk to an Expert",
     },
     FR: {
         title: "Aide & Support",
@@ -45,15 +33,9 @@ const translations: any = {
         docs: "Documentation",
         docsDesc: "Guides détaillés sur l'utilisation de la plateforme.",
         accessDocs: "Accéder à la doc",
-        liveChat: "Chat en direct",
-        liveChatDesc: "Parlez à notre équipe de support en temps réel.",
-        startChat: "Démarrer le chat",
         email: "Email",
         emailDesc: "Envoyez un email à support@uira.com",
         sendEmail: "Envoyer un email",
-        needHelp: "Encore besoin d'aide ?",
-        needHelpDesc: "Notre équipe est disponible du lundi au vendredi, de 9h à 18h pour répondre à toutes vos questions.",
-        talkToExpert: "Parler à un expert",
     },
     ES: {
         title: "Ayuda y Soporte",
@@ -61,15 +43,9 @@ const translations: any = {
         docs: "Documentación",
         docsDesc: "Guías detalladas sobre cómo usar la plataforma.",
         accessDocs: "Acceder a Docs",
-        liveChat: "Chat en Vivo",
-        liveChatDesc: "Hable con nuestro equipo de soporte en tiempo real.",
-        startChat: "Iniciar Chat",
         email: "Correo Electrónico",
         emailDesc: "Envíe un correo a support@uira.com",
         sendEmail: "Enviar Correo",
-        needHelp: "¿Aún necesita ayuda?",
-        needHelpDesc: "Nuestro equipo está disponible de lunes a viernes, de 9h a 18h para ayudarle con cualquier duda.",
-        talkToExpert: "Hablar con un Experto",
     }
 };
 
@@ -106,21 +82,6 @@ export default function HelpPage() {
 
                 <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
                     <CardHeader>
-                        <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-4 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors">
-                            <MessageCircle className="h-6 w-6" />
-                        </div>
-                        <CardTitle>{t.liveChat}</CardTitle>
-                        <CardDescription>{t.liveChatDesc}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button variant="link" className="p-0 text-green-600 font-semibold">
-                            {t.startChat} <ExternalLink className="ml-2 h-4 w-4" />
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px] hover:shadow-md transition-shadow cursor-pointer group">
-                    <CardHeader>
                         <div className="h-12 w-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 transition-colors">
                             <Mail className="h-6 w-6" />
                         </div>
@@ -134,17 +95,6 @@ export default function HelpPage() {
                     </CardContent>
                 </Card>
             </div>
-
-            <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl rounded-[32px] p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 dark:bg-black/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-                <div className="relative z-10">
-                    <h3 className="text-2xl font-bold mb-2">{t.needHelp}</h3>
-                    <p className="text-slate-300 dark:text-slate-400 mb-6 max-w-lg">{t.needHelpDesc}</p>
-                    <Button className="bg-white text-black hover:bg-slate-100 dark:bg-white dark:text-black dark:hover:bg-slate-200 rounded-full px-8 font-bold">
-                        {t.talkToExpert}
-                    </Button>
-                </div>
-            </Card>
         </div>
     );
 }

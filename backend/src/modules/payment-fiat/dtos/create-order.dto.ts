@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsEnum, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsEnum, Min, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum FiatCurrency {
@@ -13,10 +13,10 @@ export class CreateOrderDto {
     @Min(1)
     amount: number;
 
-    @ApiProperty({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency' })
-    @IsNotEmpty()
+    @ApiProperty({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency', required: false })
+    @IsOptional()
     @IsEnum(FiatCurrency)
-    currency: FiatCurrency;
+    currency?: FiatCurrency;
 
 
 }

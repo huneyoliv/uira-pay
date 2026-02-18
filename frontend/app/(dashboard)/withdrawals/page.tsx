@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 const translations: any = {
     PT: {
         title: "Saques",
-        subtitle: "Gerencie seus saques e transferências.",
+        subtitle: "Gerencie seus saques.",
         availableBalance: "Saldo Disponível",
         network: "Rede",
         selectNetwork: "Selecione a rede",
@@ -33,11 +33,11 @@ const translations: any = {
         insufficientBalance: "Saldo insuficiente.",
         minAmount: "O valor mínimo para saque é 10 USDT/USDC.",
         processing: "Processando...",
-        binanceZeroFee: "Se você for cliente binance, você tem taxa zero de transferência",
+        binanceZeroFee: "Taxa zero para clientes Binance",
         viewTransaction: "Ver Transação",
-        binanceOption: "Binance (Sem Taxas)",
-        otherOption: "Outras Redes",
-        otherDesc: "Transferência via Blockchain tradicional (BSC, Polygon, etc).",
+        binanceOption: "Binance",
+        otherOption: "Blockchain",
+        otherDesc: "BSC, Polygon, etc.",
         email: "E-mail da Conta Binance",
         back: "Voltar",
         saveWallet: "Salvar carteira para futuro",
@@ -48,7 +48,7 @@ const translations: any = {
     },
     EN: {
         title: "Withdrawals",
-        subtitle: "Manage your withdrawals and transfers.",
+        subtitle: "Manage your withdrawals.",
         availableBalance: "Available Balance",
         network: "Network",
         selectNetwork: "Select network",
@@ -63,11 +63,11 @@ const translations: any = {
         insufficientBalance: "Insufficient balance.",
         minAmount: "Minimum amount not reached.",
         processing: "Processing...",
-        binanceZeroFee: "If you are a Binance customer, you have zero transfer fees",
+        binanceZeroFee: "Zero fees for Binance users",
         viewTransaction: "View Transaction",
-        binanceOption: "Binance (Zero Fees)",
-        otherOption: "Other Networks",
-        otherDesc: "Traditional Blockchain transfer (BSC, Polygon, etc).",
+        binanceOption: "Binance",
+        otherOption: "Blockchain",
+        otherDesc: "BSC, Polygon, etc.",
         email: "Binance Account Email",
         back: "Back",
         saveWallet: "Save wallet for future",
@@ -78,7 +78,7 @@ const translations: any = {
     },
     FR: {
         title: "Retraits",
-        subtitle: "Gérez vos retraits et transferts.",
+        subtitle: "Gérez vos retraits.",
         availableBalance: "Solde Disponible",
         network: "Réseau",
         selectNetwork: "Sélectionner le réseau",
@@ -93,11 +93,11 @@ const translations: any = {
         insufficientBalance: "Solde insuffisant.",
         minAmount: "Le montant minimum de retrait est de 10 USDT/USDC.",
         processing: "Traitement...",
-        binanceZeroFee: "Si vous êtes client Binance, vous avez zéro frais de transfert",
+        binanceZeroFee: "Zéro frais pour clients Binance",
         viewTransaction: "Voir la Transaction",
-        binanceOption: "Binance (Zéro Frais)",
-        otherOption: "Autres Réseaux",
-        otherDesc: "Transfert via Blockchain traditionnelle (BSC, Polygon, etc).",
+        binanceOption: "Binance",
+        otherOption: "Blockchain",
+        otherDesc: "BSC, Polygon, etc.",
         email: "E-mail du Compte Binance",
         back: "Retour",
         saveWallet: "Enregistrer le portefeuille",
@@ -108,7 +108,7 @@ const translations: any = {
     },
     ES: {
         title: "Retiros",
-        subtitle: "Administre sus retiros y transferencias.",
+        subtitle: "Administre sus retiros.",
         availableBalance: "Saldo Disponible",
         network: "Red",
         selectNetwork: "Seleccionar red",
@@ -123,11 +123,11 @@ const translations: any = {
         insufficientBalance: "Saldo insuficiente.",
         minAmount: "El monto mínimo de retiro es 10 USDT/USDC.",
         processing: "Procesando...",
-        binanceZeroFee: "Si es cliente de Binance, tiene cero tarifas de transferencia",
+        binanceZeroFee: "Cero tarifas para clientes Binance",
         viewTransaction: "Ver Transacción",
-        binanceOption: "Binance (Cero Tarifas)",
-        otherOption: "Otras Redes",
-        otherDesc: "Transferencia vía Blockchain tradicional (BSC, Polygon, etc).",
+        binanceOption: "Binance",
+        otherOption: "Blockchain",
+        otherDesc: "BSC, Polygon, etc.",
         email: "Email de Cuenta Binance",
         back: "Volver",
         saveWallet: "Guardar billetera",
@@ -298,36 +298,36 @@ export default function WithdrawalsPage() {
 
                 {/* Main View: Selection */}
                 {view === 'main' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         <Button
                             variant="outline"
-                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[24px] dark:bg-slate-900 overflow-hidden"
+                            className="h-auto py-4 flex flex-col items-center gap-2 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[20px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('binance')}
                         >
                             <Image
                                 src="/binance-logo.png"
                                 alt="Binance Logo"
-                                width={48}
-                                height={48}
+                                width={36}
+                                height={36}
                                 className="object-contain"
                             />
                             <div className="text-center w-full overflow-hidden">
-                                <span className="block text-xl font-bold text-slate-800 dark:text-white">{t.binanceOption}</span>
-                                <span className="block text-sm text-slate-500 truncate px-2">{t.binanceZeroFee}</span>
+                                <span className="block text-base font-bold text-slate-800 dark:text-white">{t.binanceOption}</span>
+                                <span className="block text-xs text-slate-500 truncate">{t.binanceZeroFee}</span>
                             </div>
                         </Button>
 
                         <Button
                             variant="outline"
-                            className="h-auto py-6 flex flex-col items-center gap-3 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[24px] dark:bg-slate-900 overflow-hidden"
+                            className="h-auto py-4 flex flex-col items-center gap-2 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[20px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('other')}
                         >
-                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                                <Wallet className="h-6 w-6 text-slate-600" />
+                            <div className="h-9 w-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                <Wallet className="h-5 w-5 text-slate-600" />
                             </div>
                             <div className="text-center w-full overflow-hidden">
-                                <span className="block text-xl font-bold text-slate-800 dark:text-white">{t.otherOption}</span>
-                                <span className="block text-sm text-slate-500 truncate px-2">{t.otherDesc}</span>
+                                <span className="block text-base font-bold text-slate-800 dark:text-white">{t.otherOption}</span>
+                                <span className="block text-xs text-slate-500 truncate">{t.otherDesc}</span>
                             </div>
                         </Button>
                     </div>

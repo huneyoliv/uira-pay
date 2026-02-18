@@ -172,7 +172,7 @@ export default function NewTransactionPage() {
 
         setLoading(true);
         try {
-            const res = await api.post('/orders', { amount: parseFloat(amount) });
+            const res = await api.post('/orders', { amount: parseFloat(amount), currency: currency });
             setQrCode(res.data.pixCode);
             setOrderId(res.data.id);
             setStatus('WAITING');
