@@ -49,9 +49,9 @@ export class RegisterTenantUseCase {
                 doc_number: tempDocNumber,
                 email: dto.email,
                 password: hashedPassword,
-                documentUrl: dto.documentUrl || null,
-                country: dto.country || null,
-                fiatCurrency: dto.fiatCurrency || null,
+                ...(dto.documentUrl ? { documentUrl: dto.documentUrl } : {}),
+                ...(dto.country ? { country: dto.country } : {}),
+                ...(dto.fiatCurrency ? { fiatCurrency: dto.fiatCurrency } : {}),
                 preference_locked_until: new Date(), // Not locked initially
                 status: 'PENDING',
                 lastTermsAcceptedAt: new Date(),
