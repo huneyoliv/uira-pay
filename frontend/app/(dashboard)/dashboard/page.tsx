@@ -211,18 +211,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Primary Card - Total Revenue */}
         <Card className="bg-black dark:bg-slate-800 text-white border-none shadow-xl shadow-black/20 dark:shadow-slate-900/50 rounded-[32px] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-gray-100 dark:text-gray-300">{t.totalRevenue}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-              <ArrowUpRight className="h-4 w-4 text-white" />
+          <CardContent className="relative z-10 pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-gray-100 dark:text-gray-300">{t.totalRevenue}</span>
+              <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <ArrowUpRight className="h-4 w-4 text-white" />
+              </div>
             </div>
-          </CardHeader>
-          <CardContent className="relative z-10">
             <div className="text-4xl font-bold mb-2">
               {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.totalSales || 0)} <span className="text-lg text-gray-300 dark:text-gray-400 font-medium">{cryptoCurrency}</span>
             </div>
@@ -235,13 +234,13 @@ export default function DashboardPage() {
 
         {/* Secondary Card - Tenant Balance */}
         <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px]">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">{t.tenantBalance}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
-              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-slate-500">{t.tenantBalance}</span>
+              <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                <ArrowUpRight className="h-4 w-4 text-slate-400" />
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
             <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
               {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.balance || 0)} <span className="text-lg text-slate-500 dark:text-slate-400 font-medium">{cryptoCurrency}</span>
             </div>
@@ -254,13 +253,13 @@ export default function DashboardPage() {
 
         {/* Secondary Card - Sales 24h */}
         <Card className="bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px]">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">{t.sales24h}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
-              <Clock className="h-4 w-4 text-slate-400" />
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-slate-500">{t.sales24h}</span>
+              <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                <Clock className="h-4 w-4 text-slate-400" />
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
             <div className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
               {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(metrics?.sales24h || 0)} <span className="text-lg text-slate-500 dark:text-slate-400 font-medium">{cryptoCurrency}</span>
             </div>
