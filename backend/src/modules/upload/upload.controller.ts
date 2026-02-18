@@ -57,6 +57,9 @@ export class UploadController {
             throw new BadRequestException('File not found');
         }
 
+        // Allow cross-origin access for profile photos loaded by the frontend
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         res.sendFile(sanitized, { root: './uploads' });
     }
 }

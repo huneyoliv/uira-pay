@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,11 @@ import { api } from "@/lib/api";
 import { LanguageSelector } from "@/components/language-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { QRCodeSVG } from "qrcode.react";
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 import {
     Shield, ShieldCheck, ShieldX, Camera, Loader2, Copy, Check, Eye, EyeOff,
-    Globe, Palette, AlertTriangle, Key
+    Globe, Palette, AlertTriangle, Key, X, Crop as CropIcon
 } from "lucide-react";
 
 const translations: any = {
@@ -190,8 +192,13 @@ export default function SettingsPage() {
 
     // Profile photo
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const imgRef = useRef<HTMLImageElement>(null);
     const [uploading, setUploading] = useState(false);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [showCropModal, setShowCropModal] = useState(false);
+    const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+    const [crop, setCrop] = useState<Crop>();
+    const [completedCrop, setCompletedCrop] = useState<Crop>();
 
     // 2FA state
     const [twoFAStep, setTwoFAStep] = useState<TwoFAStep>("idle");
@@ -215,8 +222,49 @@ export default function SettingsPage() {
 
     const countryData = user?.country ? getCountryData(user.country) : null;
 
+    // ─── Image Crop ─────────────────────────────────────────────────────
+    const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+        const { naturalWidth: width, naturalHeight: height } = e.currentTarget;
+        const c = centerCrop(
+            makeAspectCrop({ unit: '%', width: 90 }, 1, width, height),
+            width,
+            height
+        );
+        setCrop(c);
+        setCompletedCrop(c);
+    }, []);
+
+    const getCroppedBlob = useCallback((): Promise<Blob | null> => {
+        return new Promise((resolve) => {
+            const image = imgRef.current;
+            if (!image || !completedCrop) {
+                resolve(null);
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const outputSize = 400; // 400x400 output
+            canvas.width = outputSize;
+            canvas.height = outputSize;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { resolve(null); return; }
+
+            const scaleX = image.naturalWidth / image.width;
+            const scaleY = image.naturalHeight / image.height;
+
+            const cropX = (completedCrop.x || 0) * scaleX;
+            const cropY = (completedCrop.y || 0) * scaleY;
+            const cropWidth = (completedCrop.width || 0) * scaleX;
+            const cropHeight = (completedCrop.height || 0) * scaleY;
+
+            ctx.drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, outputSize, outputSize);
+
+            canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+        });
+    }, [completedCrop]);
+
     // ─── Profile Photo Upload ───────────────────────────────────────────
-    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -227,15 +275,29 @@ export default function SettingsPage() {
             return;
         }
 
-        // Show instant preview
+        // Open crop modal
         const reader = new FileReader();
-        reader.onloadend = () => setPhotoPreview(reader.result as string);
+        reader.onloadend = () => {
+            setCropImageSrc(reader.result as string);
+            setShowCropModal(true);
+        };
         reader.readAsDataURL(file);
 
+        // Reset input so same file can be selected again
+        e.target.value = '';
+    };
+
+    const handleCropConfirm = async () => {
+        const blob = await getCroppedBlob();
+        if (!blob) return;
+
+        setShowCropModal(false);
+        setPhotoPreview(URL.createObjectURL(blob));
         setUploading(true);
+
         try {
             const formData = new FormData();
-            formData.append("file", file);
+            formData.append("file", blob, "profile.jpg");
             const res = await api.patch("/me/profile-photo", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
@@ -249,6 +311,7 @@ export default function SettingsPage() {
             setPhotoPreview(null);
         } finally {
             setUploading(false);
+            setCropImageSrc(null);
         }
     };
 
@@ -333,6 +396,50 @@ export default function SettingsPage() {
         <div className="space-y-6 max-w-2xl">
             <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
 
+            {/* Crop Modal */}
+            {showCropModal && cropImageSrc && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-auto shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <CropIcon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                    {lang === 'PT' ? 'Recortar Foto' : lang === 'ES' ? 'Recortar Foto' : lang === 'FR' ? 'Recadrer la Photo' : 'Crop Photo'}
+                                </h3>
+                            </div>
+                            <button onClick={() => { setShowCropModal(false); setCropImageSrc(null); }}>
+                                <X className="h-5 w-5 text-slate-400 hover:text-slate-600" />
+                            </button>
+                        </div>
+                        <div className="flex justify-center mb-4">
+                            <ReactCrop
+                                crop={crop}
+                                onChange={(c) => setCrop(c)}
+                                onComplete={(c) => setCompletedCrop(c)}
+                                aspect={1}
+                                circularCrop
+                            >
+                                <img
+                                    ref={imgRef}
+                                    src={cropImageSrc}
+                                    alt="Crop"
+                                    onLoad={onImageLoad}
+                                    className="max-h-[60vh] rounded-lg"
+                                />
+                            </ReactCrop>
+                        </div>
+                        <div className="flex gap-3 justify-end">
+                            <Button variant="outline" onClick={() => { setShowCropModal(false); setCropImageSrc(null); }} className="dark:border-slate-700">
+                                {t.cancel}
+                            </Button>
+                            <Button onClick={handleCropConfirm} className="bg-black text-white dark:bg-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90">
+                                {t.confirm}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Profile Card */}
             <Card className="bg-white dark:bg-[#0B0F19] border-slate-100 dark:border-slate-800">
                 <CardHeader>
@@ -363,7 +470,7 @@ export default function SettingsPage() {
                                 ref={fileInputRef}
                                 type="file"
                                 accept=".png,.jpg,.jpeg"
-                                onChange={handlePhotoUpload}
+                                onChange={handlePhotoSelect}
                                 className="hidden"
                             />
                         </div>

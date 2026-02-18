@@ -172,13 +172,32 @@ export class TenantController {
         }
 
         // SECURITY: Validate magic bytes to prevent MIME spoofing
-        const buffer = require('fs').readFileSync(file.path);
+        const fs = require('fs');
+        const buffer = fs.readFileSync(file.path);
         const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
         const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
 
         if (!jpegMagic && !pngMagic) {
-            require('fs').unlinkSync(file.path);
+            fs.unlinkSync(file.path);
             throw new BadRequestException('Invalid file content. Only real PNG/JPEG images are accepted.');
+        }
+
+        // Delete previous profile photo if exists
+        const currentTenant = await this.prisma.tenant.findUnique({ where: { id: user.id } });
+        if (currentTenant && (currentTenant as any).profilePhotoUrl) {
+            try {
+                const previousUrl: string = (currentTenant as any).profilePhotoUrl;
+                const previousFilename = previousUrl.split('/').pop();
+                if (previousFilename) {
+                    const previousPath = path.join('./uploads', previousFilename);
+                    if (fs.existsSync(previousPath)) {
+                        fs.unlinkSync(previousPath);
+                    }
+                }
+            } catch (err) {
+                // Don't fail the upload if we can't delete the old photo
+                console.warn('Failed to delete previous profile photo:', err.message);
+            }
         }
 
         const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
