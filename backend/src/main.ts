@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import { ConfigService } from '@nestjs/config';
 import { VaultService } from './infra/oci/vault.service';
 
+// Force rebuild for resend dependency
 async function bootstrap() {
   // 1. Load Secrets from OCI Vault (Runtime Injection)
   const logger = new Logger('Bootstrap');
