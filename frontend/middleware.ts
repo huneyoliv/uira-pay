@@ -33,7 +33,12 @@ export function middleware(request: NextRequest) {
     // 1. If trying to access protected route without valid token -> Redirect to login
     if (isProtectedRoute && !isTokenValid) {
         const loginUrl = new URL('/login', request.url);
-        return NextResponse.redirect(loginUrl);
+        const response = NextResponse.redirect(loginUrl);
+        // Clear stale cookie to prevent redirect loops
+        if (token) {
+            response.cookies.delete('access_token');
+        }
+        return response;
     }
 
     // 2. If trying to access auth routes (login/register) WITH valid token -> Redirect to dashboard

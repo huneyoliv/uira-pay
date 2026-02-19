@@ -58,8 +58,12 @@ export const useAuthStore = create<AuthState>()(
                 localStorage.removeItem('auth-storage');
                 set({ token: null, user: null, isAuthenticated: false, _logoutInProgress: false });
 
-                // Fire-and-forget API call to clear server-side cookie
-                api.post('/auth/logout').catch(() => { /* ignore */ });
+                // AWAIT the API call so the server's Set-Cookie header clears the HttpOnly cookie
+                try {
+                    await api.post('/auth/logout');
+                } catch {
+                    // If API fails, still redirect — the cookie will expire naturally
+                }
 
                 // Hard redirect to login — ensures middleware sees no cookie on next request
                 window.location.href = '/login';
