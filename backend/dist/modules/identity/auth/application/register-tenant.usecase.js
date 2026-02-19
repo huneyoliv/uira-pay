@@ -47,17 +47,19 @@ let RegisterTenantUseCase = class RegisterTenantUseCase {
             throw new common_1.BadRequestException('Email already in use');
         }
         const hashedPassword = await this.passwordHasher.hash(dto.password);
+        const tempDocNumber = dto.docNumber || `PENDING-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
         const tenant = await this.prisma.tenant.create({
             data: {
-                name: dto.name,
-                doc_number: dto.docNumber,
+                name: dto.name || null,
+                doc_number: tempDocNumber,
                 email: dto.email,
                 password: hashedPassword,
-                documentUrl: dto.documentUrl,
-                country: dto.country,
-                fiatCurrency: dto.fiatCurrency,
+                ...(dto.documentUrl ? { documentUrl: dto.documentUrl } : {}),
+                ...(dto.country ? { country: dto.country } : {}),
+                ...(dto.fiatCurrency ? { fiatCurrency: dto.fiatCurrency } : {}),
                 preference_locked_until: new Date(),
                 status: 'PENDING',
+                lastTermsAcceptedAt: new Date(),
             },
         });
         await this.prisma.wallet.create({

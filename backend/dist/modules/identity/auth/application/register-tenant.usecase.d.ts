@@ -13,7 +13,7 @@ export declare class RegisterTenantUseCase {
         message: string;
         user: {
             id: string;
-            name: string;
+            name: string | null;
             email: any;
             status: string;
         };

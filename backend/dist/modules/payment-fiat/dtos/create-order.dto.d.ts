@@ -4,5 +4,5 @@ export declare enum FiatCurrency {
 }
 export declare class CreateOrderDto {
     amount: number;
-    currency: FiatCurrency;
+    currency?: FiatCurrency;
 }

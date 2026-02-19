@@ -6,23 +6,49 @@ export declare class LoginUseCase {
     private readonly prisma;
     private readonly passwordHasher;
     private readonly tokenProvider;
+    private readonly logger;
     constructor(prisma: PrismaService, passwordHasher: IPasswordHasher, tokenProvider: ITokenProvider);
     execute(dto: LoginDto): Promise<{
-        accessToken: string;
+        requires2FA: boolean;
+        tempToken: string;
         user: {
             id: string;
-            name: string;
+            name: string | null;
             email: any;
             doc_number: string;
             default_currency: import(".prisma/client").$Enums.Currency | null;
             preference_locked_until: Date | null;
             fiatCurrency: any;
             country: any;
-            language: any;
+            language: string;
             theme: any;
             profilePhotoUrl: any;
             twoFactorEnabled: any;
             isAdmin: any;
+            status: any;
+            documentRequested: any;
         };
+        accessToken?: undefined;
+    } | {
+        requires2FA: boolean;
+        accessToken: string;
+        user: {
+            id: string;
+            name: string | null;
+            email: any;
+            doc_number: string;
+            default_currency: import(".prisma/client").$Enums.Currency | null;
+            preference_locked_until: Date | null;
+            fiatCurrency: any;
+            country: any;
+            language: string;
+            theme: any;
+            profilePhotoUrl: any;
+            twoFactorEnabled: any;
+            isAdmin: any;
+            status: any;
+            documentRequested: any;
+        };
+        tempToken?: undefined;
     }>;
 }

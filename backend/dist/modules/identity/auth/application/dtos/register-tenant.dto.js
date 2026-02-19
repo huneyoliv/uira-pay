@@ -24,14 +24,14 @@ class RegisterTenantDto {
 }
 exports.RegisterTenantDto = RegisterTenantDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'My Company', description: 'Company name' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: 'My Company', description: 'Company name', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '12345678000195', description: 'Document number (CNPJ/CPF)' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: '12345678000195', description: 'Document number (CNPJ/CPF)', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "docNumber", void 0);
@@ -52,20 +52,20 @@ __decorate([
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "password", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'https://example.com/doc.pdf', description: 'URL to the document' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: 'https://example.com/doc.pdf', description: 'URL to the document', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "documentUrl", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'BR', description: 'Country code used for validation' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: 'BR', description: 'Country code used for validation', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "country", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'BRL', description: 'Fiat currency' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: 'BRL', description: 'Fiat currency', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterTenantDto.prototype, "fiatCurrency", void 0);

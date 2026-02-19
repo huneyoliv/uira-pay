@@ -19,13 +19,14 @@ let AppController = class AppController {
         this.appService = appService;
     }
     getHello() {
-        return this.appService.getHello();
+        return '<html><head><title>Uirá Pay</title></head><body>OK</body></html>';
     }
 };
 exports.AppController = AppController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get Hello' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Health Check' }),
+    (0, common_1.Header)('Content-Type', 'text/html'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)

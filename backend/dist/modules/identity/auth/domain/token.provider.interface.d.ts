@@ -1,3 +1,5 @@
 export declare abstract class ITokenProvider {
-    abstract sign(payload: object): string;
+    abstract sign(payload: object, options?: {
+        expiresIn?: string;
+    }): string;
 }

@@ -25,31 +25,37 @@ async function bootstrap() {
     const expressApp = app.getHttpAdapter().getInstance();
     expressApp.set('trust proxy', true);
     app.use((0, cookie_parser_1.default)());
-    app.use((0, helmet_1.default)());
+    app.use((0, helmet_1.default)({
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }));
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
     }));
-    const config = new swagger_1.DocumentBuilder()
-        .setTitle('Uirá Payments API')
-        .setDescription('The Uirá Payments API description')
-        .setVersion('1.0')
-        .addBearerAuth()
-        .build();
-    const document = swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('api/docs', app, document);
+    if (process.env.NODE_ENV !== 'production') {
+        const config = new swagger_1.DocumentBuilder()
+            .setTitle('Uirá Payments API')
+            .setDescription('The Uirá Payments API description')
+            .setVersion('1.0')
+            .addBearerAuth()
+            .build();
+        const document = swagger_1.SwaggerModule.createDocument(app, config);
+        swagger_1.SwaggerModule.setup('api/docs', app, document);
+    }
     const configService = app.get(config_1.ConfigService);
     const domain = configService.get('DOMAIN');
     const frontendUrl = domain ? `https://${domain}` : null;
+    const corsOrigins = [
+        'https://swaptune.me',
+        'https://www.swaptune.me',
+        frontendUrl,
+    ];
+    if (process.env.NODE_ENV !== 'production') {
+        corsOrigins.push('http://localhost:3000', 'http://localhost:3001');
+    }
     app.enableCors({
-        origin: [
-            'https://swaptune.me',
-            'https://www.swaptune.me',
-            'http://localhost:3000',
-            'http://localhost:3001',
-            frontendUrl
-        ].filter(Boolean),
+        origin: corsOrigins.filter(Boolean),
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders: 'Content-Type, Accept, Authorization',

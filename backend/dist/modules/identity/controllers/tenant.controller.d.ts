@@ -1,4 +1,5 @@
 import { UpdateConfigDto } from '../dtos/update-config.dto';
+import { CompanyProfileDto } from '../dtos/company-profile.dto';
 import { IWalletRepository } from '../../finance/domain/wallet.repository.interface';
 import { PrismaService } from '../../../infra/database/prisma.service';
 export declare class TenantController {
@@ -13,6 +14,9 @@ export declare class TenantController {
         currency: string;
     }>;
     updateConfig(body: UpdateConfigDto, user: any): Promise<{
+        success: boolean;
+    }>;
+    updateCompanyProfile(body: CompanyProfileDto, user: any): Promise<{
         success: boolean;
     }>;
     updateProfilePhoto(user: any, file: Express.Multer.File): Promise<{

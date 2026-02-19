@@ -26,6 +26,15 @@ let UploadController = class UploadController {
         this.configService = configService;
     }
     uploadFile(file) {
+        const buffer = (0, fs_1.readFileSync)(file.path);
+        const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
+        const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+        const gifMagic = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
+        const pdfMagic = buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+        if (!jpegMagic && !pngMagic && !gifMagic && !pdfMagic) {
+            (0, fs_1.unlinkSync)(file.path);
+            throw new common_1.BadRequestException('Invalid file content. File does not match allowed formats.');
+        }
         const domain = this.configService.get('DOMAIN') || 'localhost:8080';
         const baseUrl = domain.includes('localhost')
             ? `http://${domain}`
@@ -43,6 +52,10 @@ let UploadController = class UploadController {
         if (!(0, fs_1.existsSync)(filePath)) {
             throw new common_1.BadRequestException('File not found');
         }
+        const domain = this.configService.get('DOMAIN');
+        const allowedOrigin = domain ? `https://${domain}` : '*';
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
         res.sendFile(sanitized, { root: './uploads' });
     }
 };
@@ -75,7 +88,6 @@ __decorate([
 ], UploadController.prototype, "uploadFile", null);
 __decorate([
     (0, common_1.Get)(':filename'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('filename')),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),

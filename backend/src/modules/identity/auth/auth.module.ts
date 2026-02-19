@@ -23,7 +23,14 @@ import { Verify2FAUseCase } from './application/totp/verify-2fa.usecase';
 import { Validate2FAUseCase } from './application/totp/validate-2fa.usecase';
 import { Disable2FAUseCase } from './application/totp/disable-2fa.usecase';
 import { Reset2FAUseCase } from './application/totp/reset-2fa.usecase';
+import { RegenerateCodesUseCase } from './application/totp/regenerate-codes.usecase';
 import { EncryptionService } from './application/encryption.service';
+
+// Security Use Cases
+import { SendSecurityCodeUseCase } from './application/send-security-code.usecase';
+import { VerifySecurityCodeUseCase } from './application/verify-security-code.usecase';
+import { ChangePasswordUseCase } from './application/change-password.usecase';
+import { ChangeEmailUseCase } from './application/change-email.usecase';
 
 @Module({
     imports: [
@@ -67,7 +74,13 @@ import { EncryptionService } from './application/encryption.service';
         Validate2FAUseCase,
         Disable2FAUseCase,
         Reset2FAUseCase,
+        RegenerateCodesUseCase,
         EncryptionService,
+        // Security
+        SendSecurityCodeUseCase,
+        VerifySecurityCodeUseCase,
+        ChangePasswordUseCase,
+        ChangeEmailUseCase,
     ],
     exports: [JwtStrategy, PassportModule, Validate2FAUseCase],
 })

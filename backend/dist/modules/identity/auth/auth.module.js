@@ -30,7 +30,12 @@ const verify_2fa_usecase_1 = require("./application/totp/verify-2fa.usecase");
 const validate_2fa_usecase_1 = require("./application/totp/validate-2fa.usecase");
 const disable_2fa_usecase_1 = require("./application/totp/disable-2fa.usecase");
 const reset_2fa_usecase_1 = require("./application/totp/reset-2fa.usecase");
+const regenerate_codes_usecase_1 = require("./application/totp/regenerate-codes.usecase");
 const encryption_service_1 = require("./application/encryption.service");
+const send_security_code_usecase_1 = require("./application/send-security-code.usecase");
+const verify_security_code_usecase_1 = require("./application/verify-security-code.usecase");
+const change_password_usecase_1 = require("./application/change-password.usecase");
+const change_email_usecase_1 = require("./application/change-email.usecase");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -76,7 +81,12 @@ exports.AuthModule = AuthModule = __decorate([
             validate_2fa_usecase_1.Validate2FAUseCase,
             disable_2fa_usecase_1.Disable2FAUseCase,
             reset_2fa_usecase_1.Reset2FAUseCase,
+            regenerate_codes_usecase_1.RegenerateCodesUseCase,
             encryption_service_1.EncryptionService,
+            send_security_code_usecase_1.SendSecurityCodeUseCase,
+            verify_security_code_usecase_1.VerifySecurityCodeUseCase,
+            change_password_usecase_1.ChangePasswordUseCase,
+            change_email_usecase_1.ChangeEmailUseCase,
         ],
         exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, validate_2fa_usecase_1.Validate2FAUseCase],
     })

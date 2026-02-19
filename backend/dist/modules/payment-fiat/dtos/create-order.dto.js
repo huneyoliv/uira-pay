@@ -30,8 +30,8 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "amount", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(FiatCurrency),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "currency", void 0);

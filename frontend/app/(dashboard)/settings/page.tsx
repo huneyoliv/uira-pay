@@ -59,6 +59,30 @@ const translations: any = {
         cancel: "Cancelar",
         success: "Sucesso!",
         error: "Erro",
+        emailCode: "Código de E-mail",
+        emailCodeDesc: "Enviaremos um código de verificação para seu e-mail",
+        sendCode: "Enviar Código",
+        codeSent: "Código enviado!",
+        changePasswordTitle: "Alterar Senha",
+        changePasswordDesc: "Atualize sua senha de acesso",
+        currentPassword: "Senha Atual",
+        newPassword: "Nova Senha",
+        changePassword: "Alterar Senha",
+        changingPassword: "Alterando...",
+        passwordChanged: "Senha alterada com sucesso!",
+        changeEmailTitle: "Alterar E-mail",
+        changeEmailDesc: "Atualize seu endereço de e-mail",
+        newEmail: "Novo E-mail",
+        changeEmailStep1: "Primeiro, enviaremos um código para seu e-mail atual",
+        changeEmailStep2: "Digite o código enviado para seu e-mail atual",
+        changeEmailStep3: "Digite o novo e-mail e o código de verificação",
+        requestChange: "Solicitar Alteração",
+        confirmEmail: "Confirmar E-mail",
+        changingEmail: "Alterando...",
+        emailChanged: "E-mail alterado com sucesso!",
+        regenerateCodes: "Regenerar Códigos",
+        regenerateCodesDesc: "Gere novos códigos de recuperação (os antigos serão invalidados)",
+        regenerating: "Regenerando...",
     },
     EN: {
         title: "Settings",
@@ -99,6 +123,30 @@ const translations: any = {
         cancel: "Cancel",
         success: "Success!",
         error: "Error",
+        emailCode: "Email Code",
+        emailCodeDesc: "We'll send a verification code to your email",
+        sendCode: "Send Code",
+        codeSent: "Code sent!",
+        changePasswordTitle: "Change Password",
+        changePasswordDesc: "Update your access password",
+        currentPassword: "Current Password",
+        newPassword: "New Password",
+        changePassword: "Change Password",
+        changingPassword: "Changing...",
+        passwordChanged: "Password changed successfully!",
+        changeEmailTitle: "Change Email",
+        changeEmailDesc: "Update your email address",
+        newEmail: "New Email",
+        changeEmailStep1: "First, we'll send a code to your current email",
+        changeEmailStep2: "Enter the code sent to your current email",
+        changeEmailStep3: "Enter your new email and verification code",
+        requestChange: "Request Change",
+        confirmEmail: "Confirm Email",
+        changingEmail: "Changing...",
+        emailChanged: "Email changed successfully!",
+        regenerateCodes: "Regenerate Codes",
+        regenerateCodesDesc: "Generate new recovery codes (old ones will be invalidated)",
+        regenerating: "Regenerating...",
     },
     FR: {
         title: "Paramètres",
@@ -139,6 +187,30 @@ const translations: any = {
         cancel: "Annuler",
         success: "Succès !",
         error: "Erreur",
+        emailCode: "Code E-mail",
+        emailCodeDesc: "Nous enverrons un code de vérification à votre e-mail",
+        sendCode: "Envoyer le Code",
+        codeSent: "Code envoyé !",
+        changePasswordTitle: "Changer le Mot de Passe",
+        changePasswordDesc: "Mettez à jour votre mot de passe",
+        currentPassword: "Mot de Passe Actuel",
+        newPassword: "Nouveau Mot de Passe",
+        changePassword: "Changer le Mot de Passe",
+        changingPassword: "Modification...",
+        passwordChanged: "Mot de passe modifié avec succès !",
+        changeEmailTitle: "Changer l'E-mail",
+        changeEmailDesc: "Mettez à jour votre adresse e-mail",
+        newEmail: "Nouvel E-mail",
+        changeEmailStep1: "D'abord, nous enverrons un code à votre e-mail actuel",
+        changeEmailStep2: "Entrez le code envoyé à votre e-mail actuel",
+        changeEmailStep3: "Entrez votre nouvel e-mail et le code de vérification",
+        requestChange: "Demander la Modification",
+        confirmEmail: "Confirmer l'E-mail",
+        changingEmail: "Modification...",
+        emailChanged: "E-mail modifié avec succès !",
+        regenerateCodes: "Régénérer les Codes",
+        regenerateCodesDesc: "Générer de nouveaux codes de récupération",
+        regenerating: "Régénération...",
     },
     ES: {
         title: "Configuración",
@@ -179,6 +251,30 @@ const translations: any = {
         cancel: "Cancelar",
         success: "¡Éxito!",
         error: "Error",
+        emailCode: "Código de E-mail",
+        emailCodeDesc: "Enviaremos un código de verificación a tu e-mail",
+        sendCode: "Enviar Código",
+        codeSent: "¡Código enviado!",
+        changePasswordTitle: "Cambiar Contraseña",
+        changePasswordDesc: "Actualiza tu contraseña de acceso",
+        currentPassword: "Contraseña Actual",
+        newPassword: "Nueva Contraseña",
+        changePassword: "Cambiar Contraseña",
+        changingPassword: "Cambiando...",
+        passwordChanged: "¡Contraseña cambiada con éxito!",
+        changeEmailTitle: "Cambiar E-mail",
+        changeEmailDesc: "Actualiza tu dirección de correo",
+        newEmail: "Nuevo E-mail",
+        changeEmailStep1: "Primero, enviaremos un código a tu correo actual",
+        changeEmailStep2: "Ingresa el código enviado a tu correo actual",
+        changeEmailStep3: "Ingresa tu nuevo correo y el código de verificación",
+        requestChange: "Solicitar Cambio",
+        confirmEmail: "Confirmar E-mail",
+        changingEmail: "Cambiando...",
+        emailChanged: "¡E-mail cambiado con éxito!",
+        regenerateCodes: "Regenerar Códigos",
+        regenerateCodesDesc: "Genera nuevos códigos de recuperación",
+        regenerating: "Regenerando...",
     },
 };
 
@@ -215,6 +311,31 @@ export default function SettingsPage() {
     const [copied, setCopied] = useState(false);
     const [showSecret, setShowSecret] = useState(false);
     const [is2FAEnabled, setIs2FAEnabled] = useState(user?.twoFactorEnabled || false);
+
+    // Email verification code for 2FA (verify + disable)
+    const [emailCode, setEmailCode] = useState("");
+    const [emailCodeSent, setEmailCodeSent] = useState(false);
+    const [sendingCode, setSendingCode] = useState(false);
+
+    // Change password state
+    const [cpCurrentPassword, setCpCurrentPassword] = useState("");
+    const [cpNewPassword, setCpNewPassword] = useState("");
+    const [cpEmailCode, setCpEmailCode] = useState("");
+    const [cpLoading, setCpLoading] = useState(false);
+    const [cpError, setCpError] = useState("");
+    const [cpSuccess, setCpSuccess] = useState("");
+    const [cpCodeSent, setCpCodeSent] = useState(false);
+
+    // Change email state
+    type EmailStep = "idle" | "verify-old" | "confirm-new";
+    const [emailStep, setEmailStep] = useState<EmailStep>("idle");
+    const [ceOldCode, setCeOldCode] = useState("");
+    const [ceNewEmail, setCeNewEmail] = useState("");
+    const [ceNewCode, setCeNewCode] = useState("");
+    const [ceTempToken, setCeTempToken] = useState("");
+    const [ceLoading, setCeLoading] = useState(false);
+    const [ceError, setCeError] = useState("");
+    const [ceSuccess, setCeSuccess] = useState("");
 
     useEffect(() => {
         setIs2FAEnabled(user?.twoFactorEnabled || false);
@@ -333,14 +454,16 @@ export default function SettingsPage() {
     };
 
     const handleVerify2FA = async () => {
-        if (verifyCode.length !== 6) return;
+        if (verifyCode.length !== 6 || emailCode.length !== 6) return;
         setTwoFALoading(true);
         setTwoFAError("");
         try {
-            await api.post("/auth/2fa/verify", { code: verifyCode });
+            await api.post("/auth/2fa/verify", { code: verifyCode, emailCode });
             setIs2FAEnabled(true);
             setTwoFAStep("backup");
-            setTwoFASuccess("2FA enabled!");
+            setTwoFASuccess(t.success);
+            setEmailCode("");
+            setEmailCodeSent(false);
             if (user) login(null, { ...user, twoFactorEnabled: true });
         } catch (err: any) {
             setTwoFAError(err.response?.data?.message || "Invalid code");
@@ -356,11 +479,14 @@ export default function SettingsPage() {
             await api.post("/auth/2fa/disable", {
                 password: disablePassword,
                 code: disableCode,
+                emailCode,
             });
             setIs2FAEnabled(false);
             setTwoFAStep("idle");
             setDisablePassword("");
             setDisableCode("");
+            setEmailCode("");
+            setEmailCodeSent(false);
             if (user) login(null, { ...user, twoFactorEnabled: false });
         } catch (err: any) {
             setTwoFAError(err.response?.data?.message || "Failed to disable 2FA");
@@ -390,6 +516,133 @@ export default function SettingsPage() {
         navigator.clipboard.writeText(backupCodes.join("\n"));
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    // ─── Send Security Code ─────────────────────────────────────────────
+    const sendSecurityCode = async () => {
+        setSendingCode(true);
+        try {
+            await api.post("/auth/send-security-code");
+            setEmailCodeSent(true);
+        } catch (err: any) {
+            setTwoFAError(err.response?.data?.message || "Failed to send code");
+        } finally {
+            setSendingCode(false);
+        }
+    };
+
+    // ─── Change Password ────────────────────────────────────────────────
+    const sendCpCode = async () => {
+        setSendingCode(true);
+        try {
+            await api.post("/auth/send-security-code");
+            setCpCodeSent(true);
+        } catch (err: any) {
+            setCpError(err.response?.data?.message || "Failed to send code");
+        } finally {
+            setSendingCode(false);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        setCpLoading(true);
+        setCpError("");
+        try {
+            await api.post("/auth/change-password", {
+                currentPassword: cpCurrentPassword,
+                newPassword: cpNewPassword,
+                emailCode: cpEmailCode,
+            });
+            setCpSuccess(t.passwordChanged);
+            setCpCurrentPassword("");
+            setCpNewPassword("");
+            setCpEmailCode("");
+            setCpCodeSent(false);
+        } catch (err: any) {
+            setCpError(err.response?.data?.message || t.error);
+        } finally {
+            setCpLoading(false);
+        }
+    };
+
+    // ─── Change Email ───────────────────────────────────────────────────
+    const handleChangeEmailRequest = async () => {
+        setCeLoading(true);
+        setCeError("");
+        try {
+            await api.post("/auth/change-email/request");
+            setEmailStep("verify-old");
+        } catch (err: any) {
+            setCeError(err.response?.data?.message || t.error);
+        } finally {
+            setCeLoading(false);
+        }
+    };
+
+    const handleChangeEmailVerifyOld = async () => {
+        setCeLoading(true);
+        setCeError("");
+        try {
+            const res = await api.post("/auth/change-email/verify-old", { code: ceOldCode });
+            setCeTempToken(res.data.tempToken);
+            setEmailStep("confirm-new");
+        } catch (err: any) {
+            setCeError(err.response?.data?.message || t.error);
+        } finally {
+            setCeLoading(false);
+        }
+    };
+
+    const handleChangeEmailConfirm = async () => {
+        setCeLoading(true);
+        setCeError("");
+        try {
+            await api.post("/auth/change-email/send-new-code", { newEmail: ceNewEmail, tempToken: ceTempToken });
+            // Small delay then confirm
+        } catch (err: any) {
+            setCeError(err.response?.data?.message || t.error);
+            setCeLoading(false);
+            return;
+        }
+        // Now confirm with code
+        try {
+            await api.post("/auth/change-email/confirm", {
+                newEmail: ceNewEmail,
+                newEmailCode: ceNewCode,
+                tempToken: ceTempToken,
+            });
+            setCeSuccess(t.emailChanged);
+            setEmailStep("idle");
+            setCeOldCode("");
+            setCeNewEmail("");
+            setCeNewCode("");
+            if (user) login(null, { ...user, email: ceNewEmail });
+        } catch (err: any) {
+            setCeError(err.response?.data?.message || t.error);
+        } finally {
+            setCeLoading(false);
+        }
+    };
+
+    // ─── Regenerate Codes ────────────────────────────────────────────────
+    const handleRegenerateCodes = async () => {
+        setTwoFALoading(true);
+        setTwoFAError("");
+        try {
+            const res = await api.post("/auth/2fa/regenerate-codes", {
+                totpCode: verifyCode || undefined,
+                emailCode: emailCode || undefined,
+            });
+            setBackupCodes(res.data.backupCodes);
+            setTwoFAStep("backup");
+            setVerifyCode("");
+            setEmailCode("");
+            setEmailCodeSent(false);
+        } catch (err: any) {
+            setTwoFAError(err.response?.data?.message || t.error);
+        } finally {
+            setTwoFALoading(false);
+        }
     };
 
     return (
@@ -574,12 +827,16 @@ export default function SettingsPage() {
 
                     {twoFAStep === "idle" && is2FAEnabled && (
                         <div className="flex gap-3 flex-wrap">
-                            <Button variant="outline" onClick={() => { setTwoFAStep("disable"); setTwoFAError(""); setTwoFASuccess(""); }} className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <Button variant="outline" onClick={() => { setTwoFAStep("disable"); setTwoFAError(""); setTwoFASuccess(""); setEmailCode(""); setEmailCodeSent(false); }} className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20">
                                 <ShieldX className="h-4 w-4 mr-2" />
                                 {t.disable2FA}
                             </Button>
                             <Button variant="outline" onClick={() => { setTwoFAStep("reset"); setTwoFAError(""); setTwoFASuccess(""); }} className="dark:border-slate-700 dark:hover:bg-slate-800">
                                 {t.reset2FA}
+                            </Button>
+                            <Button variant="outline" onClick={handleRegenerateCodes} disabled={twoFALoading} className="dark:border-slate-700 dark:hover:bg-slate-800">
+                                {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Key className="h-4 w-4 mr-2" />}
+                                {t.regenerateCodes}
                             </Button>
                         </div>
                     )}
@@ -607,22 +864,39 @@ export default function SettingsPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label>{t.enterCode}</Label>
+                                <Input
+                                    value={verifyCode}
+                                    onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    className="font-mono text-center text-lg tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>{t.emailCode}</Label>
+                                <p className="text-xs text-slate-400">{t.emailCodeDesc}</p>
                                 <div className="flex gap-2">
                                     <Input
-                                        value={verifyCode}
-                                        onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                        value={emailCode}
+                                        onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                                         placeholder="000000"
                                         maxLength={6}
-                                        className="font-mono text-center text-lg tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700"
+                                        className="font-mono text-center tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700"
                                     />
-                                    <Button onClick={handleVerify2FA} disabled={verifyCode.length !== 6 || twoFALoading} className="bg-black text-white dark:bg-white dark:text-black">
-                                        {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.verify}
+                                    <Button variant="outline" onClick={sendSecurityCode} disabled={sendingCode || emailCodeSent} className="dark:border-slate-700 shrink-0">
+                                        {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : emailCodeSent ? t.codeSent : t.sendCode}
                                     </Button>
                                 </div>
                             </div>
-                            <Button variant="ghost" onClick={() => { setTwoFAStep("idle"); setVerifyCode(""); setTwoFAError(""); }}>
-                                {t.cancel}
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button variant="ghost" onClick={() => { setTwoFAStep("idle"); setVerifyCode(""); setEmailCode(""); setEmailCodeSent(false); setTwoFAError(""); }}>
+                                    {t.cancel}
+                                </Button>
+                                <Button onClick={handleVerify2FA} disabled={verifyCode.length !== 6 || emailCode.length !== 6 || twoFALoading} className="bg-black text-white dark:bg-white dark:text-black">
+                                    {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    {t.verify}
+                                </Button>
+                            </div>
                         </div>
                     )}
 
@@ -682,11 +956,26 @@ export default function SettingsPage() {
                                     />
                                 </div>
                             </div>
+                            <div className="space-y-1.5">
+                                <Label>{t.emailCode}</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={emailCode}
+                                        onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                        placeholder="000000"
+                                        maxLength={6}
+                                        className="font-mono text-center tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700"
+                                    />
+                                    <Button variant="outline" onClick={sendSecurityCode} disabled={sendingCode || emailCodeSent} className="dark:border-slate-700 shrink-0">
+                                        {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : emailCodeSent ? t.codeSent : t.sendCode}
+                                    </Button>
+                                </div>
+                            </div>
                             <div className="flex gap-2">
-                                <Button variant="outline" onClick={() => { setTwoFAStep("idle"); setTwoFAError(""); }} className="dark:border-slate-700">
+                                <Button variant="outline" onClick={() => { setTwoFAStep("idle"); setTwoFAError(""); setEmailCode(""); setEmailCodeSent(false); }} className="dark:border-slate-700">
                                     {t.cancel}
                                 </Button>
-                                <Button onClick={handleDisable2FA} disabled={!disablePassword || disableCode.length !== 6 || twoFALoading} variant="destructive">
+                                <Button onClick={handleDisable2FA} disabled={!disablePassword || disableCode.length !== 6 || emailCode.length !== 6 || twoFALoading} variant="destructive">
                                     {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                     {t.confirm}
                                 </Button>
@@ -714,6 +1003,108 @@ export default function SettingsPage() {
                                 <Button onClick={handleReset2FA} disabled={!resetBackupCode || twoFALoading} className="bg-black text-white dark:bg-white dark:text-black">
                                     {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                     {t.confirm}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+            {/* Change Password Card */}
+            <Card className="bg-white dark:bg-[#0B0F19] border-slate-100 dark:border-slate-800">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <Key className="h-5 w-5 text-slate-500" />
+                        <div>
+                            <CardTitle>{t.changePasswordTitle}</CardTitle>
+                            <CardDescription>{t.changePasswordDesc}</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {cpError && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{cpError}</div>}
+                    {cpSuccess && <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm flex items-center gap-2"><Check className="h-4 w-4 shrink-0" />{cpSuccess}</div>}
+                    <div className="space-y-1.5">
+                        <Label>{t.currentPassword}</Label>
+                        <Input type="password" value={cpCurrentPassword} onChange={(e) => setCpCurrentPassword(e.target.value)} className="dark:bg-slate-800 dark:border-slate-700" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>{t.newPassword}</Label>
+                        <Input type="password" value={cpNewPassword} onChange={(e) => setCpNewPassword(e.target.value)} className="dark:bg-slate-800 dark:border-slate-700" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>{t.emailCode}</Label>
+                        <div className="flex gap-2">
+                            <Input value={cpEmailCode} onChange={(e) => setCpEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" maxLength={6} className="font-mono text-center tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700" />
+                            <Button variant="outline" onClick={sendCpCode} disabled={sendingCode || cpCodeSent} className="dark:border-slate-700 shrink-0">
+                                {sendingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : cpCodeSent ? t.codeSent : t.sendCode}
+                            </Button>
+                        </div>
+                    </div>
+                    <Button onClick={handleChangePassword} disabled={!cpCurrentPassword || cpNewPassword.length < 8 || cpEmailCode.length !== 6 || cpLoading} className="bg-black text-white dark:bg-white dark:text-black">
+                        {cpLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        {cpLoading ? t.changingPassword : t.changePassword}
+                    </Button>
+                </CardContent>
+            </Card>
+
+            {/* Change Email Card */}
+            <Card className="bg-white dark:bg-[#0B0F19] border-slate-100 dark:border-slate-800">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <Globe className="h-5 w-5 text-slate-500" />
+                        <div>
+                            <CardTitle>{t.changeEmailTitle}</CardTitle>
+                            <CardDescription>{t.changeEmailDesc}</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {ceError && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0" />{ceError}</div>}
+                    {ceSuccess && <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm flex items-center gap-2"><Check className="h-4 w-4 shrink-0" />{ceSuccess}</div>}
+
+                    {emailStep === "idle" && (
+                        <div className="space-y-3">
+                            <p className="text-sm text-slate-500">{t.changeEmailStep1}</p>
+                            <Button onClick={handleChangeEmailRequest} disabled={ceLoading} className="bg-black text-white dark:bg-white dark:text-black">
+                                {ceLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                {t.requestChange}
+                            </Button>
+                        </div>
+                    )}
+
+                    {emailStep === "verify-old" && (
+                        <div className="space-y-3">
+                            <p className="text-sm text-slate-500">{t.changeEmailStep2}</p>
+                            <div className="space-y-1.5">
+                                <Label>{t.emailCode}</Label>
+                                <Input value={ceOldCode} onChange={(e) => setCeOldCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" maxLength={6} className="font-mono text-center tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700" />
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" onClick={() => { setEmailStep("idle"); setCeError(""); }} className="dark:border-slate-700">{t.cancel}</Button>
+                                <Button onClick={handleChangeEmailVerifyOld} disabled={ceOldCode.length !== 6 || ceLoading} className="bg-black text-white dark:bg-white dark:text-black">
+                                    {ceLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    {t.confirm}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {emailStep === "confirm-new" && (
+                        <div className="space-y-3">
+                            <p className="text-sm text-slate-500">{t.changeEmailStep3}</p>
+                            <div className="space-y-1.5">
+                                <Label>{t.newEmail}</Label>
+                                <Input type="email" value={ceNewEmail} onChange={(e) => setCeNewEmail(e.target.value)} className="dark:bg-slate-800 dark:border-slate-700" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label>{t.emailCode}</Label>
+                                <Input value={ceNewCode} onChange={(e) => setCeNewCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" maxLength={6} className="font-mono text-center tracking-[0.5em] dark:bg-slate-800 dark:border-slate-700" />
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" onClick={() => { setEmailStep("idle"); setCeError(""); }} className="dark:border-slate-700">{t.cancel}</Button>
+                                <Button onClick={handleChangeEmailConfirm} disabled={!ceNewEmail || ceNewCode.length !== 6 || ceLoading} className="bg-black text-white dark:bg-white dark:text-black">
+                                    {ceLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    {t.confirmEmail}
                                 </Button>
                             </div>
                         </div>

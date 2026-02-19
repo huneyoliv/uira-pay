@@ -8,16 +8,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var LoginUseCase_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginUseCase = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../../../infra/database/prisma.service");
 const password_hasher_interface_1 = require("../domain/password.hasher.interface");
 const token_provider_interface_1 = require("../domain/token.provider.interface");
-let LoginUseCase = class LoginUseCase {
+function normalizeLanguage(lang) {
+    if (!lang)
+        return 'PT';
+    const map = { 'pt-BR': 'PT', 'en-US': 'EN', 'es-ES': 'ES', 'fr-FR': 'FR' };
+    return map[lang] || lang?.split('-')[0]?.toUpperCase() || 'PT';
+}
+let LoginUseCase = LoginUseCase_1 = class LoginUseCase {
     prisma;
     passwordHasher;
     tokenProvider;
+    logger = new common_1.Logger(LoginUseCase_1.name);
     constructor(prisma, passwordHasher, tokenProvider) {
         this.prisma = prisma;
         this.passwordHasher = passwordHasher;
@@ -35,35 +43,47 @@ let LoginUseCase = class LoginUseCase {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const status = tenant.status;
-        if (status === 'PENDING') {
-            throw new common_1.UnauthorizedException('Account pending approval by administrator.');
-        }
         if (status === 'REJECTED') {
             throw new common_1.UnauthorizedException('Account has been rejected. Contact support.');
         }
+        if (status === 'BLOCKED') {
+            throw new common_1.UnauthorizedException('Account has been blocked. Contact support.');
+        }
+        const userData = {
+            id: tenant.id,
+            name: tenant.name,
+            email: tenant.email,
+            doc_number: tenant.doc_number,
+            default_currency: tenant.default_currency,
+            preference_locked_until: tenant.preference_locked_until,
+            fiatCurrency: tenant.fiatCurrency,
+            country: tenant.country,
+            language: normalizeLanguage(tenant.language),
+            theme: tenant.theme || 'system',
+            profilePhotoUrl: tenant.profilePhotoUrl || null,
+            twoFactorEnabled: tenant.twoFactorEnabled || false,
+            isAdmin: tenant.isAdmin || false,
+            status: tenant.status || 'PENDING',
+            documentRequested: tenant.documentRequested || false,
+        };
+        if (tenant.twoFactorEnabled) {
+            const tempToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, purpose: '2fa-pending' }, { expiresIn: '5m' });
+            return {
+                requires2FA: true,
+                tempToken,
+                user: userData,
+            };
+        }
         const accessToken = this.tokenProvider.sign({ sub: tenant.id, email: tenant.email, tokenVersion: tenant.tokenVersion });
         return {
+            requires2FA: false,
             accessToken,
-            user: {
-                id: tenant.id,
-                name: tenant.name,
-                email: tenant.email,
-                doc_number: tenant.doc_number,
-                default_currency: tenant.default_currency,
-                preference_locked_until: tenant.preference_locked_until,
-                fiatCurrency: tenant.fiatCurrency,
-                country: tenant.country,
-                language: tenant.language || 'PT',
-                theme: tenant.theme || 'system',
-                profilePhotoUrl: tenant.profilePhotoUrl || null,
-                twoFactorEnabled: tenant.twoFactorEnabled || false,
-                isAdmin: tenant.isAdmin || false,
-            }
+            user: userData,
         };
     }
 };
 exports.LoginUseCase = LoginUseCase;
-exports.LoginUseCase = LoginUseCase = __decorate([
+exports.LoginUseCase = LoginUseCase = LoginUseCase_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         password_hasher_interface_1.IPasswordHasher,

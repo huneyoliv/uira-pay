@@ -49,6 +49,7 @@ exports.TenantController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const update_config_dto_1 = require("../dtos/update-config.dto");
+const company_profile_dto_1 = require("../dtos/company-profile.dto");
 const wallet_repository_interface_1 = require("../../finance/domain/wallet.repository.interface");
 const prisma_service_1 = require("../../../infra/database/prisma.service");
 const jwt_auth_guard_1 = require("../auth/infra/guards/jwt-auth.guard");
@@ -56,6 +57,7 @@ const current_user_decorator_1 = require("../auth/infra/decorators/current-user.
 const multer_1 = require("multer");
 const crypto = __importStar(require("crypto"));
 const path = __importStar(require("path"));
+const validators_1 = require("../validators");
 let TenantController = class TenantController {
     walletRepository;
     prisma;
@@ -109,24 +111,94 @@ let TenantController = class TenantController {
         });
         return { success: true };
     }
+    async updateCompanyProfile(body, user) {
+        const tenantId = user.id;
+        const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenant) {
+            throw new common_1.BadRequestException('Tenant not found');
+        }
+        if (!tenant.doc_number.startsWith('PENDING-')) {
+            throw new common_1.ForbiddenException('Company profile has already been completed');
+        }
+        const cleanDocNumber = body.docNumber.replace(/[^\d\w]/g, '');
+        if (!(0, validators_1.validateCompanyID)(cleanDocNumber, body.country)) {
+            throw new common_1.BadRequestException(`Invalid document number for country ${body.country}`);
+        }
+        if (!['USDT', 'USDC'].includes(body.defaultCurrency)) {
+            throw new common_1.BadRequestException('Default currency must be USDT or USDC');
+        }
+        const existingTenant = await this.prisma.tenant.findFirst({
+            where: {
+                doc_number: body.docNumber,
+                id: { not: tenantId },
+            },
+        });
+        if (existingTenant) {
+            throw new common_1.BadRequestException('Document number already in use by another account');
+        }
+        const lockUntil = new Date();
+        lockUntil.setMonth(lockUntil.getMonth() + 6);
+        await this.prisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+                name: body.name,
+                doc_number: body.docNumber,
+                documentUrl: body.documentUrl,
+                country: body.country,
+                fiatCurrency: body.fiatCurrency,
+                default_currency: body.defaultCurrency,
+                preference_locked_until: lockUntil,
+            },
+        });
+        return { success: true };
+    }
     async updateProfilePhoto(user, file) {
+        const logger = new (require('@nestjs/common').Logger)('ProfilePhoto');
         if (!file) {
             throw new common_1.BadRequestException('No file uploaded');
         }
-        const buffer = require('fs').readFileSync(file.path);
-        const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
-        const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
-        if (!jpegMagic && !pngMagic) {
-            require('fs').unlinkSync(file.path);
-            throw new common_1.BadRequestException('Invalid file content. Only real PNG/JPEG images are accepted.');
+        try {
+            const fs = require('fs');
+            if (!fs.existsSync('./uploads')) {
+                fs.mkdirSync('./uploads', { recursive: true });
+            }
+            const buffer = fs.readFileSync(file.path);
+            const jpegMagic = buffer[0] === 0xFF && buffer[1] === 0xD8;
+            const pngMagic = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+            if (!jpegMagic && !pngMagic) {
+                fs.unlinkSync(file.path);
+                throw new common_1.BadRequestException('Invalid file content. Only real PNG/JPEG images are accepted.');
+            }
+            const currentTenant = await this.prisma.tenant.findUnique({ where: { id: user.id } });
+            if (currentTenant && currentTenant.profilePhotoUrl) {
+                try {
+                    const previousUrl = currentTenant.profilePhotoUrl;
+                    const previousFilename = previousUrl.split('/').pop();
+                    if (previousFilename) {
+                        const previousPath = path.join('./uploads', previousFilename);
+                        if (fs.existsSync(previousPath)) {
+                            fs.unlinkSync(previousPath);
+                        }
+                    }
+                }
+                catch (err) {
+                    logger.warn(`Failed to delete previous profile photo: ${err.message}`);
+                }
+            }
+            const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
+            const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
+            await this.prisma.tenant.update({
+                where: { id: user.id },
+                data: { profilePhotoUrl },
+            });
+            return { profilePhotoUrl };
         }
-        const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
-        const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
-        await this.prisma.tenant.update({
-            where: { id: user.id },
-            data: { profilePhotoUrl },
-        });
-        return { profilePhotoUrl };
+        catch (err) {
+            if (err instanceof common_1.BadRequestException)
+                throw err;
+            logger.error(`Profile photo upload failed for user ${user.id}: ${err.message}`, err.stack);
+            throw new common_1.BadRequestException(`Upload failed: ${err.message}`);
+        }
     }
 };
 exports.TenantController = TenantController;
@@ -145,6 +217,14 @@ __decorate([
     __metadata("design:paramtypes", [update_config_dto_1.UpdateConfigDto, Object]),
     __metadata("design:returntype", Promise)
 ], TenantController.prototype, "updateConfig", null);
+__decorate([
+    (0, common_1.Patch)('company-profile'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [company_profile_dto_1.CompanyProfileDto, Object]),
+    __metadata("design:returntype", Promise)
+], TenantController.prototype, "updateCompanyProfile", null);
 __decorate([
     (0, common_1.Patch)('profile-photo'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {

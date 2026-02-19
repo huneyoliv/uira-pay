@@ -16,6 +16,7 @@ const check_pending_orders_job_1 = require("./check-pending-orders.job");
 const gas_monitor_job_1 = require("./gas-monitor.job");
 const liquidity_manager_job_1 = require("./liquidity-manager.job");
 const check_pending_withdrawals_job_1 = require("./check-pending-withdrawals.job");
+const cleanup_expired_codes_job_1 = require("./cleanup-expired-codes.job");
 const prisma_service_1 = require("../../infra/database/prisma.service");
 let JobsModule = class JobsModule {
 };
@@ -33,6 +34,7 @@ exports.JobsModule = JobsModule = __decorate([
             gas_monitor_job_1.GasMonitorJob,
             liquidity_manager_job_1.LiquidityManagerJob,
             check_pending_withdrawals_job_1.CheckPendingWithdrawalsJob,
+            cleanup_expired_codes_job_1.CleanupExpiredCodesJob,
             prisma_service_1.PrismaService,
         ],
     })

@@ -17,8 +17,8 @@ let JwtTokenProvider = class JwtTokenProvider {
     constructor(jwtService) {
         this.jwtService = jwtService;
     }
-    sign(payload) {
-        return this.jwtService.sign(payload);
+    sign(payload, options) {
+        return this.jwtService.sign(payload, options);
     }
 };
 exports.JwtTokenProvider = JwtTokenProvider;
