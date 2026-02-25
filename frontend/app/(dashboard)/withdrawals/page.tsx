@@ -304,13 +304,15 @@ export default function WithdrawalsPage() {
                             className="h-auto py-4 flex flex-col items-center gap-2 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[20px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('binance')}
                         >
-                            <Image
-                                src="/binance-logo.png"
-                                alt="Binance Logo"
-                                width={36}
-                                height={36}
-                                className="object-contain"
-                            />
+                            <div className="h-10 w-10 rounded-full bg-[#F0B90B]/10 flex items-center justify-center">
+                                <Image
+                                    src="/binance-logo.png"
+                                    alt="Binance Logo"
+                                    width={24}
+                                    height={24}
+                                    className="object-contain"
+                                />
+                            </div>
                             <div className="text-center w-full overflow-hidden">
                                 <span className="block text-base font-bold text-slate-800 dark:text-white">{t.binanceOption}</span>
                                 <span className="block text-xs text-slate-500 truncate">{t.binanceZeroFee}</span>
@@ -322,8 +324,8 @@ export default function WithdrawalsPage() {
                             className="h-auto py-4 flex flex-col items-center gap-2 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group rounded-[20px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('other')}
                         >
-                            <div className="h-9 w-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                                <Wallet className="h-5 w-5 text-slate-600" />
+                            <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                <Wallet className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                             </div>
                             <div className="text-center w-full overflow-hidden">
                                 <span className="block text-base font-bold text-slate-800 dark:text-white">{t.otherOption}</span>
