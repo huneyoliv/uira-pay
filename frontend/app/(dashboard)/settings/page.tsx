@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
-import { Camera, Loader2, Shield, Lock, Mail, Smartphone, Globe, Palette } from "lucide-react";
+import { Camera, Loader2, Shield, Lock, Mail, Smartphone, Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { LanguageSelector } from "@/components/language-selector";
@@ -16,6 +16,9 @@ import { ChangeEmailModal } from "./components/change-email-modal";
 import { ChangePasswordModal } from "./components/change-password-modal";
 import { TwoFactorModal } from "./components/two-factor-modal";
 import { RecoveryCodesModal } from "./components/recovery-codes-modal";
+
+const cardClass = "bg-white dark:bg-slate-900 border-none shadow-sm rounded-[32px]";
+const itemClass = "flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors";
 
 export default function SettingsPage() {
     const user = useAuthStore((state) => state.user);
@@ -69,24 +72,24 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="container max-w-4xl mx-auto py-8 space-y-8">
+        <div className="space-y-8">
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
-                <p className="text-muted-foreground">Gerencie suas informações pessoais e segurança da conta.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Configurações</h1>
+                <p className="text-slate-500 dark:text-slate-400">Gerencie suas informações pessoais e segurança da conta.</p>
             </div>
 
             {/* Profile Section */}
-            <Card>
+            <Card className={cardClass}>
                 <CardHeader>
-                    <CardTitle>Perfil</CardTitle>
-                    <CardDescription>Suas informações públicas e foto de perfil.</CardDescription>
+                    <CardTitle className="text-slate-900 dark:text-white">Perfil</CardTitle>
+                    <CardDescription className="text-slate-500 dark:text-slate-400">Suas informações públicas e foto de perfil.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex items-center gap-6">
                         <div className="relative group">
-                            <Avatar className="h-24 w-24 border-2 border-slate-100 cursor-pointer" onClick={triggerFileInput}>
+                            <Avatar className="h-24 w-24 border-2 border-slate-200 dark:border-slate-700 cursor-pointer" onClick={triggerFileInput}>
                                 <AvatarImage src={user?.profilePhotoUrl || ""} className="object-cover" />
-                                <AvatarFallback className="text-2xl font-bold">
+                                <AvatarFallback className="text-2xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">
                                     {user?.name?.substring(0, 2).toUpperCase() || "ME"}
                                 </AvatarFallback>
                                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
@@ -101,15 +104,16 @@ export default function SettingsPage() {
                                 onChange={handleFileChange}
                             />
                             {uploading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full">
-                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-black/60 rounded-full">
+                                    <Loader2 className="h-8 w-8 animate-spin text-slate-900 dark:text-white" />
                                 </div>
                             )}
                         </div>
                         <div className="space-y-1">
-                            <h3 className="font-medium text-lg">{user?.name}</h3>
-                            <p className="text-sm text-muted-foreground">{user?.email}</p>
-                            <Button variant="outline" size="sm" onClick={triggerFileInput} disabled={uploading}>
+                            <h3 className="font-medium text-lg text-slate-900 dark:text-white">{user?.name}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
+                            <Button variant="outline" size="sm" onClick={triggerFileInput} disabled={uploading}
+                                className="rounded-full border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
                                 {uploading ? "Enviando..." : "Alterar Foto"}
                             </Button>
                         </div>
@@ -117,34 +121,34 @@ export default function SettingsPage() {
 
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                            <Label>Nome da Empresa</Label>
-                            <Input value={user?.name || ""} disabled />
+                            <Label className="text-slate-500 dark:text-slate-400">Nome da Empresa</Label>
+                            <Input value={user?.name || ""} disabled className="bg-slate-50 dark:bg-slate-800 border-none text-slate-900 dark:text-white rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                            <Label>Documento</Label>
-                            <Input value={user?.doc_number || ""} disabled />
+                            <Label className="text-slate-500 dark:text-slate-400">Documento</Label>
+                            <Input value={user?.doc_number || ""} disabled className="bg-slate-50 dark:bg-slate-800 border-none text-slate-900 dark:text-white rounded-xl" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Preferences Section */}
-            <Card>
+            <Card className={cardClass}>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
                         <Globe className="h-5 w-5" />
                         Preferências
                     </CardTitle>
-                    <CardDescription>Idioma e tema da interface.</CardDescription>
+                    <CardDescription className="text-slate-500 dark:text-slate-400">Idioma e tema da interface.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
-                            <Label>Idioma</Label>
+                            <Label className="text-slate-500 dark:text-slate-400">Idioma</Label>
                             <LanguageSelector className="w-full" />
                         </div>
                         <div className="space-y-2">
-                            <Label>Tema</Label>
+                            <Label className="text-slate-500 dark:text-slate-400">Tema</Label>
                             <ThemeToggle className="w-full" />
                         </div>
                     </div>
@@ -152,72 +156,88 @@ export default function SettingsPage() {
             </Card>
 
             {/* Security Section */}
-            <Card>
+            <Card className={cardClass}>
                 <CardHeader>
-                    <CardTitle>Segurança</CardTitle>
-                    <CardDescription>Proteja sua conta com autenticação de dois fatores e senhas fortes.</CardDescription>
+                    <CardTitle className="text-slate-900 dark:text-white">Segurança</CardTitle>
+                    <CardDescription className="text-slate-500 dark:text-slate-400">Proteja sua conta com autenticação de dois fatores e senhas fortes.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
 
                     {/* Change Password */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                    <div className={itemClass}>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-full">
                                 <Lock className="h-5 w-5" />
                             </div>
                             <div>
-                                <h4 className="font-medium">Senha</h4>
-                                <p className="text-sm text-muted-foreground">Última alteração: nunca</p>
+                                <h4 className="font-medium text-slate-900 dark:text-white">Senha</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Última alteração: nunca</p>
                             </div>
                         </div>
-                        <Button variant="outline" onClick={() => setPasswordModalOpen(true)}>Alterar</Button>
+                        <Button variant="outline" onClick={() => setPasswordModalOpen(true)}
+                            className="rounded-full border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700">
+                            Alterar
+                        </Button>
                     </div>
 
                     {/* Change Email */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                    <div className={itemClass}>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-green-900 dark:text-green-200">
+                            <div className="p-2 bg-green-500/10 text-green-500 rounded-full">
                                 <Mail className="h-5 w-5" />
                             </div>
                             <div>
-                                <h4 className="font-medium">Endereço de E-mail</h4>
-                                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                <h4 className="font-medium text-slate-900 dark:text-white">Endereço de E-mail</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
                             </div>
                         </div>
-                        <Button variant="outline" onClick={() => setEmailModalOpen(true)}>Alterar</Button>
+                        <Button variant="outline" onClick={() => setEmailModalOpen(true)}
+                            className="rounded-full border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700">
+                            Alterar
+                        </Button>
                     </div>
 
                     {/* 2FA */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                    <div className={itemClass}>
                         <div className="flex items-center gap-4">
-                            <div className={`p-2 rounded-full ${user?.twoFactorEnabled ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-200'}`}>
+                            <div className={`p-2 rounded-full ${user?.twoFactorEnabled ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'}`}>
                                 <Smartphone className="h-5 w-5" />
                             </div>
                             <div>
-                                <h4 className="font-medium">Autenticação de Dois Fatores (2FA)</h4>
-                                <p className="text-sm text-muted-foreground">
+                                <h4 className="font-medium text-slate-900 dark:text-white">Autenticação de Dois Fatores (2FA)</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
                                     {user?.twoFactorEnabled ? "Protegido com App Autenticador" : "Adicione uma camada extra de segurança"}
                                 </p>
                             </div>
                         </div>
-                        <Button variant={user?.twoFactorEnabled ? "outline" : "default"} onClick={() => set2FAModalOpen(true)}>
+                        <Button
+                            variant={user?.twoFactorEnabled ? "outline" : "default"}
+                            onClick={() => set2FAModalOpen(true)}
+                            className={user?.twoFactorEnabled
+                                ? "rounded-full border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700"
+                                : "rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-lg shadow-black/20 dark:shadow-white/10"
+                            }
+                        >
                             {user?.twoFactorEnabled ? "Gerenciar" : "Ativar"}
                         </Button>
                     </div>
 
                     {/* Recovery Codes */}
                     {user?.twoFactorEnabled && (
-                        <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                        <div className={itemClass}>
                             <div className="flex items-center gap-4">
-                                <div className="p-2 bg-purple-100 text-purple-600 rounded-full dark:bg-purple-900 dark:text-purple-200">
+                                <div className="p-2 bg-purple-500/10 text-purple-500 rounded-full">
                                     <Shield className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h4 className="font-medium">Códigos de Recuperação</h4>
-                                    <p className="text-sm text-muted-foreground">Use se perder acesso ao seu celular</p>
+                                    <h4 className="font-medium text-slate-900 dark:text-white">Códigos de Recuperação</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Use se perder acesso ao seu celular</p>
                                 </div>
                             </div>
-                            <Button variant="outline" onClick={() => setRecoveryModalOpen(true)}>Visualizar</Button>
+                            <Button variant="outline" onClick={() => setRecoveryModalOpen(true)}
+                                className="rounded-full border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700">
+                                Visualizar
+                            </Button>
                         </div>
                     )}
 
