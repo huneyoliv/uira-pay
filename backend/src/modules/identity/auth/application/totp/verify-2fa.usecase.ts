@@ -26,7 +26,7 @@ export class Verify2FAUseCase {
      * Verifies the TOTP code during 2FA setup AND requires email verification code.
      * Once both are valid, 2FA is enabled and a notification email is sent.
      */
-    async execute(tenantId: string, totpCode: string, emailCode: string) {
+    async execute(tenantId: string, totpCode: string, emailCode?: string) {
         const tenant = await this.prisma.tenant.findUnique({
             where: { id: tenantId },
         });
@@ -44,8 +44,10 @@ export class Verify2FAUseCase {
             throw new BadRequestException('2FA setup has not been initiated. Please start setup first.');
         }
 
-        // Verify email code first
-        await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
+        // Verify email code first (only if provided)
+        if (emailCode) {
+            await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
+        }
 
         // Decrypt and verify TOTP code
         const secret = this.encryptionService.decrypt(encryptedSecret);

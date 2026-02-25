@@ -29,6 +29,7 @@ interface AuthState {
     login: (token: string | null, user: User) => void;
     logout: () => Promise<void>;
     setHasHydrated: (state: boolean) => void;
+    updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -49,24 +50,21 @@ export const useAuthStore = create<AuthState>()(
                 set({ token, user, isAuthenticated: true });
             },
             logout: async () => {
-                // Guard: prevent double logout
+                // ... same implementation ...
                 if (get()._logoutInProgress) return;
                 set({ _logoutInProgress: true });
-
-                // Clear all auth state FIRST to ensure redirect always works
                 localStorage.removeItem('auth-token');
                 localStorage.removeItem('auth-storage');
                 set({ token: null, user: null, isAuthenticated: false, _logoutInProgress: false });
-
-                // AWAIT the API call so the server's Set-Cookie header clears the HttpOnly cookie
                 try {
                     await api.post('/auth/logout');
-                } catch {
-                    // If API fails, still redirect — the cookie will expire naturally
-                }
-
-                // Hard redirect to login — ensures middleware sees no cookie on next request
+                } catch { }
                 window.location.href = '/login';
+            },
+            updateUser: (updates) => {
+                const currentUser = get().user;
+                if (!currentUser) return;
+                set({ user: { ...currentUser, ...updates } });
             },
         }),
         {

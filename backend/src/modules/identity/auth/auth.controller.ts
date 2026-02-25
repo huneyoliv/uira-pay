@@ -277,7 +277,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     async regenerateCodes(@CurrentUser() user: any, @Body() dto: RegenerateCodesDto) {
-        return this.regenerateCodesUseCase.execute(user.id, dto.totpCode, dto.emailCode);
+        return this.regenerateCodesUseCase.execute(user.id, dto.password, dto.totpCode, dto.emailCode);
     }
 
     // ─── Password Change ────────────────────────────────────────────────
@@ -287,7 +287,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     async changePassword(@CurrentUser() user: any, @Body() dto: ChangePasswordDto) {
-        return this.changePasswordUseCase.execute(user.id, dto.currentPassword, dto.newPassword, dto.emailCode);
+        return this.changePasswordUseCase.execute(user.id, dto.currentPassword, dto.newPassword, dto.emailCode, dto.totpCode);
     }
 
     // ─── Email Change ───────────────────────────────────────────────────
@@ -305,7 +305,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Throttle({ default: { limit: 5, ttl: 60000 } })
     async changeEmailVerifyOld(@CurrentUser() user: any, @Body() dto: ChangeEmailVerifyOldDto) {
-        return this.changeEmailUseCase.verifyOldEmail(user.id, dto.code);
+        return this.changeEmailUseCase.verifyOldEmail(user.id, dto.code, dto.totpCode);
     }
 
     @Post('change-email/send-new-code')

@@ -1,9 +1,11 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../../../infra/database/prisma.service';
 import { VerifySecurityCodeUseCase } from './verify-security-code.usecase';
 import { SendSecurityCodeUseCase } from './send-security-code.usecase';
 import { EmailService } from '../../infra/services/email.service';
 import { JwtService } from '@nestjs/jwt';
+import { EncryptionService } from './encryption.service';
+import { verify } from 'otplib';
 
 function normalizeLanguage(lang: string | null | undefined): string {
     if (!lang) return 'PT';
@@ -38,11 +40,28 @@ export class ChangeEmailUseCase {
     /**
      * Step 2: Verify code from current email, return temp token
      */
-    async verifyOldEmail(tenantId: string, code: string) {
+    async verifyOldEmail(tenantId: string, code?: string, totpCode?: string) {
         const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
         if (!tenant) throw new BadRequestException('Tenant not found');
 
-        await this.verifySecurityCodeUseCase.execute((tenant as any).email, code);
+        // Verify Identity (2FA or Email)
+        if ((tenant as any).twoFactorEnabled) {
+            if (!totpCode) {
+                throw new BadRequestException('2FA code required');
+            }
+
+            const encryptionService = new EncryptionService();
+            const encryptedSecret = (tenant as any).twoFactorSecret;
+            if (!encryptedSecret) {
+                throw new BadRequestException('2FA secret missing');
+            }
+            const secret = encryptionService.decrypt(encryptedSecret);
+            const isValid = verify({ token: totpCode, secret });
+            if (!isValid) throw new UnauthorizedException('Invalid 2FA code');
+        } else {
+            if (!code) throw new BadRequestException('Email verification code required');
+            await this.verifySecurityCodeUseCase.execute((tenant as any).email, code);
+        }
 
         // Generate a short-lived token proving old email verification
         const tempToken = this.jwtService.sign(
@@ -50,7 +69,7 @@ export class ChangeEmailUseCase {
             { secret: process.env.JWT_SECRET, expiresIn: '15m' },
         );
 
-        return { tempToken, message: 'Current email verified. Enter your new email.' };
+        return { tempToken, message: 'Identity verified. Enter your new email.' };
     }
 
     /**

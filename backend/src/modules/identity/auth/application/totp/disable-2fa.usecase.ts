@@ -27,7 +27,7 @@ export class Disable2FAUseCase {
      * Disables 2FA. Requires: password + TOTP code + email verification code.
      * Triple verification for maximum security.
      */
-    async execute(tenantId: string, password: string, totpCode: string, emailCode: string) {
+    async execute(tenantId: string, password: string, totpCode?: string, emailCode?: string) {
         const tenant = await this.prisma.tenant.findUnique({
             where: { id: tenantId },
         });
@@ -46,21 +46,27 @@ export class Disable2FAUseCase {
             throw new BadRequestException('Invalid password.');
         }
 
-        // 2. Verify TOTP code
-        const encryptedSecret = (tenant as any).twoFactorSecret;
-        if (!encryptedSecret) {
-            throw new BadRequestException('2FA secret not found.');
+        // 2. Verify TOTP code (if provided, usually required for disabling)
+        if (totpCode) {
+            const encryptedSecret = (tenant as any).twoFactorSecret;
+            if (!encryptedSecret) {
+                throw new BadRequestException('2FA secret not found.');
+            }
+
+            const secret = this.encryptionService.decrypt(encryptedSecret);
+            const result = verifySync({ token: totpCode, secret });
+
+            if (!result.valid) {
+                throw new BadRequestException('Invalid 2FA code.');
+            }
+        } else if (!emailCode) {
+            throw new BadRequestException('Please provide either 2FA code or Email code to disable 2FA.');
         }
 
-        const secret = this.encryptionService.decrypt(encryptedSecret);
-        const result = verifySync({ token: totpCode, secret });
-
-        if (!result.valid) {
-            throw new BadRequestException('Invalid 2FA code.');
+        // 3. Verify email code (only if provided)
+        if (emailCode) {
+            await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
         }
-
-        // 3. Verify email code
-        await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
 
         // Disable 2FA and clear all related data
         await this.prisma.tenant.update({

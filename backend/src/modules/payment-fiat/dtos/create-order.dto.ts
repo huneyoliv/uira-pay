@@ -1,10 +1,5 @@
-import { IsNotEmpty, IsNumber, IsString, IsEnum, Min, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum FiatCurrency {
-    BRL = 'BRL',
-    EUR = 'EUR',
-}
 
 export class CreateOrderDto {
     @ApiProperty({ example: 100.00, description: 'Order amount' })
@@ -13,10 +8,9 @@ export class CreateOrderDto {
     @Min(1)
     amount: number;
 
-    @ApiProperty({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency', required: false })
+    @ApiProperty({ example: 'BRL', description: 'Fiat currency (informational only, backend uses tenant currency)', required: false })
     @IsOptional()
-    @IsEnum(FiatCurrency)
-    currency?: FiatCurrency;
-
-
+    @IsString()
+    currency?: string;
 }
+

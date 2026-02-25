@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../infra/database/prisma.service';
 import { VerifySecurityCodeUseCase } from './verify-security-code.usecase';
+import { Validate2FAUseCase } from './totp/validate-2fa.usecase';
 import { EmailService } from '../../infra/services/email.service';
 import * as bcrypt from 'bcrypt';
 
@@ -17,10 +18,11 @@ export class ChangePasswordUseCase {
     constructor(
         private readonly prisma: PrismaService,
         private readonly verifySecurityCodeUseCase: VerifySecurityCodeUseCase,
+        private readonly validate2FAUseCase: Validate2FAUseCase,
         private readonly emailService: EmailService,
     ) { }
 
-    async execute(tenantId: string, currentPassword: string, newPassword: string, emailCode: string) {
+    async execute(tenantId: string, currentPassword: string, newPassword: string, emailCode?: string, totpCode?: string) {
         const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
 
         if (!tenant) {
@@ -33,8 +35,16 @@ export class ChangePasswordUseCase {
             throw new UnauthorizedException('Invalid current password');
         }
 
-        // Verify email code
-        await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
+        // Verify Identity (2FA or Email)
+        if ((tenant as any).twoFactorEnabled) {
+            if (!totpCode) {
+                throw new BadRequestException('2FA code required');
+            }
+            await this.validate2FAUseCase.execute(tenantId, totpCode);
+        } else {
+            if (!emailCode) throw new BadRequestException('Email verification code required');
+            await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
+        }
 
         // Validate new password strength
         if (newPassword.length < 8) {

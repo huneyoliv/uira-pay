@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 };
 
 import { cookies } from "next/headers";
+import { Toaster } from "sonner";
 
 export default async function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default async function RootLayout({
       >
         <Providers lang={lang}>
           {children}
+          <Toaster richColors closeButton />
         </Providers>
       </body>
     </html>

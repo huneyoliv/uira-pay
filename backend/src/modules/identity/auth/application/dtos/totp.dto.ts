@@ -7,10 +7,10 @@ export class Verify2FADto {
     @Length(6, 6)
     code: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Length(6, 6)
-    emailCode: string;
+    emailCode?: string;
 }
 
 export class Validate2FADto {
@@ -25,15 +25,15 @@ export class Disable2FADto {
     @IsString()
     password: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Length(6, 6)
-    code: string;
+    code?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Length(6, 6)
-    emailCode: string;
+    emailCode?: string;
 }
 
 export class Reset2FADto {
@@ -77,6 +77,10 @@ export class VerifySecurityCodeDto {
 }
 
 export class RegenerateCodesDto {
+    @IsNotEmpty()
+    @IsString()
+    password: string;
+
     @IsOptional()
     @IsString()
     @Length(6, 6)
@@ -98,10 +102,15 @@ export class ChangePasswordDto {
     @MinLength(8)
     newPassword: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Length(6, 6)
-    emailCode: string;
+    emailCode?: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(6, 6)
+    totpCode?: string;
 }
 
 export class ChangeEmailRequestDto {
@@ -109,10 +118,15 @@ export class ChangeEmailRequestDto {
 }
 
 export class ChangeEmailVerifyOldDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @Length(6, 6)
-    code: string;
+    code?: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(6, 6)
+    totpCode?: string;
 }
 
 export class ChangeEmailSendNewCodeDto {

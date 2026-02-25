@@ -144,7 +144,14 @@ export class TenantController {
     @Patch('profile-photo')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
-            destination: './uploads',
+            destination: (req, file, cb) => {
+                const fs = require('fs');
+                const uploadPath = './uploads';
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
             filename: (_req, _file, cb) => {
                 const uniqueName = crypto.randomBytes(16).toString('hex');
                 const ext = path.extname(_file.originalname).toLowerCase();
@@ -207,7 +214,11 @@ export class TenantController {
                 }
             }
 
-            const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
+            // Build URL using DOMAIN env var (consistent with other endpoints)
+            const domain = process.env.DOMAIN;
+            const baseUrl = domain
+                ? `https://api.${domain}`
+                : (process.env.API_URL || 'http://localhost:8080');
             const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
 
             await this.prisma.tenant.update({

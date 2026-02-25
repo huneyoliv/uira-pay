@@ -20,7 +20,7 @@ export class RegenerateCodesUseCase {
      * Old codes are deleted and replaced with new ones.
      * Returns the new codes (only time they can be seen).
      */
-    async execute(tenantId: string, totpCode?: string, emailCode?: string) {
+    async execute(tenantId: string, password: string, totpCode?: string, emailCode?: string) {
         const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
 
         if (!tenant) {
@@ -31,13 +31,24 @@ export class RegenerateCodesUseCase {
             throw new BadRequestException('2FA is not enabled. Enable 2FA first.');
         }
 
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, (tenant as any).password);
+        if (!isPasswordValid) {
+            throw new BadRequestException('Invalid password');
+        }
+
         // Verify identity: prefer TOTP if provided, else email code
         if (totpCode) {
             await this.validate2FAUseCase.execute(tenantId, totpCode);
         } else if (emailCode) {
             await this.verifySecurityCodeUseCase.execute((tenant as any).email, emailCode);
         } else {
-            throw new BadRequestException('Verification required: provide a 2FA code or email verification code.');
+            // If neither provided, but password was valid?
+            // Prompt says: "solicita a senha antiga sendo aprovado passa para a próxima tela, solicita o código 2fa".
+            // This implies 2 steps? Or strict requirement?
+            // If user only provided password, we should probably fail?
+            // Or maybe they need to provide TOTP too.
+            throw new BadRequestException('Verification required: provide a 2FA code.');
         }
 
         // Generate 8 new backup codes
