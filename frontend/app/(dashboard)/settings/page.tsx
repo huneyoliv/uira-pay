@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
-import { Camera, Loader2, Shield, Lock, Mail, Smartphone } from "lucide-react";
+import { Camera, Loader2, Shield, Lock, Mail, Smartphone, Globe, Palette } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { LanguageSelector } from "@/components/language-selector";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ChangeEmailModal } from "./components/change-email-modal";
 import { ChangePasswordModal } from "./components/change-password-modal";
 import { TwoFactorModal } from "./components/two-factor-modal";
@@ -121,6 +123,29 @@ export default function SettingsPage() {
                         <div className="space-y-2">
                             <Label>Documento</Label>
                             <Input value={user?.doc_number || ""} disabled />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Preferences Section */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Globe className="h-5 w-5" />
+                        Preferências
+                    </CardTitle>
+                    <CardDescription>Idioma e tema da interface.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
+                            <Label>Idioma</Label>
+                            <LanguageSelector className="w-full" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Tema</Label>
+                            <ThemeToggle className="w-full" />
                         </div>
                     </div>
                 </CardContent>
