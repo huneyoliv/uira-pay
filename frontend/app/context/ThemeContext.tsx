@@ -48,6 +48,11 @@ export function ThemeProvider({
 
         root.classList.remove("light", "dark");
 
+        if (!isAuthenticated) {
+            root.classList.add("light");
+            return;
+        }
+
         if (theme === "system") {
             const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
                 .matches
@@ -59,7 +64,7 @@ export function ThemeProvider({
         }
 
         root.classList.add(theme);
-    }, [theme]);
+    }, [theme, isAuthenticated]);
 
     const value = {
         theme,
