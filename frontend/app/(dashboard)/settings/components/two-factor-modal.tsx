@@ -164,6 +164,7 @@ export function TwoFactorModal({ isOpen, onClose }: TwoFactorModalProps) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(e, handlePasswordSubmit)}
+                                autoComplete="new-password"
                                 autoFocus
                             />
                         </div>

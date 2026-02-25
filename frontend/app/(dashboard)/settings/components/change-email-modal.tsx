@@ -190,6 +190,7 @@ export function ChangeEmailModal({ isOpen, onClose }: ChangeEmailModalProps) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(e, handlePasswordSubmit)}
+                                autoComplete="new-password"
                                 autoFocus
                             />
                         </div>

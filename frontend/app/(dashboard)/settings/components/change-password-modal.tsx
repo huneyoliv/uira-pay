@@ -149,6 +149,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(e, handleCurrentPasswordSubmit)}
+                                autoComplete="new-password"
                                 autoFocus
                             />
                         </div>
