@@ -304,13 +304,13 @@ export default function WithdrawalsPage() {
                             className="h-auto py-4 flex flex-col items-center gap-2 border-slate-200 dark:border-slate-700 hover:border-[#F0B90B] hover:bg-[#F0B90B]/5 transition-all group rounded-[20px] dark:bg-slate-900 overflow-hidden"
                             onClick={() => setView('binance')}
                         >
-                            <div className="h-10 w-10 rounded-full bg-[#F0B90B]/10 flex items-center justify-center">
+                            <div className="h-10 w-10 flex items-center justify-center rounded-full overflow-hidden">
                                 <Image
                                     src="/binance-logo.png"
                                     alt="Binance Logo"
-                                    width={28}
-                                    height={28}
-                                    className="object-contain"
+                                    width={80}
+                                    height={80}
+                                    className="object-contain scale-[2.5]"
                                 />
                             </div>
                             <div className="text-center w-full overflow-hidden">
