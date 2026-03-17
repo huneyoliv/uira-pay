@@ -87,6 +87,7 @@ jobs:
           envs: GITHUB_REPOSITORY,GITHUB_TOKEN,GITHUB_ACTOR,DOMAIN
           command_timeout: 30m
           script: |
+            set -e
             # Login to GHCR to pull private images
             echo $GITHUB_TOKEN | sudo docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
@@ -97,11 +98,11 @@ jobs:
             export DOMAIN=$DOMAIN
             
             # Pull new images
-            sudo docker compose -f docker-compose.prod.yml pull
+            sudo GITHUB_REPOSITORY=$GITHUB_REPOSITORY DOMAIN=$DOMAIN docker compose -f docker-compose.prod.yml pull
             
             # Restart containers
-            sudo docker compose -f docker-compose.prod.yml down
-            sudo docker compose -f docker-compose.prod.yml up -d
+            sudo GITHUB_REPOSITORY=$GITHUB_REPOSITORY DOMAIN=$DOMAIN docker compose -f docker-compose.prod.yml down
+            sudo GITHUB_REPOSITORY=$GITHUB_REPOSITORY DOMAIN=$DOMAIN docker compose -f docker-compose.prod.yml up -d
             
             # Prune old images
             sudo docker image prune -f
