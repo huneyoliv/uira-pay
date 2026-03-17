@@ -1,5 +1,0 @@
-vnic-micro1
-ubuntu
-CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-IMAGE   ID             DISK USAGE   CONTENT SIZE   EXTRA
-WARNING: This output is designed for human readability. For machine-readable output, please use --format.
