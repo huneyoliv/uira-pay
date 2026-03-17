@@ -56,7 +56,7 @@ export function AdminLayout() {
                             return (
                                 <Link
                                     key={item.href}
-                                    href={item.href}
+                                    to={item.href}
                                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group ${isActive
                                         ? "bg-black text-white shadow-lg shadow-black/20 dark:bg-white dark:text-black dark:shadow-white/10"
                                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
@@ -143,7 +143,7 @@ export function AdminLayout() {
                                 return (
                                     <Link
                                         key={item.href}
-                                        href={item.href}
+                                        to={item.href}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                                             ? "bg-black text-white dark:bg-white dark:text-black"
                                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
