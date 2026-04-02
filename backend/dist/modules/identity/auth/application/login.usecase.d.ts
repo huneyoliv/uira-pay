@@ -2,12 +2,14 @@ import { PrismaService } from '../../../../infra/database/prisma.service';
 import { LoginDto } from './dtos/login.dto';
 import { IPasswordHasher } from '../domain/password.hasher.interface';
 import { ITokenProvider } from '../domain/token.provider.interface';
+import { LoginLockoutService } from './login-lockout.service';
 export declare class LoginUseCase {
     private readonly prisma;
     private readonly passwordHasher;
     private readonly tokenProvider;
+    private readonly lockoutService;
     private readonly logger;
-    constructor(prisma: PrismaService, passwordHasher: IPasswordHasher, tokenProvider: ITokenProvider);
+    constructor(prisma: PrismaService, passwordHasher: IPasswordHasher, tokenProvider: ITokenProvider, lockoutService: LoginLockoutService);
     execute(dto: LoginDto): Promise<{
         requires2FA: boolean;
         tempToken: string;

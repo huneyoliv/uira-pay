@@ -43,7 +43,7 @@ exports.BcryptHasher = void 0;
 const common_1 = require("@nestjs/common");
 const bcrypt = __importStar(require("bcrypt"));
 let BcryptHasher = class BcryptHasher {
-    SALT_ROUNDS = 10;
+    SALT_ROUNDS = 12;
     async hash(password) {
         return bcrypt.hash(password, this.SALT_ROUNDS);
     }

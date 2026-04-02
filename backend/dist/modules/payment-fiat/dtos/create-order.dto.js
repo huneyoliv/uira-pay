@@ -9,14 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateOrderDto = exports.FiatCurrency = void 0;
+exports.CreateOrderDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-var FiatCurrency;
-(function (FiatCurrency) {
-    FiatCurrency["BRL"] = "BRL";
-    FiatCurrency["EUR"] = "EUR";
-})(FiatCurrency || (exports.FiatCurrency = FiatCurrency = {}));
 class CreateOrderDto {
     amount;
     currency;
@@ -30,9 +25,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "amount", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: FiatCurrency, example: FiatCurrency.BRL, description: 'Fiat currency', required: false }),
+    (0, swagger_1.ApiProperty)({ example: 'BRL', description: 'Fiat currency (informational only, backend uses tenant currency)', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(FiatCurrency),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "currency", void 0);
 //# sourceMappingURL=create-order.dto.js.map

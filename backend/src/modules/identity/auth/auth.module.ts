@@ -31,6 +31,7 @@ import { SendSecurityCodeUseCase } from './application/send-security-code.usecas
 import { VerifySecurityCodeUseCase } from './application/verify-security-code.usecase';
 import { ChangePasswordUseCase } from './application/change-password.usecase';
 import { ChangeEmailUseCase } from './application/change-email.usecase';
+import { LoginLockoutService } from './application/login-lockout.service';
 
 @Module({
     imports: [
@@ -81,7 +82,8 @@ import { ChangeEmailUseCase } from './application/change-email.usecase';
         VerifySecurityCodeUseCase,
         ChangePasswordUseCase,
         ChangeEmailUseCase,
+        LoginLockoutService,
     ],
-    exports: [JwtStrategy, PassportModule, Validate2FAUseCase],
+    exports: [JwtStrategy, PassportModule, Validate2FAUseCase, LoginLockoutService],
 })
 export class AuthModule { }

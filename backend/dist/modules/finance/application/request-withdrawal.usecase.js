@@ -109,7 +109,8 @@ let RequestWithdrawalUseCase = RequestWithdrawalUseCase_1 = class RequestWithdra
                 }
             }
             else {
-                throw new common_1.BadRequestException(`Insufficient platform liquidity for ${currency}. Available: ${binanceBalance}. Please try a smaller amount or try later.`);
+                this.logger.warn(`Insufficient liquidity: ${currency} balance=${binanceBalance}, requested=${amount}`);
+                throw new common_1.BadRequestException(`Withdrawal temporarily unavailable. Please try a smaller amount or try again later.`);
             }
         }
         const { updatedWallet, transaction } = await this.withdrawService.execute(walletCandidate.id, totalDeduction, amount, finalFee, network, network === 'BINANCE_INTERNAL' ? 'INTERNAL_TRANSFER' : null);

@@ -16,6 +16,9 @@ exports.WalletController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../../identity/auth/infra/guards/jwt-auth.guard");
 const prisma_service_1 = require("../../../infra/database/prisma.service");
+function isValidObjectId(id) {
+    return /^[a-f\d]{24}$/i.test(id);
+}
 let WalletController = class WalletController {
     prisma;
     constructor(prisma) {
@@ -30,6 +33,9 @@ let WalletController = class WalletController {
         return wallets;
     }
     async deleteSavedWallet(req, id) {
+        if (!isValidObjectId(id)) {
+            throw new common_1.BadRequestException('Invalid wallet ID');
+        }
         const tenantId = req.user.id;
         const wallet = await this.prisma.savedWallet.findUnique({ where: { id } });
         if (!wallet || wallet.tenant_id !== tenantId) {

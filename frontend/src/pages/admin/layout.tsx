@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSignedUrl } from "@/hooks/use-signed-url";
 
 export function AdminLayout() {
     const pathname = useLocation().pathname;
@@ -34,7 +35,7 @@ export function AdminLayout() {
         { name: "System Logs", href: "/admin/logs", icon: FileText },
     ];
 
-    const profilePhotoUrl = user?.profilePhotoUrl || undefined;
+    const profilePhotoUrl = useSignedUrl(user?.profilePhotoUrl);
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">

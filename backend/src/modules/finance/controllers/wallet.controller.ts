@@ -1,6 +1,10 @@
-import { Controller, Get, Delete, Param, UseGuards, Request, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Delete, Param, UseGuards, Request, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../identity/auth/infra/guards/jwt-auth.guard';
 import { PrismaService } from '../../../infra/database/prisma.service';
+
+function isValidObjectId(id: string): boolean {
+    return /^[a-f\d]{24}$/i.test(id);
+}
 
 @Controller('wallets')
 @UseGuards(JwtAuthGuard)
@@ -19,6 +23,10 @@ export class WalletController {
 
     @Delete('saved/:id')
     async deleteSavedWallet(@Request() req: any, @Param('id') id: string) {
+        if (!isValidObjectId(id)) {
+            throw new BadRequestException('Invalid wallet ID');
+        }
+
         const tenantId = req.user.id;
         const wallet = await this.prisma.savedWallet.findUnique({ where: { id } });
 

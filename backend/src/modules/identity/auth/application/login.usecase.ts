@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, Logger, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../../../infra/database/prisma.service';
 import { LoginDto } from './dtos/login.dto';
 import { IPasswordHasher } from '../domain/password.hasher.interface';
 import { ITokenProvider } from '../domain/token.provider.interface';
+import { LoginLockoutService } from './login-lockout.service';
 
 function normalizeLanguage(lang: string | null | undefined): string {
     if (!lang) return 'PT';
@@ -18,22 +19,36 @@ export class LoginUseCase {
         private readonly prisma: PrismaService,
         private readonly passwordHasher: IPasswordHasher,
         private readonly tokenProvider: ITokenProvider,
+        private readonly lockoutService: LoginLockoutService,
     ) { }
 
     async execute(dto: LoginDto) {
+        const lockStatus = this.lockoutService.isLocked(dto.email);
+        if (lockStatus.locked) {
+            const minutes = Math.ceil(lockStatus.remainingMs! / 60000);
+            throw new ForbiddenException(`Account temporarily locked. Try again in ${minutes} minutes.`);
+        }
+
         const tenant = await this.prisma.tenant.findUnique({
             where: { email: dto.email } as any,
         });
 
         if (!tenant) {
+            this.lockoutService.recordFailedAttempt(dto.email);
             throw new UnauthorizedException('Invalid credentials');
         }
 
         const isPasswordValid = await this.passwordHasher.compare(dto.password, (tenant as any).password);
 
         if (!isPasswordValid) {
+            const result = this.lockoutService.recordFailedAttempt(dto.email);
+            if (result.locked) {
+                throw new ForbiddenException('Account temporarily locked due to too many failed attempts. Try again in 15 minutes.');
+            }
             throw new UnauthorizedException('Invalid credentials');
         }
+
+        this.lockoutService.recordSuccessfulLogin(dto.email);
 
         const status = (tenant as any).status;
 

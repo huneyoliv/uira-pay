@@ -21,6 +21,7 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
+import { useSignedUrl } from "@/hooks/use-signed-url";
 
 import { PendingRequirementsModal } from "@/components/pending-requirements-modal";
 import { DocumentRequestModal } from "@/components/document-request-modal";
@@ -99,7 +100,7 @@ export function DashboardLayout() {
         { name: t.help, href: "/help", icon: HelpCircle },
     ];
 
-    const profilePhotoUrl = user?.profilePhotoUrl || undefined;
+    const profilePhotoUrl = useSignedUrl(user?.profilePhotoUrl);
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] flex font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">

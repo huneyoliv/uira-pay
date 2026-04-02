@@ -27,6 +27,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: '123456', description: '6-digit verification code' }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(6, 6),
     __metadata("design:type", String)
 ], VerifyCodeDto.prototype, "code", void 0);
 //# sourceMappingURL=verify-code.dto.js.map

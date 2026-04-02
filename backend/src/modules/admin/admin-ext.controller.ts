@@ -7,6 +7,7 @@ import { BinanceService } from './services/binance.service';
 import { TermsService } from './services/terms.service';
 import { AdminEmailService } from './services/admin-email.service';
 import { PrismaService } from '../../infra/database/prisma.service';
+import { CreateTermsDto } from './dtos/create-terms.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -52,7 +53,7 @@ export class AdminExtController {
     }
 
     @Post('terms')
-    async createTerms(@Body() body: any, @CurrentUser() admin: any) {
+    async createTerms(@Body() body: CreateTermsDto, @CurrentUser() admin: any) {
         const doc = await this.termsService.createOrUpdate({
             type: body.type,
             content_pt: body.content_pt,
@@ -63,7 +64,6 @@ export class AdminExtController {
             createdById: admin.id,
         });
 
-        // Send bulk email notifications if requested
         if (body.notifyUsers) {
             const tenants = await this.prisma.tenant.findMany({
                 where: { status: 'ACTIVE' } as any,

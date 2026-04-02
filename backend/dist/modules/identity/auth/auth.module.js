@@ -36,6 +36,7 @@ const send_security_code_usecase_1 = require("./application/send-security-code.u
 const verify_security_code_usecase_1 = require("./application/verify-security-code.usecase");
 const change_password_usecase_1 = require("./application/change-password.usecase");
 const change_email_usecase_1 = require("./application/change-email.usecase");
+const login_lockout_service_1 = require("./application/login-lockout.service");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -87,8 +88,9 @@ exports.AuthModule = AuthModule = __decorate([
             verify_security_code_usecase_1.VerifySecurityCodeUseCase,
             change_password_usecase_1.ChangePasswordUseCase,
             change_email_usecase_1.ChangeEmailUseCase,
+            login_lockout_service_1.LoginLockoutService,
         ],
-        exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, validate_2fa_usecase_1.Validate2FAUseCase],
+        exports: [jwt_strategy_1.JwtStrategy, passport_1.PassportModule, validate_2fa_usecase_1.Validate2FAUseCase, login_lockout_service_1.LoginLockoutService],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

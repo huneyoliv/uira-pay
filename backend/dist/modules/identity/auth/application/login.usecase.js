@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../../../infra/database/prisma.service");
 const password_hasher_interface_1 = require("../domain/password.hasher.interface");
 const token_provider_interface_1 = require("../domain/token.provider.interface");
+const login_lockout_service_1 = require("./login-lockout.service");
 function normalizeLanguage(lang) {
     if (!lang)
         return 'PT';
@@ -25,23 +26,36 @@ let LoginUseCase = LoginUseCase_1 = class LoginUseCase {
     prisma;
     passwordHasher;
     tokenProvider;
+    lockoutService;
     logger = new common_1.Logger(LoginUseCase_1.name);
-    constructor(prisma, passwordHasher, tokenProvider) {
+    constructor(prisma, passwordHasher, tokenProvider, lockoutService) {
         this.prisma = prisma;
         this.passwordHasher = passwordHasher;
         this.tokenProvider = tokenProvider;
+        this.lockoutService = lockoutService;
     }
     async execute(dto) {
+        const lockStatus = this.lockoutService.isLocked(dto.email);
+        if (lockStatus.locked) {
+            const minutes = Math.ceil(lockStatus.remainingMs / 60000);
+            throw new common_1.ForbiddenException(`Account temporarily locked. Try again in ${minutes} minutes.`);
+        }
         const tenant = await this.prisma.tenant.findUnique({
             where: { email: dto.email },
         });
         if (!tenant) {
+            this.lockoutService.recordFailedAttempt(dto.email);
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const isPasswordValid = await this.passwordHasher.compare(dto.password, tenant.password);
         if (!isPasswordValid) {
+            const result = this.lockoutService.recordFailedAttempt(dto.email);
+            if (result.locked) {
+                throw new common_1.ForbiddenException('Account temporarily locked due to too many failed attempts. Try again in 15 minutes.');
+            }
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        this.lockoutService.recordSuccessfulLogin(dto.email);
         const status = tenant.status;
         if (status === 'REJECTED') {
             throw new common_1.UnauthorizedException('Account has been rejected. Contact support.');
@@ -87,6 +101,7 @@ exports.LoginUseCase = LoginUseCase = LoginUseCase_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         password_hasher_interface_1.IPasswordHasher,
-        token_provider_interface_1.ITokenProvider])
+        token_provider_interface_1.ITokenProvider,
+        login_lockout_service_1.LoginLockoutService])
 ], LoginUseCase);
 //# sourceMappingURL=login.usecase.js.map

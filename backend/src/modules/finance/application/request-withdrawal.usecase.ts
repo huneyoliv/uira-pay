@@ -125,8 +125,9 @@ export class RequestWithdrawalUseCase {
                     );
                 }
             } else {
+                this.logger.warn(`Insufficient liquidity: ${currency} balance=${binanceBalance}, requested=${amount}`);
                 throw new BadRequestException(
-                    `Insufficient platform liquidity for ${currency}. Available: ${binanceBalance}. Please try a smaller amount or try later.`
+                    `Withdrawal temporarily unavailable. Please try a smaller amount or try again later.`
                 );
             }
         }

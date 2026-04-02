@@ -61,8 +61,8 @@ export class EfiHmacGuard implements CanActivate {
         // Raw Body is required. 'rawBody' property is added by NestJS if rawBody: true is set in main.ts
         const payload = request.rawBody;
 
-        if (nodeEnv === 'development' && !signature) {
-            console.warn('Webhook received without signature in DEV mode - Bypassing for testing.');
+        if (this.configService.get<string>('ALLOW_UNSIGNED_WEBHOOKS') === 'true' && !signature) {
+            console.warn('[SECURITY WARNING] Unsigned webhook accepted - DO NOT USE IN PRODUCTION!');
             return true;
         }
 

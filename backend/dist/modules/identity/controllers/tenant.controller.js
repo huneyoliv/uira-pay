@@ -185,7 +185,10 @@ let TenantController = class TenantController {
                     logger.warn(`Failed to delete previous profile photo: ${err.message}`);
                 }
             }
-            const baseUrl = process.env.API_URL || 'https://api.swaptune.me';
+            const domain = process.env.DOMAIN;
+            const baseUrl = domain
+                ? `https://api.${domain}`
+                : (process.env.API_URL || 'http://localhost:8080');
             const profilePhotoUrl = `${baseUrl}/upload/${file.filename}`;
             await this.prisma.tenant.update({
                 where: { id: user.id },
@@ -229,7 +232,14 @@ __decorate([
     (0, common_1.Patch)('profile-photo'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
-            destination: './uploads',
+            destination: (req, file, cb) => {
+                const fs = require('fs');
+                const uploadPath = './uploads';
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
             filename: (_req, _file, cb) => {
                 const uniqueName = crypto.randomBytes(16).toString('hex');
                 const ext = path.extname(_file.originalname).toLowerCase();

@@ -82,8 +82,8 @@ let EfiHmacGuard = class EfiHmacGuard {
         const timestamp = request.headers['x-request-timestamp'] || request.headers['request-timestamp'];
         const nonce = request.headers['x-nonce'] || request.headers['nonce'];
         const payload = request.rawBody;
-        if (nodeEnv === 'development' && !signature) {
-            console.warn('Webhook received without signature in DEV mode - Bypassing for testing.');
+        if (this.configService.get('ALLOW_UNSIGNED_WEBHOOKS') === 'true' && !signature) {
+            console.warn('[SECURITY WARNING] Unsigned webhook accepted - DO NOT USE IN PRODUCTION!');
             return true;
         }
         if (!payload) {

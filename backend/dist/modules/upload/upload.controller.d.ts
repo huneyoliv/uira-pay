@@ -5,6 +5,13 @@ export declare class UploadController {
     constructor(configService: ConfigService);
     uploadFile(file: Express.Multer.File): {
         url: string;
+        filename: string;
+        signedUrl: string;
     };
-    serveFile(filename: string, res: Response): void;
+    serveFile(filename: string, token: string, expires: string, res: Response): void;
+    getSignedUrl(filename: string): {
+        signedUrl: string;
+        expiresAt: number;
+    };
+    generateSignedUrl(filename: string): string;
 }

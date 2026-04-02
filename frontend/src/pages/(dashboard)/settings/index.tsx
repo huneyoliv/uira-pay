@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { api } from "@/lib/api";
+import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Camera, Loader2, Shield, Lock, Mail, Smartphone, Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ export function SettingsPage() {
     const updateUser = useAuthStore((state) => state.updateUser);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const profilePhotoUrl = useSignedUrl(user?.profilePhotoUrl);
 
     // Modals state
     const [isEmailModalOpen, setEmailModalOpen] = useState(false);
@@ -88,7 +90,7 @@ export function SettingsPage() {
                     <div className="flex items-center gap-6">
                         <div className="relative group">
                             <Avatar className="h-24 w-24 border-2 border-slate-200 dark:border-slate-700 cursor-pointer" onClick={triggerFileInput}>
-                                <AvatarImage src={user?.profilePhotoUrl || ""} className="object-cover" />
+                                <AvatarImage src={profilePhotoUrl || ""} className="object-cover" />
                                 <AvatarFallback className="text-2xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">
                                     {user?.name?.substring(0, 2).toUpperCase() || "ME"}
                                 </AvatarFallback>

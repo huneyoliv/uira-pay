@@ -203,16 +203,16 @@ let AuthController = AuthController_1 = class AuthController {
         return this.reset2FAUseCase.execute(user.id, dto.backupCode);
     }
     async regenerateCodes(user, dto) {
-        return this.regenerateCodesUseCase.execute(user.id, dto.totpCode, dto.emailCode);
+        return this.regenerateCodesUseCase.execute(user.id, dto.password, dto.totpCode, dto.emailCode);
     }
     async changePassword(user, dto) {
-        return this.changePasswordUseCase.execute(user.id, dto.currentPassword, dto.newPassword, dto.emailCode);
+        return this.changePasswordUseCase.execute(user.id, dto.currentPassword, dto.newPassword, dto.emailCode, dto.totpCode);
     }
     async changeEmailRequest(user) {
         return this.changeEmailUseCase.requestChange(user.id);
     }
     async changeEmailVerifyOld(user, dto) {
-        return this.changeEmailUseCase.verifyOldEmail(user.id, dto.code);
+        return this.changeEmailUseCase.verifyOldEmail(user.id, dto.code, dto.totpCode);
     }
     async changeEmailSendNewCode(user, dto) {
         return this.changeEmailUseCase.sendNewEmailCode(user.id, dto.newEmail, dto.tempToken);

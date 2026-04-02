@@ -1,4 +1,4 @@
-import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, UseGuards, BadRequestException, Query, UnauthorizedException } from '@nestjs/common';
 import { JwtAuthGuard } from '../identity/auth/infra/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -6,6 +6,7 @@ import { extname, basename, join } from 'path';
 import { existsSync, readFileSync, unlinkSync } from 'fs';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 
 @Controller('upload')
 export class UploadController {
@@ -51,13 +52,19 @@ export class UploadController {
             : `https://api.${domain}`;
 
         return {
-            url: `${baseUrl}/uploads/${file.filename}`
+            url: `${baseUrl}/upload/${file.filename}`,
+            filename: file.filename,
+            signedUrl: this.generateSignedUrl(file.filename),
         };
     }
 
     @Get(':filename')
-    serveFile(@Param('filename') filename: string, @Res() res: Response) {
-        // SECURITY: Sanitize filename to prevent path traversal attacks (e.g. ../../etc/passwd)
+    serveFile(
+        @Param('filename') filename: string,
+        @Query('token') token: string,
+        @Query('expires') expires: string,
+        @Res() res: Response,
+    ) {
         const sanitized = basename(filename);
 
         if (!sanitized || sanitized !== filename || sanitized.includes('\0')) {
@@ -69,11 +76,74 @@ export class UploadController {
             throw new BadRequestException('File not found');
         }
 
-        // Allow cross-origin access for profile photos loaded by the frontend
+        const secret = this.configService.get<string>('JWT_SECRET');
+        if (!secret) {
+            throw new UnauthorizedException('Server configuration error');
+        }
+        if (!token || !expires) {
+            throw new UnauthorizedException('Missing access token');
+        }
+
+        const expiresNum = parseInt(expires, 10);
+        if (isNaN(expiresNum) || Date.now() > expiresNum) {
+            throw new UnauthorizedException('Access token expired');
+        }
+
+        const expectedToken = crypto
+            .createHmac('sha256', secret)
+            .update(`${sanitized}:${expires}`)
+            .digest('hex');
+
+        if (token !== expectedToken) {
+            throw new UnauthorizedException('Invalid access token');
+        }
+
         const domain = this.configService.get('DOMAIN');
         const allowedOrigin = domain ? `https://${domain}` : '*';
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+        res.setHeader('Cache-Control', 'private, max-age=3600');
         res.sendFile(sanitized, { root: './uploads' });
+    }
+
+    @Get('signed-url/:filename')
+    @UseGuards(JwtAuthGuard)
+    getSignedUrl(@Param('filename') filename: string) {
+        const sanitized = basename(filename);
+
+        if (!sanitized || sanitized !== filename || sanitized.includes('\0')) {
+            throw new BadRequestException('Invalid filename');
+        }
+
+        const filePath = join('./uploads', sanitized);
+        if (!existsSync(filePath)) {
+            throw new BadRequestException('File not found');
+        }
+
+        const expires = Date.now() + 3600 * 1000;
+        return {
+            signedUrl: this.generateSignedUrl(sanitized),
+            expiresAt: expires,
+        };
+    }
+
+    generateSignedUrl(filename: string): string {
+        const secret = this.configService.get<string>('JWT_SECRET');
+        if (!secret) {
+            throw new Error('JWT_SECRET not configured');
+        }
+        const domain = this.configService.get('DOMAIN') || 'localhost:8080';
+        const expires = Date.now() + 3600 * 1000; // 1 hour
+
+        const token = crypto
+            .createHmac('sha256', secret)
+            .update(`${filename}:${expires}`)
+            .digest('hex');
+
+        const baseUrl = domain.includes('localhost')
+            ? `http://${domain}`
+            : `https://api.${domain}`;
+
+        return `${baseUrl}/upload/${filename}?token=${token}&expires=${expires}`;
     }
 }
