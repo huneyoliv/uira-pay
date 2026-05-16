@@ -180,7 +180,7 @@ export const locales = {
                 signup: "Criar Conta",
             },
             hero: {
-                title1: "Simples, Transparente e",
+                title1: "Simples e Transparente",
                 title2: "Pagamentos Globais",
                 description: "Otimize o fluxo de caixa da sua empresa. Nossa plataforma permite pagar fornecedores, gerenciar folha de pagamento internacional e realizar operações de câmbio com eficiência e segurança.",
                 sendMoney: "Fazer Pagamento",
@@ -434,7 +434,7 @@ export const locales = {
                 signup: "Open Account",
             },
             hero: {
-                title1: "Simple, Transparent, and",
+                title1: "Simple and Transparent",
                 title2: "Global Business Payments",
                 description: "Streamline your global operations. Our platform enables businesses to pay suppliers, manage international payroll, and execute FX transactions efficiently and securely.",
                 sendMoney: "Make Payment",
@@ -688,7 +688,7 @@ export const locales = {
                 signup: "Ouvrir Compte",
             },
             hero: {
-                title1: "Simple, Transparent et",
+                title1: "Simple et Transparent",
                 title2: "Paiements Mondiaux pour Entreprises",
                 description: "Simplifiez vos paiements mondiaux. Notre plateforme permet aux entreprises de payer leurs fournisseurs, gérer la paie internationale et effectuer des opérations de change efficacement.",
                 sendMoney: "Effectuer un Paiement",
@@ -942,7 +942,7 @@ export const locales = {
                 signup: "Crear Cuenta",
             },
             hero: {
-                title1: "Simple, Transparente y",
+                title1: "Simple y Transparente",
                 title2: "Pagos Globales",
                 description: "Simplifique sus pagos globales. Nuestra plataforma permite a las empresas pagar a proveedores, gestionar nóminas internacionales y realizar operaciones de cambio con eficiencia y seguridad.",
                 sendMoney: "Hacer Pago",
